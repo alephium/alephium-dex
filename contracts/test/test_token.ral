@@ -1,0 +1,29 @@
+import "std/token_interface"
+
+Contract TestToken(
+  symbol: ByteVec,
+  name: ByteVec,
+  decimals: U256,
+  totalSupply: U256
+) implements IToken {
+  @using(assetsInContract = true)
+  pub fn getToken(sender: Address, amount: U256) -> () {
+    transferTokenFromSelf!(sender, selfTokenId!(), amount)
+  }
+
+  pub fn getSymbol() -> ByteVec {
+    return symbol
+  }
+
+  pub fn getName() -> ByteVec {
+    return name
+  }
+
+  pub fn getDecimals() -> U256 {
+    return decimals
+  }
+
+  pub fn getTotalSupply() -> U256 {
+    return totalSupply
+  }
+}

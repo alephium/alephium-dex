@@ -1,0 +1,99 @@
+Contract Router() extends Constants() {
+  fn addLiquidity_(
+    reserve0: U256,
+    reserve1: U256,
+    amount0Desired: U256,
+    amount1Desired: U256,
+    amount0Min: U256,
+    amount1Min: U256
+  ) -> (U256, U256) {
+    if (reserve0 == 0 && reserve1 == 0) {
+      return amount0Desired, amount1Desired
+    }
+    let amount1Optimal = amount0Desired * reserve1 / reserve0
+    if (amount1Optimal <= amount1Desired) {
+      assert!(amount1Optimal >= amount1Min, ErrorCodes.InsufficientToken1Amount)
+      return amount0Desired, amount1Optimal
+    }
+
+    let amount0Optimal = amount1Desired * reserve0 / reserve1
+    assert!(amount0Optimal >= amount0Min && amount0Optimal <= amount0Desired, ErrorCodes.InsufficientToken0Amount)
+    return amount0Optimal, amount1Desired
+  }
+
+  @using(preapprovedAssets = true)
+  pub fn addLiquidity(
+    tokenPair: TokenPair,
+    sender: Address,
+    amount0Desired: U256,
+    amount1Desired: U256,
+    amount0Min: U256,
+    amount1Min: U256,
+    deadline: U256
+  ) -> (U256, U256, U256) {
+    assert!(deadline >= blockTimeStamp!(), ErrorCodes.Expired)
+    let (token0Id, token1Id) = tokenPair.getTokenPair()
+    let (reserve0, reserve1) = tokenPair.getReserves()
+    let (amount0, amount1) = addLiquidity_(reserve0, reserve1, amount0Desired, amount1Desired, amount0Min, amount1Min)
+    let liquidity = tokenPair.mint{sender -> token0Id: amount0, token1Id: amount1}(sender, amount0, amount1)
+    return amount0, amount1, liquidity
+  }
+
+  @using(preapprovedAssets = true)
+  pub fn removeLiquidity(
+    tokenPairId: ByteVec,
+    sender: Address,
+    liquidity: U256,
+    amount0Min: U256,
+    amount1Min: U256,
+    deadline: U256
+  ) -> (U256, U256) {
+    assert!(deadline >= blockTimeStamp!(), ErrorCodes.Expired)
+    let (amount0, amount1) = TokenPair(tokenPairId).burn{sender -> tokenPairId: liquidity}(sender, liquidity)
+    assert!(amount0 >= amount0Min, ErrorCodes.InsufficientToken0Amount)
+    assert!(amount1 >= amount1Min, ErrorCodes.InsufficientToken1Amount)
+    return amount0, amount1
+  }
+
+  fn getReserveInAndReserveOut(tokenPair: TokenPair, tokenInId: ByteVec) -> (U256, U256) {
+    let (reserve0, reserve1) = tokenPair.getReserves()
+    let (token0Id, _) = tokenPair.getTokenPair()
+    if (tokenInId == token0Id) {
+      return reserve0, reserve1
+    }
+    return reserve1, reserve0
+  }
+
+  @using(preapprovedAssets = true)
+  pub fn swapExactTokenForToken(
+    tokenPair: TokenPair,
+    sender: Address,
+    tokenInId: ByteVec,
+    amountIn: U256,
+    amountOutMin: U256,
+    deadline: U256
+  ) -> () {
+    assert!(deadline >= blockTimeStamp!(), ErrorCodes.Expired)
+    let (reserveIn, reserveOut) = getReserveInAndReserveOut(tokenPair, tokenInId)
+    let amountInExcludeFee = 997 * amountIn
+    let amountOut = (amountInExcludeFee * reserveOut) / (amountInExcludeFee + 1000 * reserveIn)
+    assert!(amountOut >= amountOutMin, ErrorCodes.InsufficientOutputAmount)
+    tokenPair.swap{sender -> tokenInId: amountIn}(sender, tokenInId, amountIn, amountOut)
+  }
+
+  @using(preapprovedAssets = true)
+  pub fn swapTokenForExactToken(
+    tokenPair: TokenPair,
+    sender: Address,
+    tokenInId: ByteVec,
+    amountInMax: U256,
+    amountOut: U256,
+    deadline: U256
+  ) -> () {
+    assert!(deadline >= blockTimeStamp!(), ErrorCodes.Expired)
+    let (reserveIn, reserveOut) = getReserveInAndReserveOut(tokenPair, tokenInId)
+    let amountIn = ((reserveIn * amountOut * 1000) / ((reserveOut - amountOut) * 997)) + 1
+    assert!(amountIn <= amountInMax, ErrorCodes.InsufficientInputAmount)
+    tokenPair.swap{sender -> tokenInId: amountIn}(sender, tokenInId, amountIn, amountOut)
+  }
+}

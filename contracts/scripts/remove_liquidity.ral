@@ -1,0 +1,13 @@
+TxScript RemoveLiquidity(
+  sender: Address,
+  router: Router,
+  pairId: ByteVec,
+  liquidity: U256,
+  amount0Min: U256,
+  amount1Min: U256,
+  deadline: U256
+) {
+  router.removeLiquidity{sender -> pairId: liquidity}(
+    pairId, sender, liquidity, amount0Min, amount1Min, deadline
+  )
+}

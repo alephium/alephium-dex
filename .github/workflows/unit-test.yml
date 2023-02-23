@@ -1,0 +1,25 @@
+name: Unit Test
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+jobs:
+  dex:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: Run tests
+        working-directory: .
+        run: |
+          npm audit --production
+          npm ci
+          npx @alephium/cli devnet start
+          npm run compile && test -z "$(git status --porcelain)"
+          npm run test
+          npx @alephium/cli devnet stop
+

@@ -1,0 +1,136 @@
+import "std/token_interface"
+
+Contract TokenPair(
+  token0Id: ByteVec,
+  token1Id: ByteVec,
+  mut reserve0: U256,
+  mut reserve1: U256,
+  mut blockTimeStampLast: U256,
+  mut price0CumulativeLast: U256,
+  mut price1CumulativeLast: U256,
+  mut totalSupply: U256
+) extends Math(), Constants() implements IToken {
+
+  event Mint(sender: Address, amount0: U256, amount1: U256, liquidity: U256)
+  event Burn(sender: Address, amount0: U256, amount1: U256, liquidity: U256)
+  event Swap(sender: Address, tokenInId: ByteVec, amountIn: U256, amountOut: U256)
+
+  const MINIMUM_LIQUIDITY = 1000
+
+  pub fn getTokenPair() -> (ByteVec, ByteVec) {
+    return token0Id, token1Id
+  }
+
+  pub fn getReserves() -> (U256, U256) {
+    return reserve0, reserve1
+  }
+
+  pub fn getSymbol() -> ByteVec {
+    return #414c50482d444558 // ALPH-DEX
+  }
+
+  pub fn getName() -> ByteVec {
+    return #414c50482d444558 // ALPH-DEX
+  }
+
+  pub fn getDecimals() -> U256 {
+    return 18
+  }
+
+  pub fn getTotalSupply() -> U256 {
+    return totalSupply
+  }
+
+  @using(updateFields = true)
+  fn update(newReserve0: U256, newReserve1: U256) -> () {
+    let max = 1 << 112 - 1
+    assert!(newReserve0 < max && newReserve1 < max, ErrorCodes.ReserveOverflow)
+
+    let blockTimeStampSecond = (blockTimeStamp!() / 1000) % (1 << 32)
+    let timeElapsed = blockTimeStampSecond - blockTimeStampLast
+    if (timeElapsed > 0 && reserve0 > 0 && reserve1 > 0) {
+      // allow overflow for TWAP(time-weighted-average-price)
+      price0CumulativeLast = price0CumulativeLast |+| uqdiv(reserve1, reserve0) * timeElapsed
+      price1CumulativeLast = price1CumulativeLast |+| uqdiv(reserve0, reserve1) * timeElapsed
+    }
+    
+    reserve1 = newReserve1
+    reserve0 = newReserve0
+    blockTimeStampLast = blockTimeStampSecond
+  }
+
+  @using(preapprovedAssets = true, assetsInContract = true, updateFields = true, checkExternalCaller = false)
+  pub fn mint(sender: Address, amount0: U256, amount1: U256) -> U256 {
+    let mut liquidity = 0
+    if (totalSupply == 0) {
+      let initLiquidity = sqrt(amount0 * amount1)
+      assert!(initLiquidity > MINIMUM_LIQUIDITY, ErrorCodes.InsufficientInitLiquidity)
+      liquidity = initLiquidity - MINIMUM_LIQUIDITY
+      totalSupply = totalSupply + MINIMUM_LIQUIDITY
+      burnToken!(selfAddress!(), selfTokenId!(), MINIMUM_LIQUIDITY)
+    } else {
+      let liquidity0 = amount0 * totalSupply / reserve0
+      let liquidity1 = amount1 * totalSupply / reserve1
+      liquidity = if (liquidity0 > liquidity1) liquidity1 else liquidity0
+    }
+
+    assert!(liquidity > 0, ErrorCodes.InsufficientLiquidityMinted)
+    totalSupply = totalSupply + liquidity
+    transferTokenFromSelf!(sender, selfTokenId!(), liquidity)
+
+    update(reserve0 + amount0, reserve1 + amount1)
+
+    transferTokenToSelf!(sender, token0Id, amount0)
+    transferTokenToSelf!(sender, token1Id, amount1)
+
+    emit Mint(sender, amount0, amount1, liquidity)
+    return liquidity
+  }
+
+  @using(preapprovedAssets = true, assetsInContract = true, updateFields = true, checkExternalCaller = false)
+  pub fn burn(sender: Address, liquidity: U256) -> (U256, U256) {
+    let amount0 = liquidity * reserve0 / totalSupply
+    let amount1 = liquidity * reserve1 / totalSupply
+    assert!(amount0 > 0 && amount1 > 0, ErrorCodes.InsufficientLiquidityBurned)
+
+    totalSupply = totalSupply - liquidity
+    update(reserve0 - amount0, reserve1 - amount1)
+
+    transferTokenToSelf!(sender, selfTokenId!(), liquidity)
+    transferTokenFromSelf!(sender, token0Id, amount0)
+    transferTokenFromSelf!(sender, token1Id, amount1)
+
+    emit Burn(sender, amount0, amount1, liquidity)
+    return amount0, amount1
+  }
+
+  @using(preapprovedAssets = true, assetsInContract = true, checkExternalCaller = false)
+  pub fn swap(sender: Address, tokenInId: ByteVec, amountIn: U256, amountOut: U256) -> () {
+    assert!(isAssetAddress!(sender), ErrorCodes.InvalidToAddress)
+    assert!(amountOut > 0, ErrorCodes.InsufficientOutputAmount)
+    assert!(tokenInId == token0Id || tokenInId == token1Id, ErrorCodes.InvalidTokenInId)
+
+    // fee: 0.003 * amountIn
+    let amountInExcludeFee = amountIn * 997
+    let kX1000 = reserve0 * reserve1 * 1000
+
+    if (tokenInId == token0Id) {
+      assert!(amountOut < reserve1, ErrorCodes.InsufficientLiquidity)
+      let newReserve0X1000 = 1000 * reserve0 + amountInExcludeFee
+      let newReserve1 = reserve1 - amountOut
+      assert!(newReserve0X1000 * newReserve1 >= kX1000, ErrorCodes.InvalidK)
+      transferTokenFromSelf!(sender, token1Id, amountOut)
+      update(reserve0 + amountIn, newReserve1)
+    } else {
+      assert!(amountOut < reserve0, ErrorCodes.InsufficientLiquidity)
+      let newReserve0 = reserve0 - amountOut
+      let newReserve1X1000 = 1000 * reserve1 + amountInExcludeFee
+      assert!(newReserve0 * newReserve1X1000 >= kX1000, ErrorCodes.InvalidK)
+      transferTokenFromSelf!(sender, token0Id, amountOut)
+      update(newReserve0, reserve1 + amountIn)
+    }
+
+    transferTokenToSelf!(sender, tokenInId, amountIn)
+    emit Swap(sender, tokenInId, amountIn, amountOut)
+  }
+}

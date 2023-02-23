@@ -1,0 +1,11 @@
+TxScript SwapMaxIn(
+  sender: Address,
+  router: Router,
+  pair: TokenPair,
+  tokenInId: ByteVec,
+  amountInMax: U256,
+  amountOut: U256,
+  deadline: U256
+) {
+  router.swapTokenForExactToken{sender -> tokenInId: amountInMax}(pair, sender, tokenInId, amountInMax, amountOut, deadline)
+}
