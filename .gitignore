@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+lerna-debug.log
+artifacts/
+/dist
+/dev
+.deployments.devnet.json
+.project.json
