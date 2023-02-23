@@ -1,0 +1,11 @@
+TxScript SwapMinOut(
+  sender: Address,
+  router: Router,
+  pair: TokenPair,
+  tokenInId: ByteVec,
+  amountIn: U256,
+  amountOutMin: U256,
+  deadline: U256
+) {
+  router.swapExactTokenForToken{sender -> tokenInId: amountIn}(pair, sender, tokenInId, amountIn, amountOutMin, deadline)
+}

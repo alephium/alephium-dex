@@ -1,0 +1,9 @@
+TxScript CreatePair(
+  payer: Address,
+  factory: TokenPairFactory,
+  alphAmount: U256,
+  tokenAId: ByteVec,
+  tokenBId: ByteVec
+) {
+  factory.createPair{payer -> ALPH: alphAmount, tokenAId: 1, tokenBId: 1}(payer, alphAmount, tokenAId, tokenBId)
+}

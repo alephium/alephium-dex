@@ -1,0 +1,19 @@
+import { Deployer, DeployFunction } from '@alephium/cli'
+import { TokenPair } from '../artifacts/ts'
+
+const deployTokenPairTemplate: DeployFunction<undefined> = async (deployer: Deployer): Promise<void> => {
+  const initialFields = {
+    token0Id: '',
+    token1Id: '',
+    reserve0: 0n,
+    reserve1: 0n,
+    blockTimeStampLast: 0n,
+    price0CumulativeLast: 0n,
+    price1CumulativeLast: 0n,
+    totalSupply: 0n
+  }
+  const result = await deployer.deployContract(TokenPair, { initialFields: initialFields })
+  console.log(`TokenPair template contract address: ${result.contractAddress}, contract id: ${result.contractId}`)
+}
+
+export default deployTokenPairTemplate

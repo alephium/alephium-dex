@@ -1,0 +1,19 @@
+Abstract Contract Math() {
+  pub fn uqdiv(a: U256, b: U256) -> U256 {
+    return a * (1 << 112) / b
+  }
+
+  // babylonian method
+  pub fn sqrt(y: U256) -> U256 {
+    if (y > 3) {
+      let mut z = y
+      let mut x = y / 2 + 1
+      while (x < z) {
+        z = x
+        x = (y / x + x) / 2
+      }
+      return z
+    }
+    return 1
+  }
+}

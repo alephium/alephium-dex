@@ -1,0 +1,86 @@
+{
+  "version": "v1.7.0",
+  "name": "TokenPairFactory",
+  "bytecode": "0202402140880000020402101600711702160171170316021603314c03160016010216011600020103040900403d16001602a50c3316001603a50c331a130f7b1602160342130b7b160216030000170517041604160513026417060c0c0c0c0c0c130664170716001601a21604160544ce00160616070d1340ff3bc2170805160416051608a00061a0000d2aa100",
+  "codeHash": "6e20ca1d1474ca5d61542b180e858beac69c23e5feb6cb5c1a53c68e0e6a5d36",
+  "fieldsSig": {
+    "names": [
+      "pairTemplateId",
+      "pairSize"
+    ],
+    "types": [
+      "ByteVec",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      true
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "PairCreated",
+      "fieldNames": [
+        "token0",
+        "token1",
+        "pair",
+        "currentPairSize"
+      ],
+      "fieldTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "U256"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "sortTokens",
+      "usePreapprovedAssets": false,
+      "useAssetsInContract": false,
+      "isPublic": false,
+      "paramNames": [
+        "tokenA",
+        "tokenB"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec",
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "createPair",
+      "usePreapprovedAssets": true,
+      "useAssetsInContract": false,
+      "isPublic": true,
+      "paramNames": [
+        "payer",
+        "alphAmount",
+        "tokenAId",
+        "tokenBId"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ]
+}

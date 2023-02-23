@@ -1,0 +1,46 @@
+{
+  "version": "v1.7.0",
+  "name": "SwapMinOut",
+  "bytecodeTemplate": "0101030000000e{0}{3}{4}a3{2}{0}{3}{4}{5}{6}13060c{1}0104",
+  "fieldsSig": {
+    "names": [
+      "sender",
+      "router",
+      "pair",
+      "tokenInId",
+      "amountIn",
+      "amountOutMin",
+      "deadline"
+    ],
+    "types": [
+      "Address",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "usePreapprovedAssets": true,
+      "useAssetsInContract": false,
+      "isPublic": true,
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

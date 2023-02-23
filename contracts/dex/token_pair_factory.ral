@@ -1,0 +1,52 @@
+// TODO: do we need to support `feeTo`???
+Contract TokenPairFactory(
+  pairTemplateId: ByteVec, // the template contract id of `TokenPair`
+  mut pairSize: U256
+) extends Constants() {
+  event PairCreated(token0: ByteVec, token1: ByteVec, pair: ByteVec, currentPairSize: U256)
+
+  fn sortTokens(tokenA: ByteVec, tokenB: ByteVec) -> (ByteVec, ByteVec) {
+    let left = u256From32Byte!(tokenA)
+    let right = u256From32Byte!(tokenB)
+    if (left < right) {
+      return tokenA, tokenB
+    }
+    return tokenB, tokenA
+  }
+
+  @using(preapprovedAssets = true, updateFields = true)
+  pub fn createPair(
+    payer: Address,
+    alphAmount: U256,
+    tokenAId: ByteVec,
+    tokenBId: ByteVec
+  ) -> () {
+    assert!(
+      tokenRemaining!(payer, tokenAId) > 0 &&
+      tokenRemaining!(payer, tokenBId) > 0,
+      ErrorCodes.TokenNotExist
+    )
+    assert!(tokenAId != tokenBId, ErrorCodes.IdenticalTokenIds)
+    let (token0Id, token1Id) = sortTokens(tokenAId, tokenBId)
+    let encodedImmutableFields = encodeToByteVec!(token0Id, token1Id)
+    let encodedMutableFields = encodeToByteVec!(
+      0, // reserve0
+      0, // reserve1
+      0, // blockTimeStampLast
+      0, // price0CumulativeLast
+      0, // price1CumulativeLast
+      0  // totalSupply
+    )
+    let pairId = copyCreateSubContractWithToken!{payer -> ALPH: alphAmount}(
+      token0Id ++ token1Id,
+      pairTemplateId,
+      encodedImmutableFields,
+      encodedMutableFields,
+      1 << 255
+    )
+
+    emit PairCreated(token0Id, token1Id, pairId, pairSize)
+
+    pairSize = pairSize + 1
+  }
+}
