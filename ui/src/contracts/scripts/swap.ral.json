@@ -1,5 +1,5 @@
 {
-  "version": "v1.7.0",
+  "version": "v1.7.1",
   "name": "Swap",
   "bytecodeTemplate": "0101030000000c{0}{2}{3}a3{0}{2}{3}{4}100c{1}010b",
   "fieldsSig": {

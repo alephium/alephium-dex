@@ -1,5 +1,5 @@
 {
-  "version": "v1.7.0",
+  "version": "v1.7.1",
   "name": "RemoveLiquidity",
   "bytecodeTemplate": "01010300000010{0}{2}{3}a3{2}{0}{3}{4}{5}{6}13060e{1}01021818",
   "fieldsSig": {
