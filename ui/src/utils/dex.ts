@@ -248,7 +248,7 @@ export interface AddLiquidityResult {
 }
 
 export function formatAddLiquidityResult(result: AddLiquidityResult): string {
-  const amount = formatUnits(result.shareAmount, PairTokenDecimals)
+  const amount = bigIntToString(result.shareAmount, PairTokenDecimals)
   return `Share amount: ${amount.toString()}, share percentage: ${result.sharePercentage}%`
 }
 
@@ -406,11 +406,6 @@ export async function removeLiquidity(
   })
   await waitTxConfirmed(web3.getCurrentNodeProvider(), result.txId, 1)
   return result
-}
-
-export function formatRemoveLiquidityResult(result: RemoveLiquidityResult): string {
-  const amount = formatUnits(result.remainShareAmount, PairTokenDecimals)
-  return `Share amount: ${amount}, share percentage: ${result.remainSharePercentage}%`
 }
 
 export async function getBalanceByTokenId(tokenId: string, address: string): Promise<bigint> {

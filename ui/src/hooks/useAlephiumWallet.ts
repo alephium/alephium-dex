@@ -1,6 +1,6 @@
 import { NodeProvider, SignerProvider, Address, groupOfAddress } from '@alephium/web3'
 import { useEffect, useState } from 'react'
-import { network, networkName } from '../utils/consts'
+import { network } from '../utils/consts'
 import { useAccount, useContext } from "@alephium/web3-react"
 
 export class AlephiumWallet {
@@ -19,7 +19,7 @@ export class AlephiumWallet {
 
 export function useAlephiumWallet() {
   const context = useContext()
-  const { account, isConnected } = useAccount(networkName)
+  const { account, isConnected } = useAccount()
   const [wallet, setWallet] = useState<AlephiumWallet | undefined>(undefined)
 
   useEffect(() => {

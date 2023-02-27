@@ -1,4 +1,4 @@
-import { ALPH_TOKEN_ID, Asset, Token, web3 } from '@alephium/web3'
+import { ALPH_TOKEN_ID, Asset, number256ToBigint, Token, web3 } from '@alephium/web3'
 import {
   buildProject,
   ContractFixture,
@@ -155,7 +155,7 @@ describe('test token pair', () => {
         { alphAmount: oneAlph - defaultGasFee - dustAmount, tokens: [] }
       ])
       if (token0Id === ALPH_TOKEN_ID) {
-        expect(contractState.asset.alphAmount).toEqual(amount0 + initAsset.alphAmount)
+        expect(contractState.asset.alphAmount).toEqual(amount0 + number256ToBigint(initAsset.alphAmount))
         expectTokensEqual(contractState.asset.tokens!, [
           { id: token1Id, amount: currentReserve1 },
           { id: tokenPairFixture.contractId, amount: (1n << 255n) - currentTotalSupply }
@@ -236,7 +236,7 @@ describe('test token pair', () => {
       expect(contractState.fields.totalSupply).toEqual(totalSupply - liquidity)
 
       if (token0Id === ALPH_TOKEN_ID) {
-        expect(contractState.asset.alphAmount).toEqual(initialAsset.alphAmount - amount0Out)
+        expect(contractState.asset.alphAmount).toEqual(number256ToBigint(initialAsset.alphAmount) - amount0Out)
         expectTokensEqual(contractState.asset.tokens!, [
           { id: tokenPairFixture.contractId, amount: remainTokens + liquidity },
           { id: token1Id, amount: reserve1 - amount1Out }

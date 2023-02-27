@@ -1,4 +1,6 @@
-import { default as devnetDeployment } from '../../../.deployments.devnet.json'
+import { default as devnetDeploymentJson } from '../../../.deployments.devnet.json'
+
+const devnetDeployment = (devnetDeploymentJson as any)[Object.keys(devnetDeploymentJson)[0]]
 
 export interface Network {
   nodeHost: string
@@ -41,8 +43,8 @@ export const networks: Record<NetworkName, Network> = {
     explorerUrl: 'http://localhost:3000',
     networkId: 4,
     groupIndex: 0,
-    factoryId: devnetDeployment[0].deployContractResults.TokenPairFactory.contractId,
-    routerId: devnetDeployment[0].deployContractResults.Router.contractId
+    factoryId: devnetDeployment.deployContractResults.TokenPairFactory.contractId,
+    routerId: devnetDeployment.deployContractResults.Router.contractId
   }
 }
 
