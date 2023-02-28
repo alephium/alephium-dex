@@ -107,9 +107,9 @@ const useStyles = makeStyles((theme) => ({
 
 function Swap({ dexTokens }: { dexTokens: DexTokens }) {
   const classes = useStyles();
-  const [tokenInAmountStr, setTokenInAmountStr] = useState<string | undefined>(undefined)
+  const [tokenInInput, setTokenInInput] = useState<string | undefined>(undefined)
   const [tokenInAmount, setTokenInAmount] = useState<bigint | undefined>(undefined)
-  const [tokenOutAmountStr, setTokenOutAmountStr] = useState<string | undefined>(undefined)
+  const [tokenOutInput, setTokenOutInput] = useState<string | undefined>(undefined)
   const [tokenOutAmount, setTokenOutAmount] = useState<bigint | undefined>(undefined)
   const [tokenInInfo, setTokenInInfo] = useState<TokenInfo | undefined>(undefined);
   const [tokenOutInfo, setTokenOutInfo] = useState<TokenInfo | undefined>(undefined);
@@ -124,13 +124,13 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
 
   const handleTokenInChange = useCallback((tokenInfo) => {
     setTokenInInfo(tokenInfo);
-    if (tokenInAmountStr !== undefined) setTokenInAmount(stringToBigInt(tokenInAmountStr, tokenInfo.decimals))
-  }, [tokenInAmountStr]);
+    if (tokenInInput !== undefined) setTokenInAmount(stringToBigInt(tokenInInput, tokenInfo.decimals))
+  }, [tokenInInput]);
 
   const handleTokenOutChange = useCallback((tokenInfo) => {
     setTokenOutInfo(tokenInfo)
-    if (tokenOutAmountStr !== undefined) setTokenOutAmount(stringToBigInt(tokenOutAmountStr, tokenInfo.decimals))
-  }, [tokenOutAmountStr]);
+    if (tokenOutInput !== undefined) setTokenOutAmount(stringToBigInt(tokenOutInput, tokenInfo.decimals))
+  }, [tokenOutInput]);
 
   useEffect(() => {
     if (tokenInInfo !== undefined && tokenOutInfo !== undefined) {
@@ -146,16 +146,16 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
         if (lastInput === 'tokenIn' && tokenInAmount !== undefined) {
           const tokenOutAmount = getAmountOut(tokenPairState, tokenInInfo.tokenId, tokenInAmount)
           setTokenOutAmount(tokenOutAmount)
-          setTokenOutAmountStr(bigIntToString(tokenOutAmount, tokenOutInfo.decimals))
+          setTokenOutInput(bigIntToString(tokenOutAmount, tokenOutInfo.decimals))
         } else if (lastInput === 'tokenOut' && tokenOutAmount !== undefined) {
           const tokenInAmount = getAmountIn(tokenPairState, tokenOutInfo.tokenId, tokenOutAmount)
           setTokenInAmount(tokenInAmount)
-          setTokenInAmountStr(bigIntToString(tokenInAmount, tokenInInfo.decimals))
+          setTokenInInput(bigIntToString(tokenInAmount, tokenInInfo.decimals))
         } else {
           setTokenInAmount(undefined)
-          setTokenInAmountStr(undefined)
+          setTokenInInput(undefined)
           setTokenOutAmount(undefined)
-          setTokenOutAmountStr(undefined)
+          setTokenOutInput(undefined)
         }
       }
     } catch (error) {
@@ -170,10 +170,10 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       setLastInput('tokenIn')
       if (event.target.value === '') {
         setTokenInAmount(undefined)
-        setTokenInAmountStr(undefined)
+        setTokenInInput(undefined)
         return
       }
-      setTokenInAmountStr(event.target.value)
+      setTokenInInput(event.target.value)
       if (tokenInInfo !== undefined) {
         setTokenInAmount(stringToBigInt(event.target.value, tokenInInfo.decimals))
       }
@@ -186,10 +186,10 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       setLastInput('tokenOut')
       if (event.target.value === '') {
         setTokenOutAmount(undefined)
-        setTokenOutAmountStr(undefined)
+        setTokenOutInput(undefined)
         return
       }
-      setTokenOutAmountStr(event.target.value)
+      setTokenOutInput(event.target.value)
       if (tokenOutInfo !== undefined) {
         setTokenOutAmount(stringToBigInt(event.target.value, tokenOutInfo.decimals))
       }
@@ -201,19 +201,19 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
     setTokenOutInfo(tokenInInfo)
     setTokenInAmount(tokenOutAmount)
     setTokenOutAmount(tokenInAmount)
-    setTokenInAmountStr(tokenOutAmountStr)
-    setTokenOutAmountStr(tokenInAmountStr)
+    setTokenInInput(tokenOutInput)
+    setTokenOutInput(tokenInInput)
     if (lastInput === 'tokenIn') setLastInput('tokenOut')
     else if (lastInput === 'tokenOut') setLastInput('tokenIn')
-  }, [tokenInInfo, tokenOutInfo, tokenInAmount, tokenOutAmount, tokenInAmountStr, tokenOutAmountStr, lastInput]);
+  }, [tokenInInfo, tokenOutInfo, tokenInAmount, tokenOutAmount, tokenInInput, tokenOutInput, lastInput]);
 
   const handleReset = useCallback(() => {
     setTokenInInfo(undefined)
     setTokenOutInfo(undefined)
     setTokenInAmount(undefined)
-    setTokenInAmountStr(undefined)
+    setTokenInInput(undefined)
     setTokenOutAmount(undefined)
-    setTokenOutAmountStr(undefined)
+    setTokenOutInput(undefined)
     setTokenPairState(undefined)
     setLastInput(undefined)
     setCompleted(false)
@@ -232,7 +232,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       />
       <NumberTextField
         className={classes.numberField}
-        value={tokenInAmountStr !== undefined ? tokenInAmountStr : ''}
+        value={tokenInInput !== undefined ? tokenInInput : ''}
         onChange={handleTokenInAmountChange}
         autoFocus={true}
         InputProps={{ disableUnderline: true }}
@@ -251,7 +251,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       />
       <NumberTextField
         className={classes.numberField}
-        value={tokenOutAmountStr !== undefined ? tokenOutAmountStr : ''}
+        value={tokenOutInput !== undefined ? tokenOutInput : ''}
         onChange={handleTokenOutAmountChange}
         InputProps={{ disableUnderline: true }}
         disabled={!!swapping || !!completed}

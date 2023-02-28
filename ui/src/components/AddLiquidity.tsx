@@ -124,9 +124,9 @@ const useStyles = makeStyles((theme) => ({
 
 function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const classes = useStyles();
-  const [tokenAAmountStr, setTokenAAmountStr] = useState<string | undefined>(undefined)
+  const [tokenAInput, setTokenAInput] = useState<string | undefined>(undefined)
   const [tokenAAmount, setTokenAAmount] = useState<bigint | undefined>(undefined)
-  const [tokenBAmountStr, setTokenBAmountStr] = useState<string | undefined>(undefined)
+  const [tokenBInput, setTokenBInput] = useState<string | undefined>(undefined)
   const [tokenBAmount, setTokenBAmount] = useState<bigint | undefined>(undefined)
   const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
@@ -142,13 +142,13 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     setTokenAInfo(tokenInfo);
-    if (tokenAAmountStr !== undefined) setTokenAAmount(stringToBigInt(tokenAAmountStr, tokenInfo.decimals))
-  }, [tokenAAmountStr]);
+    if (tokenAInput !== undefined) setTokenAAmount(stringToBigInt(tokenAInput, tokenInfo.decimals))
+  }, [tokenAInput]);
 
   const handleTokenBChange = useCallback((tokenInfo) => {
     setTokenBInfo(tokenInfo)
-    if (tokenBAmountStr !== undefined) setTokenBAmount(stringToBigInt(tokenBAmountStr, tokenInfo.decimals))
-  }, [tokenBAmountStr]);
+    if (tokenBInput !== undefined) setTokenBAmount(stringToBigInt(tokenBInput, tokenInfo.decimals))
+  }, [tokenBInput]);
 
   useEffect(() => {
     setAddLiquidityResult(undefined)
@@ -175,18 +175,18 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
         if (lastInput === 'tokenA' && tokenAAmount !== undefined) {
           const addLiquidityResult = getAddLiquidityResult(tokenPairState, tokenAInfo.tokenId, tokenAAmount, 'TokenA')
           setTokenBAmount(addLiquidityResult.amountB)
-          setTokenBAmountStr(bigIntToString(addLiquidityResult.amountB, tokenBInfo.decimals))
+          setTokenBInput(bigIntToString(addLiquidityResult.amountB, tokenBInfo.decimals))
           setAddLiquidityResult(addLiquidityResult)
         } else if (lastInput === 'tokenB' && tokenBAmount !== undefined) {
           const addLiquidityResult = getAddLiquidityResult(tokenPairState, tokenBInfo.tokenId, tokenBAmount, 'TokenB')
           setTokenAAmount(addLiquidityResult.amountA)
-          setTokenAAmountStr(bigIntToString(addLiquidityResult.amountA, tokenAInfo.decimals))
+          setTokenAInput(bigIntToString(addLiquidityResult.amountA, tokenAInfo.decimals))
           setAddLiquidityResult(addLiquidityResult)
         } else {
           setTokenAAmount(undefined)
-          setTokenAAmountStr(undefined)
+          setTokenAInput(undefined)
           setTokenBAmount(undefined)
-          setTokenBAmountStr(undefined)
+          setTokenBInput(undefined)
           setAddLiquidityResult(undefined)
         }
       }
@@ -202,10 +202,10 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       setLastInput('tokenA')
       if (event.target.value === '') {
         setTokenAAmount(undefined)
-        setTokenAAmountStr(undefined)
+        setTokenAInput(undefined)
         return
       }
-      setTokenAAmountStr(event.target.value)
+      setTokenAInput(event.target.value)
       if (tokenAInfo !== undefined) {
         setTokenAAmount(stringToBigInt(event.target.value, tokenAInfo.decimals))
       }
@@ -218,10 +218,10 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       setLastInput('tokenB')
       if (event.target.value === '') {
         setTokenBAmount(undefined)
-        setTokenBAmountStr(undefined)
+        setTokenBInput(undefined)
         return
       }
-      setTokenBAmountStr(event.target.value)
+      setTokenBInput(event.target.value)
       if (tokenBInfo !== undefined) {
         setTokenBAmount(stringToBigInt(event.target.value, tokenBInfo.decimals))
       }
@@ -232,9 +232,9 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     setTokenAInfo(undefined)
     setTokenBInfo(undefined)
     setTokenAAmount(undefined)
-    setTokenAAmountStr(undefined)
+    setTokenAInput(undefined)
     setTokenBAmount(undefined)
-    setTokenBAmountStr(undefined)
+    setTokenBInput(undefined)
     setTokenPairState(undefined)
     setLastInput(undefined)
     setCompleted(false)
@@ -254,7 +254,7 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       />
       <NumberTextField
         className={classes.numberField}
-        value={tokenAAmountStr !== undefined ? tokenAAmountStr : ''}
+        value={tokenAInput !== undefined ? tokenAInput : ''}
         onChange={handleTokenAAmountChange}
         autoFocus={true}
         InputProps={{ disableUnderline: true }}
@@ -272,7 +272,7 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       />
       <NumberTextField
         className={classes.numberField}
-        value={tokenBAmountStr !== undefined ? tokenBAmountStr : ''}
+        value={tokenBInput !== undefined ? tokenBInput : ''}
         onChange={handleTokenBAmountChange}
         InputProps={{ disableUnderline: true }}
         disabled={!!addingLiquidity || !!completed}

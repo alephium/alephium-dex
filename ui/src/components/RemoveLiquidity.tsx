@@ -139,7 +139,7 @@ const useStyles = makeStyles((theme) => ({
 
 function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const classes = useStyles();
-  const [amountStr, setAmountStr] = useState<string | undefined>(undefined)
+  const [amountInput, setAmountInput] = useState<string | undefined>(undefined)
   const [amount, setAmount] = useState<bigint | undefined>(undefined)
   const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
@@ -206,11 +206,11 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       setRemoveLiquidityResult(undefined)
       if (event.target.value === '') {
         setAmount(undefined)
-        setAmountStr(undefined)
+        setAmountInput(undefined)
         return
       }
       setAmount(stringToBigInt(event.target.value, PairTokenDecimals))
-      setAmountStr(event.target.value)
+      setAmountInput(event.target.value)
     }, []
   )
 
@@ -219,7 +219,7 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     setTokenBInfo(undefined)
     setTokenPairState(undefined)
     setAmount(undefined)
-    setAmountStr(undefined)
+    setAmountInput(undefined)
     setTotalLiquidityAmount(undefined)
     setCompleted(false)
     setRemovingLiquidity(false)
@@ -246,11 +246,11 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     </div>
   )
   
-  const amountInput = (
+  const amountInputBox = (
     <div className={classes.tokenContainer}>
       <NumberTextField
         className={classes.numberField}
-        value={amountStr !== undefined ? amountStr : ''}
+        value={amountInput !== undefined ? amountInput : ''}
         onChange={handleAmountChanged}
         autoFocus={true}
         InputProps={{ disableUnderline: true }}
@@ -372,7 +372,7 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
                     </div>
                   </>
                 ): null}
-                {amountInput}
+                {amountInputBox}
                 {wallet !== undefined ? (
                 <>
                   {removeLiquidityResult && amount && !error ? (
