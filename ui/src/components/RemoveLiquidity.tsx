@@ -202,20 +202,15 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
 
   const handleAmountChanged = useCallback(
     (event) => {
-      try {
-        setError(undefined)
-        setRemoveLiquidityResult(undefined)
-        if (event.target.value === '') {
-          setAmount(undefined)
-          setAmountStr(undefined)
-          return
-        }
-        setAmount(stringToBigInt(event.target.value, PairTokenDecimals))
-        setAmountStr(event.target.value)
-      } catch (error) {
-        setError(`${error}`)
-        console.error(`handleAmountChanged error: ${error}`)
+      setError(undefined)
+      setRemoveLiquidityResult(undefined)
+      if (event.target.value === '') {
+        setAmount(undefined)
+        setAmountStr(undefined)
+        return
       }
+      setAmount(stringToBigInt(event.target.value, PairTokenDecimals))
+      setAmountStr(event.target.value)
     }, []
   )
 

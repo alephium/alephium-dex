@@ -9,12 +9,12 @@ import {
   DialogContent,
   DialogTitle,
   Tooltip,
-  TextField,
   Box,
   makeStyles,
   Typography,
   InputAdornment
 } from "@material-ui/core";
+import NumberTextField from './NumberTextField'
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -24,14 +24,6 @@ const useStyles = makeStyles(() => ({
     alignItems: 'center',
   }
 }))
-
-const numberRegex = new RegExp('^[0-9]*[.]?[0-9]*$')
-
-function checkNumber(str: string) {
-  if (!numberRegex.test(str)) {
-    throw new Error(`Invalid number ${str}`)
-  }
-}
 
 function Settings() {
   const classes = useStyles()
@@ -55,7 +47,6 @@ function Settings() {
     }
 
     try {
-      checkNumber(value)
       const parsed = Math.floor(Number.parseFloat(value)) // can not large than 50%
       if (!Number.isInteger(parsed) || parsed < 0 || parsed > 50) {
         throw new Error(`Invalid slippage input ${value}`)
@@ -77,8 +68,8 @@ function Settings() {
       setDeadline(DEFAULT_DEADLINE_FROM_NOW)
       return
     }
+
     try {
-      checkNumber(value)
       const parsed: number = Math.floor(Number.parseFloat(value) * 60) // can not less than 1 minutes
       if (!Number.isInteger(parsed) || parsed < 60 || parsed > THREE_DAYS_IN_SECONDS) {
         throw new Error(`Invalid deadline input ${value}`)
@@ -97,7 +88,7 @@ function Settings() {
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
         <Box display="flex" className={classes.container}>
-          <Tooltip title='Your transaction will revert if it is pending for more than this period of time. The default is 0.5%.'>
+          <Tooltip title='Your transaction will revert if the price changes unfavorably by more than this percentage.. The default is 0.5%.'>
             <Typography
               variant="subtitle2"
               style={{ marginLeft: '30px' }}
@@ -105,7 +96,7 @@ function Settings() {
               Slippage tolerance
             </Typography>
           </Tooltip>
-          <TextField
+          <NumberTextField
             variant='outlined'
             size='small'
             style={{ left: '30px', width: 140 }}
@@ -131,7 +122,7 @@ function Settings() {
               Deadline
             </Typography>
           </Tooltip>
-          <TextField
+          <NumberTextField
             variant='outlined'
             size='small'
             style={{ left: '50px', width: 140 }}

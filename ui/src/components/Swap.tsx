@@ -193,42 +193,32 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
 
   const handleTokenInAmountChange = useCallback(
     (event) => {
-      try {
-        setError(undefined)
-        setLastInput('tokenIn')
-        if (event.target.value === '') {
-          setTokenInAmount(undefined)
-          setTokenInAmountStr(undefined)
-          return
-        }
-        setTokenInAmountStr(event.target.value)
-        if (tokenInInfo !== undefined) {
-          setTokenInAmount(stringToBigInt(event.target.value, tokenInInfo.decimals))
-        }
-      } catch (error) {
-        setError(`${error}`)
-        console.error(`handleTokenInAmountChange error: ${error}`)
+      setError(undefined)
+      setLastInput('tokenIn')
+      if (event.target.value === '') {
+        setTokenInAmount(undefined)
+        setTokenInAmountStr(undefined)
+        return
+      }
+      setTokenInAmountStr(event.target.value)
+      if (tokenInInfo !== undefined) {
+        setTokenInAmount(stringToBigInt(event.target.value, tokenInInfo.decimals))
       }
     }, [tokenInInfo]
   )
 
   const handleTokenOutAmountChange = useCallback(
     (event) => {
-      try {
-        setError(undefined)
-        setLastInput('tokenOut')
-        if (event.target.value === '') {
-          setTokenOutAmount(undefined)
-          setTokenOutAmountStr(undefined)
-          return
-        }
-        setTokenOutAmountStr(event.target.value)
-        if (tokenOutInfo !== undefined) {
-          setTokenOutAmount(stringToBigInt(event.target.value, tokenOutInfo.decimals))
-        }
-      } catch (error) {
-        setError(`${error}`)
-        console.log(`handleTokenOutAmountChange error: ${error}`)
+      setError(undefined)
+      setLastInput('tokenOut')
+      if (event.target.value === '') {
+        setTokenOutAmount(undefined)
+        setTokenOutAmountStr(undefined)
+        return
+      }
+      setTokenOutAmountStr(event.target.value)
+      if (tokenOutInfo !== undefined) {
+        setTokenOutAmount(stringToBigInt(event.target.value, tokenOutInfo.decimals))
       }
     }, [tokenOutInfo]
   )

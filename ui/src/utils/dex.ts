@@ -19,6 +19,7 @@ import { genLogo } from "./avatar_images";
 
 const MINIMUM_LIQUIDITY = 1000n
 export const PairTokenDecimals = 18
+export const numberRegex = new RegExp('^[0-9]*[.]?[0-9]*$')
 
 export interface TokenPair {
   token0Id: string
@@ -329,6 +330,10 @@ export async function addLiquidity(
   slippage: number,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
+  if (amountADesired === 0n || amountBDesired === 0n) {
+    throw new Error('the input amount must be greater than 0')
+  }
+
   const balances = await getBalance(sender)
   const tokenAAvailable = balances.get(tokenAInfo.tokenId) ?? 0n
   if (tokenAAvailable < amountADesired) {
@@ -527,11 +532,7 @@ export async function getTokenInfo(nodeProvider: NodeProvider, tokenId: string):
 }
 
 export function stringToBigInt(amount: string, decimals: number): bigint {
-  const result = parseUnits(amount, decimals).toBigInt()
-  if (result < 0n) {
-    throw new Error(`Invalid amount ${amount}`)
-  }
-  return result
+  return parseUnits(amount, decimals).toBigInt()
 }
 
 export function bigIntToString(amount: bigint, decimals: number, fractionDigits: number = 6): string {

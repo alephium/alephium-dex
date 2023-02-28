@@ -217,42 +217,32 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
 
   const handleTokenAAmountChange = useCallback(
     (event) => {
-      try {
-        setError(undefined)
-        setLastInput('tokenA')
-        if (event.target.value === '') {
-          setTokenAAmount(undefined)
-          setTokenAAmountStr(undefined)
-          return
-        }
-        setTokenAAmountStr(event.target.value)
-        if (tokenAInfo !== undefined) {
-          setTokenAAmount(stringToBigInt(event.target.value, tokenAInfo.decimals))
-        }
-      } catch (error) {
-        setError(`${error}`)
-        console.error(`handleTokenAAmountChange error: ${error}`)
+      setError(undefined)
+      setLastInput('tokenA')
+      if (event.target.value === '') {
+        setTokenAAmount(undefined)
+        setTokenAAmountStr(undefined)
+        return
+      }
+      setTokenAAmountStr(event.target.value)
+      if (tokenAInfo !== undefined) {
+        setTokenAAmount(stringToBigInt(event.target.value, tokenAInfo.decimals))
       }
     }, [tokenAInfo]
   )
 
   const handleTokenBAmountChange = useCallback(
     (event) => {
-      try {
-        setError(undefined)
-        setLastInput('tokenB')
-        if (event.target.value === '') {
-          setTokenBAmount(undefined)
-          setTokenBAmountStr(undefined)
-          return
-        }
-        setTokenBAmountStr(event.target.value)
-        if (tokenBInfo !== undefined) {
-          setTokenBAmount(stringToBigInt(event.target.value, tokenBInfo.decimals))
-        }
-      } catch (error) {
-        setError(`${error}`)
-        console.log(`handleTokenBAmountChange error: ${error}`)
+      setError(undefined)
+      setLastInput('tokenB')
+      if (event.target.value === '') {
+        setTokenBAmount(undefined)
+        setTokenBAmountStr(undefined)
+        return
+      }
+      setTokenBAmountStr(event.target.value)
+      if (tokenBInfo !== undefined) {
+        setTokenBAmount(stringToBigInt(event.target.value, tokenBInfo.decimals))
       }
     }, [tokenBInfo]
   )
