@@ -27,6 +27,9 @@ import {
   bigIntToString
 } from "../utils/dex";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
+import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
+import { useDeadline } from "../hooks/useDeadline";
+import { DEFAULT_SLIPPAGE } from "../state/reducer";
 
 const useStyles = makeStyles((theme) => ({
   numberField: {
@@ -133,6 +136,8 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const [addLiquidityResult, setAddLiquidityResult] = useState<AddLiquidityResult | undefined>(undefined)
   const [completed, setCompleted] = useState<boolean>(false)
   const [addingLiquidity, setAddingLiquidity] = useState<boolean>(false)
+  const [slippage,] = useSlippageTolerance()
+  const [deadline,] = useDeadline()
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
 
@@ -327,7 +332,9 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
           tokenAInfo,
           tokenBInfo,
           tokenAAmount,
-          tokenBAmount
+          tokenBAmount,
+          slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage,
+          deadline
         )
         console.log(`add liquidity succeed, tx id: ${result.txId}`)
         setCompleted(true)
@@ -338,7 +345,7 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       setAddingLiquidity(false)
       console.error(`failed to add liquidity, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount])
+  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline])
 
   const readyToAddLiquidity =
     wallet !== undefined &&

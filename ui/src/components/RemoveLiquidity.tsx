@@ -28,6 +28,9 @@ import {
 } from "../utils/dex";
 import { formatUnits } from "ethers/lib/utils";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
+import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
+import { useDeadline } from "../hooks/useDeadline";
+import { DEFAULT_SLIPPAGE } from "../state/reducer";
 
 const useStyles = makeStyles((theme) => ({
   numberField: {
@@ -145,6 +148,8 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const [removeLiquidityResult, setRemoveLiquidityResult] = useState<RemoveLiquidityResult | undefined>(undefined)
   const [completed, setCompleted] = useState<boolean>(false)
   const [removingLiquidity, setRemovingLiquidity] = useState<boolean>(false)
+  const [slippage,] = useSlippageTolerance()
+  const [deadline,] = useDeadline()
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
 
@@ -281,7 +286,9 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
           tokenPairState.tokenPairId,
           amount,
           removeLiquidityResult.amount0,
-          removeLiquidityResult.amount1
+          removeLiquidityResult.amount1,
+          slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage,
+          deadline
         )
         console.log(`remove liquidity succeed, tx id: ${result.txId}`)
         setCompleted(true)
@@ -292,7 +299,7 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       setRemovingLiquidity(false)
       console.error(`failed to remove liquidity, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, amount, removeLiquidityResult])
+  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, amount, removeLiquidityResult, slippage, deadline])
 
   const readyToRemoveLiquidity =
     wallet !== undefined &&

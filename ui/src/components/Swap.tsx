@@ -16,6 +16,9 @@ import NumberTextField from "../components/NumberTextField";
 import { COLORS } from "../muiTheme";
 import { getAmountIn, getAmountOut, getTokenPairState, swap, TokenInfo, TokenPairState, DexTokens, stringToBigInt, bigIntToString } from "../utils/dex";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
+import { useDeadline } from "../hooks/useDeadline";
+import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
+import { DEFAULT_SLIPPAGE } from "../state/reducer";
 
 const useStyles = makeStyles((theme) => ({
   numberField: {
@@ -116,6 +119,8 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
   const [completed, setCompleted] = useState<boolean>(false)
   const [swapping, setSwapping] = useState<boolean>(false)
   const [error, setError] = useState<string | undefined>(undefined)
+  const [slippage,] = useSlippageTolerance()
+  const [deadline,] = useDeadline()
   const wallet = useAlephiumWallet()
 
   const handleTokenInChange = useCallback((tokenInfo) => {
@@ -314,7 +319,9 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
           tokenPairState.tokenPairId,
           tokenInInfo,
           tokenInAmount,
-          tokenOutAmount
+          tokenOutAmount,
+          slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage,
+          deadline
         )
         console.log(`swap succeed, tx id: ${result.txId}`)
         setCompleted(true)
@@ -325,7 +332,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       setSwapping(false)
       console.error(`failed to swap, error: ${error}`)
     }
-  }, [lastInput, wallet, tokenPairState, tokenInInfo, tokenInAmount, tokenOutAmount])
+  }, [lastInput, wallet, tokenPairState, tokenInInfo, tokenInAmount, tokenOutAmount, slippage, deadline])
 
   const readyToSwap =
     wallet !== undefined &&

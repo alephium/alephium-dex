@@ -18,7 +18,6 @@ import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, Re
 import { genLogo } from "./avatar_images";
 
 const MINIMUM_LIQUIDITY = 1000n
-const DEFAULT_TTL = 60 * 60 * 1000 // one hour in millis
 export const PairTokenDecimals = 18
 
 export interface TokenPair {
@@ -151,13 +150,18 @@ function _getAmountOut(amountIn: bigint, reserveIn: bigint, reserveOut: bigint):
   return numerator / denominator
 }
 
+function deadline(ttl: number): bigint {
+  return BigInt(Date.now() + ttl * 60 * 1000)
+}
+
 async function swapMinOut(
   signer: SignerProvider,
   sender: string,
   pairId: string,
   tokenInId: string,
   amountIn: bigint,
-  amountOutMin: bigint
+  amountOutMin: bigint,
+  ttl: number
 ): Promise<SignExecuteScriptTxResult> {
   const result = await SwapMinOut.execute(signer, {
     initialFields: {
@@ -167,7 +171,7 @@ async function swapMinOut(
       tokenInId: tokenInId,
       amountIn: amountIn,
       amountOutMin: amountOutMin,
-      deadline: BigInt(Date.now() + DEFAULT_TTL)
+      deadline: deadline(ttl)
     },
     tokens: [{ id: tokenInId, amount: amountIn }]
   })
@@ -181,7 +185,8 @@ async function swapMaxIn(
   pairId: string,
   tokenInId: string,
   amountInMax: bigint,
-  amountOut: bigint
+  amountOut: bigint,
+  ttl: number
 ): Promise<SignExecuteScriptTxResult> {
   const result = await SwapMaxIn.execute(signer, {
     initialFields: {
@@ -191,7 +196,7 @@ async function swapMaxIn(
       tokenInId: tokenInId,
       amountInMax: amountInMax,
       amountOut: amountOut,
-      deadline: BigInt(Date.now() + DEFAULT_TTL)
+      deadline: deadline(ttl)
     },
     tokens: [{ id: tokenInId, amount: amountInMax }]
   })
@@ -206,7 +211,9 @@ export async function swap(
   pairId: string,
   tokenInInfo: TokenInfo,
   amountIn: bigint,
-  amountOut: bigint
+  amountOut: bigint,
+  slippage: number,
+  ttl: number
 ): Promise<SignExecuteScriptTxResult> {
   const balances = await getBalance(sender)
   const available = balances.get(tokenInInfo.tokenId) ?? 0n
@@ -215,12 +222,12 @@ export async function swap(
   }
 
   if (type === 'ExactInput') {
-    const amountOutMin = (amountOut * 995n) / 1000n
-    return swapMinOut(signer, sender, pairId, tokenInInfo.tokenId, amountIn, amountOutMin)
+    const amountOutMin = minimalAmount(amountOut, slippage)
+    return swapMinOut(signer, sender, pairId, tokenInInfo.tokenId, amountIn, amountOutMin, ttl)
   }
 
-  const amountInMax = (amountIn * 1005n) / 1000n
-  return swapMaxIn(signer, sender, pairId, tokenInInfo.tokenId, amountInMax, amountOut)
+  const amountInMax = maximalAmount(amountIn, slippage)
+  return swapMaxIn(signer, sender, pairId, tokenInInfo.tokenId, amountInMax, amountOut, ttl)
 }
 
 function isConfirmed(txStatus: node.TxStatus): txStatus is node.Confirmed {
@@ -299,8 +306,16 @@ function sqrt(y: bigint): bigint {
   return 1n
 }
 
-function calcSlippageAmount(amount: bigint, isInitial: boolean): bigint {
-  return isInitial ? amount : (amount * 995n) / 1000n
+function calcSlippageAmount(amount: bigint, slippage: number): bigint {
+  return BigInt(BigNumber(amount.toString()).times(slippage).idiv(100).toString())
+}
+
+function minimalAmount(amount: bigint, slippage: number): bigint {
+  return amount - calcSlippageAmount(amount, slippage)
+}
+
+function maximalAmount(amount: bigint, slippage: number): bigint {
+  return amount + calcSlippageAmount(amount, slippage)
 }
 
 export async function addLiquidity(
@@ -310,7 +325,9 @@ export async function addLiquidity(
   tokenAInfo: TokenInfo,
   tokenBInfo: TokenInfo,
   amountADesired: bigint,
-  amountBDesired: bigint
+  amountBDesired: bigint,
+  slippage: number,
+  ttl: number
 ): Promise<SignExecuteScriptTxResult> {
   const balances = await getBalance(sender)
   const tokenAAvailable = balances.get(tokenAInfo.tokenId) ?? 0n
@@ -323,9 +340,8 @@ export async function addLiquidity(
   }
 
   const isInitial = tokenPairState.reserve0 === 0n && tokenPairState.reserve1 === 0n
-  const amountAMin = calcSlippageAmount(amountADesired, isInitial)
-  const amountBMin = calcSlippageAmount(amountBDesired, isInitial)
-  const deadline = BigInt(Date.now() + DEFAULT_TTL)
+  const amountAMin = isInitial ? amountADesired : minimalAmount(amountADesired, slippage)
+  const amountBMin = isInitial ? amountBDesired : minimalAmount(amountBDesired, slippage)
   const [amount0Desired, amount1Desired, amount0Min, amount1Min] = tokenAInfo.tokenId === tokenPairState.token0Id
     ? [amountADesired, amountBDesired, amountAMin, amountBMin]
     : [amountBDesired, amountADesired, amountBMin, amountAMin]
@@ -338,7 +354,7 @@ export async function addLiquidity(
       amount1Desired: amount1Desired,
       amount0Min: amount0Min,
       amount1Min: amount1Min,
-      deadline: deadline
+      deadline: deadline(ttl)
     },
     tokens: [
       { id: tokenAInfo.tokenId, amount: amountADesired },
@@ -387,11 +403,12 @@ export async function removeLiquidity(
   pairId: string,
   liquidity: bigint,
   amount0Desired: bigint,
-  amount1Desired: bigint
+  amount1Desired: bigint,
+  slippage: number,
+  ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  const amount0Min = calcSlippageAmount(amount0Desired, false)
-  const amount1Min = calcSlippageAmount(amount1Desired, false)
-  const deadline = BigInt(Date.now() + DEFAULT_TTL)
+  const amount0Min = minimalAmount(amount0Desired, slippage)
+  const amount1Min = minimalAmount(amount1Desired, slippage)
   const result = await RemoveLiquidity.execute(signer, {
     initialFields: {
       sender: sender,
@@ -400,7 +417,7 @@ export async function removeLiquidity(
       liquidity: liquidity,
       amount0Min: amount0Min,
       amount1Min: amount1Min,
-      deadline: deadline
+      deadline: deadline(ttl)
     },
     tokens: [{ id: pairId, amount: liquidity }]
   })

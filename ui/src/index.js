@@ -6,20 +6,24 @@ import { HashRouter } from "react-router-dom";
 import App from "./App";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { theme } from "./muiTheme";
+import { store } from "./state"
+import { Provider } from "react-redux"
 import { AlephiumConnectProvider } from "@alephium/web3-react"
 
 ReactDOM.render(
   <ErrorBoundary>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-        <AlephiumConnectProvider>
-          <SnackbarProvider maxSnack={3}>
-            <HashRouter>
-              <App />
-            </HashRouter>
-          </SnackbarProvider>
-        </AlephiumConnectProvider>
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+          <AlephiumConnectProvider>
+            <SnackbarProvider maxSnack={3}>
+              <HashRouter>
+                <App />
+              </HashRouter>
+            </SnackbarProvider>
+          </AlephiumConnectProvider>
+      </ThemeProvider>
+    </Provider>
   </ErrorBoundary>,
   document.getElementById("root")
 );
