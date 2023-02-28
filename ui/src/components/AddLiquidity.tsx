@@ -124,7 +124,6 @@ const useStyles = makeStyles((theme) => ({
 
 function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const classes = useStyles();
-  // TODO: improve state management
   const [tokenAAmountStr, setTokenAAmountStr] = useState<string | undefined>(undefined)
   const [tokenAAmount, setTokenAAmount] = useState<bigint | undefined>(undefined)
   const [tokenBAmountStr, setTokenBAmountStr] = useState<string | undefined>(undefined)
@@ -143,11 +142,13 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     setTokenAInfo(tokenInfo);
-  }, []);
+    if (tokenAAmountStr !== undefined) setTokenAAmount(stringToBigInt(tokenAAmountStr, tokenInfo.decimals))
+  }, [tokenAAmountStr]);
 
   const handleTokenBChange = useCallback((tokenInfo) => {
     setTokenBInfo(tokenInfo)
-  }, []);
+    if (tokenBAmountStr !== undefined) setTokenBAmount(stringToBigInt(tokenBAmountStr, tokenInfo.decimals))
+  }, [tokenBAmountStr]);
 
   useEffect(() => {
     setAddLiquidityResult(undefined)
@@ -157,26 +158,6 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
         .catch((error) => setError(error))
     }
   }, [tokenAInfo, tokenBInfo])
-
-  useEffect(() => {
-    if (tokenAInfo !== undefined && tokenAAmountStr !== undefined) {
-      try {
-        setTokenAAmount(stringToBigInt(tokenAAmountStr, tokenAInfo.decimals))
-      } catch (e) {
-        setError(`Invalid token amount: ${e}`)
-      }
-    }
-  }, [tokenAInfo, tokenAAmountStr])
-
-  useEffect(() => {
-    if (tokenBInfo !== undefined && tokenBAmountStr !== undefined) {
-      try {
-        setTokenBAmount(stringToBigInt(tokenBAmountStr, tokenBInfo.decimals))
-      } catch (e) {
-        setError(`Invalid token amount: ${e}`)
-      }
-    }
-  }, [tokenBInfo, tokenBAmountStr])
 
   useEffect(() => {
     setAddLiquidityResult(undefined)

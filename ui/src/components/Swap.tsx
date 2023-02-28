@@ -107,7 +107,6 @@ const useStyles = makeStyles((theme) => ({
 
 function Swap({ dexTokens }: { dexTokens: DexTokens }) {
   const classes = useStyles();
-  // TODO: improve state management
   const [tokenInAmountStr, setTokenInAmountStr] = useState<string | undefined>(undefined)
   const [tokenInAmount, setTokenInAmount] = useState<bigint | undefined>(undefined)
   const [tokenOutAmountStr, setTokenOutAmountStr] = useState<string | undefined>(undefined)
@@ -125,11 +124,13 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
 
   const handleTokenInChange = useCallback((tokenInfo) => {
     setTokenInInfo(tokenInfo);
-  }, []);
+    if (tokenInAmountStr !== undefined) setTokenInAmount(stringToBigInt(tokenInAmountStr, tokenInfo.decimals))
+  }, [tokenInAmountStr]);
 
   const handleTokenOutChange = useCallback((tokenInfo) => {
     setTokenOutInfo(tokenInfo)
-  }, []);
+    if (tokenOutAmountStr !== undefined) setTokenOutAmount(stringToBigInt(tokenOutAmountStr, tokenInfo.decimals))
+  }, [tokenOutAmountStr]);
 
   useEffect(() => {
     if (tokenInInfo !== undefined && tokenOutInfo !== undefined) {
@@ -140,49 +141,21 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
   }, [tokenInInfo, tokenOutInfo])
 
   useEffect(() => {
-    if (tokenInInfo !== undefined && tokenInAmountStr !== undefined) {
-      try {
-        setTokenInAmount(stringToBigInt(tokenInAmountStr, tokenInInfo.decimals))
-      } catch (e) {
-        setError(`Invalid token in amount ${e}`)
-      }
-    }
-  }, [tokenInInfo, tokenInAmountStr])
-
-  useEffect(() => {
-    if (tokenOutInfo !== undefined && tokenOutAmountStr !== undefined) {
-      try {
-        setTokenOutAmount(stringToBigInt(tokenOutAmountStr, tokenOutInfo.decimals))
-      } catch (e) {
-        setError(`Invalid token out amount ${e}`)
-      }
-    }
-  }, [tokenOutInfo, tokenOutAmountStr])
-
-  useEffect(() => {
     try {
       if (tokenPairState !== undefined && tokenInInfo !== undefined && tokenOutInfo !== undefined) {
-        if (lastInput === 'tokenIn' && tokenInAmount === undefined) {
-          setTokenOutAmount(undefined)
-          setTokenOutAmountStr(undefined)
-          return
-        }
         if (lastInput === 'tokenIn' && tokenInAmount !== undefined) {
           const tokenOutAmount = getAmountOut(tokenPairState, tokenInInfo.tokenId, tokenInAmount)
           setTokenOutAmount(tokenOutAmount)
           setTokenOutAmountStr(bigIntToString(tokenOutAmount, tokenOutInfo.decimals))
-          return
-        }
-        if (lastInput === 'tokenOut' && tokenOutAmount === undefined) {
-          setTokenInAmount(undefined)
-          setTokenInAmountStr(undefined)
-          return
-        }
-        if (lastInput === 'tokenOut' && tokenOutAmount !== undefined) {
+        } else if (lastInput === 'tokenOut' && tokenOutAmount !== undefined) {
           const tokenInAmount = getAmountIn(tokenPairState, tokenOutInfo.tokenId, tokenOutAmount)
           setTokenInAmount(tokenInAmount)
           setTokenInAmountStr(bigIntToString(tokenInAmount, tokenInInfo.decimals))
-          return
+        } else {
+          setTokenInAmount(undefined)
+          setTokenInAmountStr(undefined)
+          setTokenOutAmount(undefined)
+          setTokenOutAmountStr(undefined)
         }
       }
     } catch (error) {
