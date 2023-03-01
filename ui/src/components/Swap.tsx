@@ -205,6 +205,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
 
         const result = await swap(
           swapType,
+          wallet.balances,
           wallet.signer,
           wallet.address,
           tokenPairState.tokenPairId,

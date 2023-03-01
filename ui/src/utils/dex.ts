@@ -210,6 +210,7 @@ async function swapMaxIn(
 
 export async function swap(
   type: 'ExactIn' | 'ExactOut',
+  balances: Map<string, bigint>,
   signer: SignerProvider,
   sender: string,
   pairId: string,
@@ -219,7 +220,6 @@ export async function swap(
   slippage: number,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  const balances = await getBalance(sender)
   const available = balances.get(tokenInInfo.tokenId) ?? 0n
   if (available < amountIn) {
     throw new Error(`not enough balance, available: ${bigIntToString(available, tokenInInfo.decimals)}`)
@@ -318,6 +318,7 @@ function maximalAmount(amount: bigint, slippage: number): bigint {
 }
 
 export async function addLiquidity(
+  balances: Map<string, bigint>,
   signer: SignerProvider,
   sender: string,
   tokenPairState: TokenPairState,
@@ -332,7 +333,6 @@ export async function addLiquidity(
     throw new Error('the input amount must be greater than 0')
   }
 
-  const balances = await getBalance(sender)
   const tokenAAvailable = balances.get(tokenAInfo.tokenId) ?? 0n
   if (tokenAAvailable < amountADesired) {
     throw new Error(`not enough balance for token ${tokenAInfo.name}, available: ${bigIntToString(tokenAAvailable, tokenAInfo.decimals)}`)
@@ -554,20 +554,6 @@ export function tryBigIntToString(amount: bigint | undefined, decimals: number |
     return undefined
   }
   return bigIntToString(amount, decimals)
-}
-
-async function getBalance(address: string): Promise<Map<string, bigint>> {
-  const balances = new Map<string, bigint>()
-  const result = await web3.getCurrentNodeProvider().addresses.getAddressesAddressBalance(address)
-  const alphAmount = BigInt(result.balance) - BigInt(result.lockedBalance)
-  balances.set(ALPH_TOKEN_ID, alphAmount)
-  const tokens: node.Token[] = result.tokenBalances ?? []
-  for (const token of tokens) {
-    const locked = BigInt(result.lockedTokenBalances?.find((t) => t.id === token.id)?.amount ?? '0')
-    const tokenAmount = BigInt(token.amount) - locked
-    balances.set(token.id, tokenAmount)
-  }
-  return balances
 }
 
 export function checkContractId(contractId: string) {

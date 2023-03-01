@@ -214,6 +214,7 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
         }
 
         const result = await addLiquidity(
+          wallet.balances,
           wallet.signer,
           wallet.address,
           tokenPairState,
