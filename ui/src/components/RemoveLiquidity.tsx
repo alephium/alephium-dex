@@ -328,6 +328,31 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     return formatUnits(amount, tokenInfo.decimals)
   }
 
+  const formatRemoveLiquidityResult = (result: RemoveLiquidityResult, amount: bigint) => {
+    return <>
+        <div className={classes.notification}>
+          <p className={classes.leftAlign}>Remove share amount:</p>
+          <p className={classes.rightAlign}>{bigIntToString(amount, PairTokenDecimals)}</p>
+        </div>
+        <div className={classes.notification}>
+          <p className={classes.leftAlign}>Token {tokenAInfo!.name}:</p>
+          <p className={classes.rightAlign}>{getTokenAmount(result, tokenAInfo!)}</p>
+        </div>
+        <div className={classes.notification}>
+          <p className={classes.leftAlign}>Token {tokenBInfo!.name}:</p>
+          <p className={classes.rightAlign}>{getTokenAmount(result, tokenBInfo!).toString()}</p>
+        </div>
+        <div className={classes.notification}>
+          <p className={classes.leftAlign}>Remain share amount:</p>
+          <p className={classes.rightAlign}>{formatUnits(result.remainShareAmount, PairTokenDecimals)}</p>
+        </div>
+        <div className={classes.notification}>
+          <p className={classes.leftAlign}>Remain share percentage:</p>
+          <p className={classes.rightAlign}>{result.remainSharePercentage}%</p>
+        </div>
+      </>
+  }
+
   return (
     <Container className={classes.centeredContainer} maxWidth="sm">
       <div className={classes.titleBar}></div>
@@ -380,30 +405,7 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
                 {amountInputBox}
                 {wallet !== undefined ? (
                 <>
-                  {removeLiquidityResult && amount && !error ? (
-                    <>
-                      <div className={classes.notification}>
-                        <p className={classes.leftAlign}>Remove share amount:</p>
-                        <p className={classes.rightAlign}>{bigIntToString(amount, PairTokenDecimals)}</p>
-                      </div>
-                      <div className={classes.notification}>
-                        <p className={classes.leftAlign}>Token {tokenAInfo!.name}:</p>
-                        <p className={classes.rightAlign}>{getTokenAmount(removeLiquidityResult, tokenAInfo!)}</p>
-                      </div>
-                      <div className={classes.notification}>
-                        <p className={classes.leftAlign}>Token {tokenBInfo!.name}:</p>
-                        <p className={classes.rightAlign}>{getTokenAmount(removeLiquidityResult, tokenBInfo!).toString()}</p>
-                      </div>
-                      <div className={classes.notification}>
-                        <p className={classes.leftAlign}>Remain share amount:</p>
-                        <p className={classes.rightAlign}>{formatUnits(removeLiquidityResult.remainShareAmount, PairTokenDecimals)}</p>
-                      </div>
-                      <div className={classes.notification}>
-                        <p className={classes.leftAlign}>Remain share percentage:</p>
-                        <p className={classes.rightAlign}>{removeLiquidityResult.remainSharePercentage}%</p>
-                      </div>
-                    </>
-                  ): null}
+                  {removeLiquidityResult && amount && !error ? (formatRemoveLiquidityResult(removeLiquidityResult, amount)): null}
                   {error ? (
                     <Typography variant="body2" color="error" className={classes.error}>
                       {error}

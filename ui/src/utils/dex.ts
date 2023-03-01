@@ -258,11 +258,6 @@ export interface AddLiquidityResult {
   sharePercentage: number
 }
 
-export function formatAddLiquidityResult(result: AddLiquidityResult): string {
-  const amount = bigIntToString(result.shareAmount, PairTokenDecimals)
-  return `Share amount: ${amount.toString()}, share percentage: ${result.sharePercentage}%`
-}
-
 export function getInitAddLiquidityResult(amountA: bigint, amountB: bigint): AddLiquidityResult {
   const liquidity = sqrt(amountA * amountB)
   if (liquidity <= MINIMUM_LIQUIDITY) {
@@ -311,10 +306,10 @@ function sqrt(y: bigint): bigint {
 }
 
 function calcSlippageAmount(amount: bigint, slippage: number): bigint {
-  return BigInt(BigNumber(amount.toString()).times(slippage).idiv(100).toString())
+  return BigInt(BigNumber(amount.toString()).times(slippage).idiv(100).toFixed())
 }
 
-function minimalAmount(amount: bigint, slippage: number): bigint {
+export function minimalAmount(amount: bigint, slippage: number): bigint {
   return amount - calcSlippageAmount(amount, slippage)
 }
 

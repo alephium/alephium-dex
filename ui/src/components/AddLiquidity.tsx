@@ -13,7 +13,7 @@ import TokenSelectDialog from "./TokenSelectDialog";
 import CircleLoader from "./CircleLoader";
 import NumberTextField from "./NumberTextField";
 import { COLORS } from "../muiTheme";
-import { addLiquidity, formatAddLiquidityResult, DexTokens } from "../utils/dex";
+import { addLiquidity, DexTokens, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityResult, TokenPairState } from "../utils/dex";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
@@ -107,11 +107,19 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
   },
   notification: {
-    marginTop: theme.spacing(1),
-    textAlign: "center",
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  leftAlign: {
+    textAlign: "left",
     fontSize: "15px",
-    color: COLORS.green
-  }
+    fontFamily: "monospace"
+  },
+  rightAlign: {
+    textAlign: "right",
+    fontSize: "15px",
+    fontFamily: "monospace"
+  },
 }));
 
 function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
@@ -248,6 +256,32 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     </ButtonWithLoader>
   );
 
+  const formatAddLiquidityResult = (state: TokenPairState, result: AddLiquidityResult, slippage: number | 'auto') => {
+    const slippageTolerance = slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage
+    return <>
+      <div className={classes.notification}>
+        <p className={classes.leftAlign}>Share amount:</p>
+        <p className={classes.rightAlign}>{bigIntToString(result.shareAmount, PairTokenDecimals)}</p>
+      </div>
+      <div className={classes.notification}>
+        <p className={classes.leftAlign}>Share percentage:</p>
+        <p className={classes.rightAlign}>{result.sharePercentage}%</p>
+      </div>
+      {state.reserve0 > 0n ? (
+        <>
+          <div className={classes.notification}>
+            <p className={classes.leftAlign}>Minimal amount of token {state.token0Info.symbol}:</p>
+            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(result.amountA, slippageTolerance), state.token0Info.decimals)}</p>
+          </div>
+          <div className={classes.notification}>
+            <p className={classes.leftAlign}>Minimal amount of token {state.token1Info.symbol}:</p>
+            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(result.amountB, slippageTolerance), state.token1Info.decimals)}</p>
+          </div>
+        </>
+      ) : null}
+    </>
+  }
+
   return (
     <Container className={classes.centeredContainer} maxWidth="sm">
       <div className={classes.titleBar}></div>
@@ -298,15 +332,7 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
                 <div className={classes.spacer} />
               </>
             }
-            {addLiquidityResult && !error ? (
-              <>
-                <div className={classes.spacer} />
-                <Typography variant="body2" className={classes.notification}>
-                  {formatAddLiquidityResult(addLiquidityResult)}
-                </Typography>
-                <div className={classes.spacer} />
-              </>
-            ) : null}
+            {addLiquidityResult && tokenPairState && !error ? (formatAddLiquidityResult(tokenPairState, addLiquidityResult, slippage)) : null}
             {addLiquidityButton}
           </Collapse>
         </div>
