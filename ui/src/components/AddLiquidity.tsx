@@ -141,13 +141,23 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const wallet = useAlephiumWallet()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
-    setTokenAInfo(tokenInfo);
-    if (tokenAInput !== undefined) setTokenAAmount(stringToBigInt(tokenAInput, tokenInfo.decimals))
+    try {
+      setTokenAInfo(tokenInfo);
+      if (tokenAInput !== undefined) setTokenAAmount(stringToBigInt(tokenAInput, tokenInfo.decimals))
+    } catch (error) {
+      console.log(`Invalid tokenA input: ${tokenAInput}, error: ${error}`)
+      setError(`${error}`)
+    }
   }, [tokenAInput]);
 
   const handleTokenBChange = useCallback((tokenInfo) => {
-    setTokenBInfo(tokenInfo)
-    if (tokenBInput !== undefined) setTokenBAmount(stringToBigInt(tokenBInput, tokenInfo.decimals))
+    try {
+      setTokenBInfo(tokenInfo)
+      if (tokenBInput !== undefined) setTokenBAmount(stringToBigInt(tokenBInput, tokenInfo.decimals))
+    } catch (error) {
+      console.log(`Invalid tokenB input: ${tokenBInput}, error: ${error}`)
+      setError(`${error}`)
+    }
   }, [tokenBInput]);
 
   useEffect(() => {
@@ -206,8 +216,13 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
         return
       }
       setTokenAInput(event.target.value)
-      if (tokenAInfo !== undefined) {
-        setTokenAAmount(stringToBigInt(event.target.value, tokenAInfo.decimals))
+      try {
+        if (tokenAInfo !== undefined) {
+          setTokenAAmount(stringToBigInt(event.target.value, tokenAInfo.decimals))
+        }
+      } catch (error) {
+        console.log(`Invalid tokenA input: ${event.target.value}, error: ${error}`)
+        setError(`${error}`)
       }
     }, [tokenAInfo]
   )
@@ -222,8 +237,13 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
         return
       }
       setTokenBInput(event.target.value)
-      if (tokenBInfo !== undefined) {
-        setTokenBAmount(stringToBigInt(event.target.value, tokenBInfo.decimals))
+      try {
+        if (tokenBInfo !== undefined) {
+          setTokenBAmount(stringToBigInt(event.target.value, tokenBInfo.decimals))
+        }
+      } catch (error) {
+        console.log(`Invalid tokenB input: ${event.target.value}, error: ${error}`)
+        setError(`${error}`)
       }
     }, [tokenBInfo]
   )

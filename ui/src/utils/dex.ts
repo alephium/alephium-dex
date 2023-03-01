@@ -8,12 +8,13 @@ import {
   web3,
   ALPH_TOKEN_ID,
   fromApiVal,
-  isHexString
+  isHexString,
+  prettifyTokenAmount
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
 import { network } from "./consts"
 import BigNumber from "bignumber.js"
-import { parseUnits, formatUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, RemoveLiquidity, CreatePair } from "../contracts/ts"
 import { genLogo } from "./avatar_images";
 
@@ -531,17 +532,17 @@ export async function getTokenInfo(nodeProvider: NodeProvider, tokenId: string):
   }
 }
 
+// This is only used for user inputs
 export function stringToBigInt(amount: string, decimals: number): bigint {
   return parseUnits(amount, decimals).toBigInt()
 }
 
-export function bigIntToString(amount: bigint, decimals: number, fractionDigits: number = 6): string {
-  const parts = formatUnits(amount, decimals).split('.')
-  if (parts.length === 1) {
-    return parts[1]
+export function bigIntToString(amount: bigint, decimals: number): string {
+  const str = prettifyTokenAmount(amount, decimals)
+  if (str === undefined) {
+    throw new Error(`Invalid amount: ${amount}, decimals: ${decimals}`)
   }
-  const fraction = parseFloat('0.' + parts[1].slice(0, fractionDigits)).toString().slice(1)
-  return parts[0] + fraction
+  return str
 }
 
 async function getBalance(address: string): Promise<Map<string, bigint>> {

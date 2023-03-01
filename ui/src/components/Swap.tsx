@@ -14,7 +14,17 @@ import CircleLoader from "../components/CircleLoader";
 import HoverIcon from "../components/HoverIcon";
 import NumberTextField from "../components/NumberTextField";
 import { COLORS } from "../muiTheme";
-import { getAmountIn, getAmountOut, getTokenPairState, swap, TokenInfo, TokenPairState, DexTokens, stringToBigInt, bigIntToString } from "../utils/dex";
+import {
+  getAmountIn,
+  getAmountOut,
+  getTokenPairState,
+  swap,
+  TokenInfo,
+  TokenPairState,
+  DexTokens,
+  stringToBigInt,
+  bigIntToString
+} from "../utils/dex";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
 import { useDeadline } from "../hooks/useDeadline";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
@@ -123,13 +133,23 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
   const wallet = useAlephiumWallet()
 
   const handleTokenInChange = useCallback((tokenInfo) => {
-    setTokenInInfo(tokenInfo);
-    if (tokenInInput !== undefined) setTokenInAmount(stringToBigInt(tokenInInput, tokenInfo.decimals))
+    try {
+      setTokenInInfo(tokenInfo);
+      if (tokenInInput !== undefined) setTokenInAmount(stringToBigInt(tokenInInput, tokenInfo.decimals))
+    } catch (error) {
+      console.log(`Invalid tokenIn input: ${tokenInInput}, error: ${error}`)
+      setError(`${error}`)
+    }
   }, [tokenInInput]);
 
   const handleTokenOutChange = useCallback((tokenInfo) => {
-    setTokenOutInfo(tokenInfo)
-    if (tokenOutInput !== undefined) setTokenOutAmount(stringToBigInt(tokenOutInput, tokenInfo.decimals))
+    try {
+      setTokenOutInfo(tokenInfo)
+      if (tokenOutInput !== undefined) setTokenOutAmount(stringToBigInt(tokenOutInput, tokenInfo.decimals))
+    } catch (error) {
+      console.log(`Invalid tokenOut input: ${tokenOutInput}, error: ${error}`)
+      setError(`${error}`)
+    }
   }, [tokenOutInput]);
 
   useEffect(() => {
@@ -174,8 +194,13 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
         return
       }
       setTokenInInput(event.target.value)
-      if (tokenInInfo !== undefined) {
-        setTokenInAmount(stringToBigInt(event.target.value, tokenInInfo.decimals))
+      try {
+        if (tokenInInfo !== undefined) {
+          setTokenInAmount(stringToBigInt(event.target.value, tokenInInfo.decimals))
+        }
+      } catch (error) {
+        console.log(`Invalid tokenIn input: ${event.target.value}, error: ${error}`)
+        setError(`${error}`)
       }
     }, [tokenInInfo]
   )
@@ -190,8 +215,13 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
         return
       }
       setTokenOutInput(event.target.value)
-      if (tokenOutInfo !== undefined) {
-        setTokenOutAmount(stringToBigInt(event.target.value, tokenOutInfo.decimals))
+      try {
+        if (tokenOutInfo !== undefined) {
+          setTokenOutAmount(stringToBigInt(event.target.value, tokenOutInfo.decimals))
+        }
+      } catch (error) {
+        console.log(`Invalid tokenOut input: ${event.target.value}, error: ${error}`)
+        setError(`${error}`)
       }
     }, [tokenOutInfo]
   )

@@ -209,8 +209,13 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
         setAmountInput(undefined)
         return
       }
-      setAmount(stringToBigInt(event.target.value, PairTokenDecimals))
       setAmountInput(event.target.value)
+      try {
+        setAmount(stringToBigInt(event.target.value, PairTokenDecimals))
+      } catch (error) {
+        console.log(`Invalid input: ${event.target.value}, error: ${error}`)
+        setError(`${error}`)
+      }
     }, []
   )
 
