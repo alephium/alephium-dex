@@ -7,7 +7,6 @@ import IconButton from '@material-ui/core/IconButton'
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
   Tooltip,
   Box,
   makeStyles,
@@ -16,26 +15,30 @@ import {
 } from "@material-ui/core";
 import NumberTextField from './NumberTextField'
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   container: {
     width: 380,
     height: 60,
     display: 'flex',
     alignItems: 'center',
-  }
+  },
+  error: {
+    marginTop: theme.spacing(1),
+    textAlign: "center",
+  },
 }))
 
-function Settings() {
+function SettingsDialog() {
   const classes = useStyles()
   const [slippageTolerance, setSlippageTolerance] = useSlippageTolerance()
 
   const [deadline, setDeadline] = useDeadline()
 
   const [slippageInput, setSlippageInput] = useState('')
-  const [slippageError, setSlippageError] = useState<'InvalidInput' | false>(false)
+  const [slippageError, setSlippageError] = useState<string | false>(false)
 
   const [deadlineInput, setDeadlineInput] = useState('')
-  const [deadlineError, setDeadlineError] = useState<'InvalidInput' | false>(false)
+  const [deadlineError, setDeadlineError] = useState<string | false>(false)
 
   function handleSlippageChanged(value: string) {
     setSlippageInput(value)
@@ -47,15 +50,17 @@ function Settings() {
     }
 
     try {
-      const parsed = Math.floor(Number.parseFloat(value)) // can not large than 50%
-      if (!Number.isInteger(parsed) || parsed < 0 || parsed > 50) {
-        throw new Error(`Invalid slippage input ${value}`)
-      } else {
-        setSlippageTolerance(parsed)
+      const parsed = Number.parseFloat(value)
+      if (parsed === 0) {
+        throw new Error('The slipplage cannot be 0')
       }
+      if (parsed > 50) {
+        throw new Error('The slippage cannot large than 50%')
+      }
+      setSlippageTolerance(parsed)
     } catch (error) {
       console.log(`Invalid slippage input ${value}`)
-      setSlippageError('InvalidInput')
+      setSlippageError(`${error}`)
       setSlippageTolerance('auto')
     }
   }
@@ -71,21 +76,22 @@ function Settings() {
 
     try {
       const parsed: number = Math.floor(Number.parseFloat(value) * 60) // can not less than 1 minutes
-      if (!Number.isInteger(parsed) || parsed < 60 || parsed > THREE_DAYS_IN_SECONDS) {
-        throw new Error(`Invalid deadline input ${value}`)
-      } else {
-        setDeadline(parsed)
+      if (parsed < 60) {
+        throw new Error('The deadline cannot less than 1 minutes')
       }
+      if (parsed > THREE_DAYS_IN_SECONDS) {
+        throw new Error('The deadline cannot large than 3 days')
+      }
+      setDeadline(parsed)
     } catch (error) {
       console.log(`Invalid deadline input ${value}`)
       setDeadline(DEFAULT_DEADLINE_FROM_NOW)
-      setDeadlineError('InvalidInput')
+      setDeadlineError(`${error}`)
     }
   }
 
   const confirmationContent = (
     <>
-      <DialogTitle>Settings</DialogTitle>
       <DialogContent>
         <Box display="flex" className={classes.container}>
           <Tooltip title='Your transaction will revert if the price changes unfavorably by more than this percentage.. The default is 0.5%.'>
@@ -138,6 +144,16 @@ function Settings() {
             onChange={(e) => handleDeadlineChanged(e.target.value)}
           />
         </Box>
+        {slippageError ? (
+          <Typography variant="body2" color="error" className={classes.error}>
+            {slippageError}
+          </Typography>
+        ) : null}
+        {deadlineError ? (
+          <Typography variant="body2" color="error" className={classes.error}>
+            {deadlineError}
+          </Typography>
+        ) : null}
       </DialogContent>
     </>
   );
@@ -156,7 +172,7 @@ export default function TransactionSettings() {
         <SettingsIcon/>
       </IconButton>
       <Dialog open={open} onClose={() => setOpen(false)}>
-        <Settings />
+        <SettingsDialog />
       </Dialog>
     </>
   )
