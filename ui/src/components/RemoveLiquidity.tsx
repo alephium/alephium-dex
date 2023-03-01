@@ -30,7 +30,7 @@ import { formatUnits } from "ethers/lib/utils";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
-import { DEFAULT_SLIPPAGE } from "../state/reducer";
+import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
 
 const useStyles = makeStyles((theme) => ({
   numberField: {
@@ -170,7 +170,7 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       wallet !== undefined &&
       wallet.signer !== undefined
     ) {
-      getTokenPairState(tokenAInfo.tokenId, tokenBInfo.tokenId)
+      getTokenPairState(tokenAInfo, tokenBInfo)
         .then((state) => {
           setTokenPairState(state)
           getBalanceByTokenId(state.tokenPairId, wallet.address)

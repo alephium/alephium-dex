@@ -7,29 +7,21 @@ import {
 } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
 import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import CircleLoader from "./CircleLoader";
 import NumberTextField from "./NumberTextField";
 import { COLORS } from "../muiTheme";
-import {
-  getAddLiquidityResult,
-  getTokenPairState,
-  addLiquidity,
-  AddLiquidityResult,
-  TokenInfo,
-  TokenPairState,
-  getInitAddLiquidityResult,
-  formatAddLiquidityResult,
-  DexTokens,
-  stringToBigInt,
-  bigIntToString
-} from "../utils/dex";
+import { addLiquidity, formatAddLiquidityResult, DexTokens } from "../utils/dex";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
-import { DEFAULT_SLIPPAGE } from "../state/reducer";
+import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
+import { useDispatch, useSelector } from 'react-redux'
+import { reset, selectTokenA, selectTokenB, typeInput } from "../state/mint/actions";
+import { useDerivedMintInfo } from "../state/mint/hooks";
+import { selectMintState } from "../state/mint/selectors";
 
 const useStyles = makeStyles((theme) => ({
   numberField: {
@@ -124,144 +116,41 @@ const useStyles = makeStyles((theme) => ({
 
 function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const classes = useStyles();
-  const [tokenAInput, setTokenAInput] = useState<string | undefined>(undefined)
-  const [tokenAAmount, setTokenAAmount] = useState<bigint | undefined>(undefined)
-  const [tokenBInput, setTokenBInput] = useState<string | undefined>(undefined)
-  const [tokenBAmount, setTokenBAmount] = useState<bigint | undefined>(undefined)
-  const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
-  const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
-  const [lastInput, setLastInput] = useState<'tokenA' | 'tokenB' | undefined>(undefined)
-  const [tokenPairState, setTokenPairState] = useState<TokenPairState | undefined>(undefined)
-  const [addLiquidityResult, setAddLiquidityResult] = useState<AddLiquidityResult | undefined>(undefined)
   const [completed, setCompleted] = useState<boolean>(false)
   const [addingLiquidity, setAddingLiquidity] = useState<boolean>(false)
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
+  const dispatch = useDispatch()
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
-    try {
-      setTokenAInfo(tokenInfo);
-      if (tokenAInput !== undefined) setTokenAAmount(stringToBigInt(tokenAInput, tokenInfo.decimals))
-    } catch (error) {
-      console.log(`Invalid tokenA input: ${tokenAInput}, error: ${error}`)
-      setError(`${error}`)
-    }
-  }, [tokenAInput]);
+    dispatch(selectTokenA(tokenInfo))
+  }, [dispatch]);
 
   const handleTokenBChange = useCallback((tokenInfo) => {
-    try {
-      setTokenBInfo(tokenInfo)
-      if (tokenBInput !== undefined) setTokenBAmount(stringToBigInt(tokenBInput, tokenInfo.decimals))
-    } catch (error) {
-      console.log(`Invalid tokenB input: ${tokenBInput}, error: ${error}`)
-      setError(`${error}`)
-    }
-  }, [tokenBInput]);
+    dispatch(selectTokenB(tokenInfo))
+  }, [dispatch]);
 
-  useEffect(() => {
-    setAddLiquidityResult(undefined)
-    if (tokenAInfo !== undefined && tokenBInfo !== undefined) {
-      getTokenPairState(tokenAInfo.tokenId, tokenBInfo.tokenId)
-        .then((state) => setTokenPairState(state))
-        .catch((error) => setError(error))
-    }
-  }, [tokenAInfo, tokenBInfo])
+  const { tokenAInfo, tokenBInfo } = useSelector(selectMintState)
+  const { tokenAInput, tokenBInput, tokenAAmount, tokenBAmount, tokenPairState, addLiquidityResult } = useDerivedMintInfo(setError)
 
-  useEffect(() => {
-    setAddLiquidityResult(undefined)
-    try {
-      if (tokenPairState !== undefined && tokenAInfo !== undefined && tokenBInfo !== undefined) {
-        if (tokenPairState.reserve0 === 0n && tokenPairState.reserve1 === 0n) {
-          // initial add liquidity
-          if (tokenAAmount !== undefined && tokenBAmount !== undefined) {
-            const addLiquidityResult = getInitAddLiquidityResult(tokenAAmount, tokenBAmount)
-            setAddLiquidityResult(addLiquidityResult)
-          }
-          return
-        }
+  const handleTokenAAmountChange = useCallback((event) => {
+    const hasLiquidity = tokenPairState !== undefined && tokenPairState.reserve0 > 0n
+    dispatch(typeInput({ type: 'TokenA', value: event.target.value, hasLiquidity }))
+  }, [dispatch, tokenPairState])
 
-        if (lastInput === 'tokenA' && tokenAAmount !== undefined) {
-          const addLiquidityResult = getAddLiquidityResult(tokenPairState, tokenAInfo.tokenId, tokenAAmount, 'TokenA')
-          setTokenBAmount(addLiquidityResult.amountB)
-          setTokenBInput(bigIntToString(addLiquidityResult.amountB, tokenBInfo.decimals))
-          setAddLiquidityResult(addLiquidityResult)
-        } else if (lastInput === 'tokenB' && tokenBAmount !== undefined) {
-          const addLiquidityResult = getAddLiquidityResult(tokenPairState, tokenBInfo.tokenId, tokenBAmount, 'TokenB')
-          setTokenAAmount(addLiquidityResult.amountA)
-          setTokenAInput(bigIntToString(addLiquidityResult.amountA, tokenAInfo.decimals))
-          setAddLiquidityResult(addLiquidityResult)
-        } else {
-          setTokenAAmount(undefined)
-          setTokenAInput(undefined)
-          setTokenBAmount(undefined)
-          setTokenBInput(undefined)
-          setAddLiquidityResult(undefined)
-        }
-      }
-    } catch (error) {
-      setError(`${error}`)
-      console.error(`failed to update token amounts: ${error}`)
-    }
-  }, [tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, lastInput])
-
-  const handleTokenAAmountChange = useCallback(
-    (event) => {
-      setError(undefined)
-      setLastInput('tokenA')
-      if (event.target.value === '') {
-        setTokenAAmount(undefined)
-        setTokenAInput(undefined)
-        return
-      }
-      setTokenAInput(event.target.value)
-      try {
-        if (tokenAInfo !== undefined) {
-          setTokenAAmount(stringToBigInt(event.target.value, tokenAInfo.decimals))
-        }
-      } catch (error) {
-        console.log(`Invalid tokenA input: ${event.target.value}, error: ${error}`)
-        setError(`${error}`)
-      }
-    }, [tokenAInfo]
-  )
-
-  const handleTokenBAmountChange = useCallback(
-    (event) => {
-      setError(undefined)
-      setLastInput('tokenB')
-      if (event.target.value === '') {
-        setTokenBAmount(undefined)
-        setTokenBInput(undefined)
-        return
-      }
-      setTokenBInput(event.target.value)
-      try {
-        if (tokenBInfo !== undefined) {
-          setTokenBAmount(stringToBigInt(event.target.value, tokenBInfo.decimals))
-        }
-      } catch (error) {
-        console.log(`Invalid tokenB input: ${event.target.value}, error: ${error}`)
-        setError(`${error}`)
-      }
-    }, [tokenBInfo]
-  )
+  const handleTokenBAmountChange = useCallback((event) => {
+    const hasLiquidity = tokenPairState !== undefined && tokenPairState.reserve0 > 0n
+    dispatch(typeInput({ type: 'TokenB', value: event.target.value, hasLiquidity }))
+  }, [dispatch, tokenPairState])
 
   const handleReset = useCallback(() => {
-    setTokenAInfo(undefined)
-    setTokenBInfo(undefined)
-    setTokenAAmount(undefined)
-    setTokenAInput(undefined)
-    setTokenBAmount(undefined)
-    setTokenBInput(undefined)
-    setTokenPairState(undefined)
-    setLastInput(undefined)
+    dispatch(reset())
     setCompleted(false)
     setAddingLiquidity(false)
-    setAddLiquidityResult(undefined)
     setError(undefined)
-  }, [])
+  }, [dispatch])
 
   const sourceContent = (
     <div className={classes.tokenContainer}>

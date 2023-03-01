@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { useMemo, useCallback } from 'react'
-import { selectSlippageTolerance } from '../state/selectors'
-import { updateSlippageTolerance } from '../state/reducer'
+import { selectSlippageTolerance } from '../state/settings/selectors'
+import { updateSlippageTolerance } from '../state/settings/reducer'
 
 export function useSlippageTolerance(): [number | 'auto', (slippageTolerance: number | 'auto') => void] {
   const slippageTolerance = useSelector(selectSlippageTolerance)

@@ -1,8 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userState from "./reducer";
+import settings from "./settings/reducer";
+import swap from "./swap/reducer"
+import mint from "./mint/reducer"
 
 export const store = configureStore({
-  reducer: { userState },
+  reducer: { settings, swap, mint },
 });
 
 export type RootState = ReturnType<typeof store.getState>;

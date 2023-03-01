@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 import Collapse from "@material-ui/core/Collapse";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { COLORS } from "../muiTheme";
 import { getTokenPairState, TokenPairState, DexTokens, TokenPair, bigIntToString, PairTokenDecimals } from "../utils/dex";
 
@@ -68,14 +68,16 @@ function ListTokenPair({ tokenPair, onError, dexTokens }: { tokenPair: TokenPair
   const token0Info = dexTokens.tokenInfos.find((info) => info.tokenId === tokenPair.token0Id)
   const token1Info = dexTokens.tokenInfos.find((info) => info.tokenId === tokenPair.token1Id)
 
-  const handleClick = () => {
-    setOpen(!open)
-    getTokenPairState(tokenPair.token0Id, tokenPair.token1Id)
-      .then((state) => {
-        setTokenPairState(state)
-      })
-      .catch((error) => onError(error))
-  }
+  const handleClick = useCallback(() => {
+    if (token0Info !== undefined && token1Info !== undefined) {
+      setOpen(!open)
+      getTokenPairState(token0Info, token1Info)
+        .then((state) => {
+          setTokenPairState(state)
+        })
+        .catch((error) => onError(error))
+    }
+  }, [token0Info, token1Info, onError, open])
 
   return (<>
     <ListItem key={tokenPair.tokenPairId} button onClick={handleClick}>

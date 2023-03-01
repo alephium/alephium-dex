@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useDeadline } from '../hooks/useDeadline'
 import { useSlippageTolerance } from '../hooks/useSlippageTolerance'
-import { DEFAULT_DEADLINE_FROM_NOW } from '../state/reducer'
+import { DEFAULT_DEADLINE_FROM_NOW } from '../state/settings/reducer'
 import SettingsIcon from '@material-ui/icons/Settings'
 import IconButton from '@material-ui/core/IconButton'
 import {

@@ -11,6 +11,9 @@ import AddPool from "../components/AddPool";
 import Pools from "../components/Pools";
 import { AlephiumConnectButton } from "@alephium/web3-react";
 import TransactionSettings from "../components/Settings";
+import { useDispatch } from "react-redux"
+import { reset as resetSwapState } from "../state/swap/actions";
+import { reset as resetMintState } from "../state/mint/actions";
 
 const useStyles = makeStyles((theme) => ({
   spacer: {
@@ -50,6 +53,7 @@ function Home() {
   const classes = useStyles();
   web3.setCurrentNodeProvider(network.nodeHost)
   const { dexTokens } = useGetDexTokens(network.factoryId)
+  const dispatch = useDispatch()
 
   return (
     <div className={classes.bg}>
@@ -68,6 +72,7 @@ function Home() {
                 to="/swap"
                 color="inherit"
                 className={classes.link}
+                onClick={() => { dispatch(resetSwapState()) }}
               >
                 Swap
               </Link>
@@ -76,6 +81,7 @@ function Home() {
                 to="/add-liquidity"
                 color="inherit"
                 className={classes.link}
+                onClick={() => { dispatch(resetMintState()) }}
               >
                 Add Liquidity
               </Link>

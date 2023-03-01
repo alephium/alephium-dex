@@ -94,15 +94,15 @@ export interface TokenPairState {
   tokenPairId: string
   reserve0: bigint
   reserve1: bigint
-  token0Id: string
-  token1Id: string
+  token0Info: TokenInfo,
+  token1Info: TokenInfo,
   totalSupply: bigint
 }
 
-export async function getTokenPairState(tokenAId: string, tokenBId: string): Promise<TokenPairState> {
+export async function getTokenPairState(tokenAInfo: TokenInfo, tokenBInfo: TokenInfo): Promise<TokenPairState> {
   const factoryId = network.factoryId
   const groupIndex = network.groupIndex
-  const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId)
+  const [token0Id, token1Id] = sortTokens(tokenAInfo.tokenId, tokenBInfo.tokenId)
   const path = token0Id + token1Id
   const pairContractId = subContractId(factoryId, path, groupIndex)
   const contractAddress = addressFromContractId(pairContractId)
@@ -112,8 +112,8 @@ export async function getTokenPairState(tokenAId: string, tokenBId: string): Pro
     tokenPairId: pairContractId,
     reserve0: state.fields.reserve0,
     reserve1: state.fields.reserve1,
-    token0Id: state.fields.token0Id,
-    token1Id: state.fields.token1Id,
+    token0Info: token0Id === tokenAInfo.tokenId ? tokenAInfo : tokenBInfo,
+    token1Info: token1Id === tokenBInfo.tokenId ? tokenBInfo : tokenAInfo,
     totalSupply: state.fields.totalSupply
   }
 }
@@ -123,13 +123,15 @@ export function getAmountIn(
   tokenOutId: string,
   amountOut: bigint
 ): bigint {
-  if (tokenOutId === state.token0Id) return _getAmountIn(amountOut, state.reserve1, state.reserve0)
-  else return _getAmountIn(amountOut, state.reserve0, state.reserve1)
+  const [tokenOutInfo, reserveIn, reserveOut] = tokenOutId === state.token0Info.tokenId
+    ? [state.token0Info, state.reserve1, state.reserve0]
+    : [state.token1Info, state.reserve0, state.reserve1]
+  return _getAmountIn(amountOut, reserveIn, reserveOut, tokenOutInfo)
 }
 
-function _getAmountIn(amountOut: bigint, reserveIn: bigint, reserveOut: bigint): bigint {
+function _getAmountIn(amountOut: bigint, reserveIn: bigint, reserveOut: bigint, tokenOutInfo: TokenInfo): bigint {
   if (amountOut >= reserveOut) {
-    throw new Error(`amountOut must less than reserveOut, amountOut: ${amountOut}, reserveOut: ${reserveOut}`)
+    throw new Error(`amout must less than reserve, amount: ${bigIntToString(amountOut, tokenOutInfo.decimals)}, reserve: ${bigIntToString(reserveOut, tokenOutInfo.decimals)}`)
   }
   const numerator = reserveIn * amountOut * 1000n
   const denominator = (reserveOut - amountOut) * 997n
@@ -141,7 +143,7 @@ export function getAmountOut(
   tokenInId: string,
   amountIn: bigint
 ): bigint {
-  if (tokenInId === state.token0Id) return _getAmountOut(amountIn, state.reserve0, state.reserve1)
+  if (tokenInId === state.token0Info.tokenId) return _getAmountOut(amountIn, state.reserve0, state.reserve1)
   else return _getAmountOut(amountIn, state.reserve1, state.reserve0)
 }
 
@@ -207,7 +209,7 @@ async function swapMaxIn(
 }
 
 export async function swap(
-  type: 'ExactInput' | 'ExactOutput',
+  type: 'ExactIn' | 'ExactOut',
   signer: SignerProvider,
   sender: string,
   pairId: string,
@@ -223,7 +225,7 @@ export async function swap(
     throw new Error(`not enough balance, available: ${bigIntToString(available, tokenInInfo.decimals)}`)
   }
 
-  if (type === 'ExactInput') {
+  if (type === 'ExactIn') {
     const amountOutMin = minimalAmount(amountOut, slippage)
     return swapMinOut(signer, sender, pairId, tokenInInfo.tokenId, amountIn, amountOutMin, ttl)
   }
@@ -275,7 +277,7 @@ export function getInitAddLiquidityResult(amountA: bigint, amountB: bigint): Add
 }
 
 export function getAddLiquidityResult(state: TokenPairState, tokenId: string, amountA: bigint, type: 'TokenA' | 'TokenB'): AddLiquidityResult {
-  const [reserveA, reserveB] = tokenId === state.token0Id
+  const [reserveA, reserveB] = tokenId === state.token0Info.tokenId
     ? [state.reserve0, state.reserve1]
     : [state.reserve1, state.reserve0]
   const amountB = amountA * reserveB / reserveA
@@ -348,7 +350,7 @@ export async function addLiquidity(
   const isInitial = tokenPairState.reserve0 === 0n && tokenPairState.reserve1 === 0n
   const amountAMin = isInitial ? amountADesired : minimalAmount(amountADesired, slippage)
   const amountBMin = isInitial ? amountBDesired : minimalAmount(amountBDesired, slippage)
-  const [amount0Desired, amount1Desired, amount0Min, amount1Min] = tokenAInfo.tokenId === tokenPairState.token0Id
+  const [amount0Desired, amount1Desired, amount0Min, amount1Min] = tokenAInfo.tokenId === tokenPairState.token0Info.tokenId
     ? [amountADesired, amountBDesired, amountAMin, amountBMin]
     : [amountBDesired, amountADesired, amountBMin, amountAMin]
   const result = await AddLiquidity.execute(signer, {
@@ -394,9 +396,9 @@ export function getRemoveLiquidityResult(
     .div(BigNumber(remainSupply.toString()))
     .toFixed(5)
   return {
-    token0Id: tokenPairState.token0Id,
+    token0Id: tokenPairState.token0Info.tokenId,
     amount0,
-    token1Id: tokenPairState.token1Id,
+    token1Id: tokenPairState.token1Info.tokenId,
     amount1,
     remainShareAmount,
     remainSharePercentage: parseFloat(remainSharePercentage)
@@ -537,12 +539,26 @@ export function stringToBigInt(amount: string, decimals: number): bigint {
   return parseUnits(amount, decimals).toBigInt()
 }
 
+export function tryStringToBigInt(amount: string | undefined, decimals: number | undefined): bigint | undefined {
+  if (amount === undefined || decimals === undefined) {
+    return undefined
+  }
+  return stringToBigInt(amount, decimals)
+}
+
 export function bigIntToString(amount: bigint, decimals: number): string {
   const str = prettifyTokenAmount(amount, decimals)
   if (str === undefined) {
     throw new Error(`Invalid amount: ${amount}, decimals: ${decimals}`)
   }
   return str
+}
+
+export function tryBigIntToString(amount: bigint | undefined, decimals: number | undefined): string | undefined {
+  if (amount === undefined || decimals === undefined) {
+    return undefined
+  }
+  return bigIntToString(amount, decimals)
 }
 
 async function getBalance(address: string): Promise<Map<string, bigint>> {

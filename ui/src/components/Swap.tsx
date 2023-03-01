@@ -7,28 +7,22 @@ import {
 } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
 import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import ButtonWithLoader from "../components/ButtonWithLoader";
 import TokenSelectDialog from "../components/TokenSelectDialog";
 import CircleLoader from "../components/CircleLoader";
 import HoverIcon from "../components/HoverIcon";
 import NumberTextField from "../components/NumberTextField";
 import { COLORS } from "../muiTheme";
-import {
-  getAmountIn,
-  getAmountOut,
-  getTokenPairState,
-  swap,
-  TokenInfo,
-  TokenPairState,
-  DexTokens,
-  stringToBigInt,
-  bigIntToString
-} from "../utils/dex";
+import { swap, DexTokens } from "../utils/dex";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
 import { useDeadline } from "../hooks/useDeadline";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
-import { DEFAULT_SLIPPAGE } from "../state/reducer";
+import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
+import { useDispatch, useSelector } from 'react-redux'
+import { reset, selectTokenIn, selectTokenOut, switchTokens, typeInput } from "../state/swap/actions";
+import { useDerivedSwapInfo } from "../state/swap/hooks";
+import { selectSwapState } from "../state/swap/selectors";
 
 const useStyles = makeStyles((theme) => ({
   numberField: {
@@ -117,139 +111,43 @@ const useStyles = makeStyles((theme) => ({
 
 function Swap({ dexTokens }: { dexTokens: DexTokens }) {
   const classes = useStyles();
-  const [tokenInInput, setTokenInInput] = useState<string | undefined>(undefined)
-  const [tokenInAmount, setTokenInAmount] = useState<bigint | undefined>(undefined)
-  const [tokenOutInput, setTokenOutInput] = useState<string | undefined>(undefined)
-  const [tokenOutAmount, setTokenOutAmount] = useState<bigint | undefined>(undefined)
-  const [tokenInInfo, setTokenInInfo] = useState<TokenInfo | undefined>(undefined);
-  const [tokenOutInfo, setTokenOutInfo] = useState<TokenInfo | undefined>(undefined);
-  const [lastInput, setLastInput] = useState<'tokenIn' | 'tokenOut' | undefined>(undefined)
-  const [tokenPairState, setTokenPairState] = useState<TokenPairState | undefined>(undefined)
   const [completed, setCompleted] = useState<boolean>(false)
   const [swapping, setSwapping] = useState<boolean>(false)
+  const dispatch = useDispatch()
   const [error, setError] = useState<string | undefined>(undefined)
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
   const wallet = useAlephiumWallet()
 
   const handleTokenInChange = useCallback((tokenInfo) => {
-    try {
-      setTokenInInfo(tokenInfo);
-      if (tokenInInput !== undefined) setTokenInAmount(stringToBigInt(tokenInInput, tokenInfo.decimals))
-    } catch (error) {
-      console.log(`Invalid tokenIn input: ${tokenInInput}, error: ${error}`)
-      setError(`${error}`)
-    }
-  }, [tokenInInput]);
+    dispatch(selectTokenIn(tokenInfo))
+  }, [dispatch]);
 
   const handleTokenOutChange = useCallback((tokenInfo) => {
-    try {
-      setTokenOutInfo(tokenInfo)
-      if (tokenOutInput !== undefined) setTokenOutAmount(stringToBigInt(tokenOutInput, tokenInfo.decimals))
-    } catch (error) {
-      console.log(`Invalid tokenOut input: ${tokenOutInput}, error: ${error}`)
-      setError(`${error}`)
-    }
-  }, [tokenOutInput]);
+    dispatch(selectTokenOut(tokenInfo))
+  }, [dispatch]);
 
-  useEffect(() => {
-    if (tokenInInfo !== undefined && tokenOutInfo !== undefined) {
-      getTokenPairState(tokenInInfo.tokenId, tokenOutInfo.tokenId)
-        .then((state) => setTokenPairState(state))
-        .catch((error) => setError(error))
-    }
-  }, [tokenInInfo, tokenOutInfo])
+  const { tokenInInfo, tokenOutInfo } = useSelector(selectSwapState)
+  const { tokenInInput, tokenOutInput, tokenInAmount, tokenOutAmount, tokenPairState, swapType } = useDerivedSwapInfo(setError)
 
-  useEffect(() => {
-    try {
-      if (tokenPairState !== undefined && tokenInInfo !== undefined && tokenOutInfo !== undefined) {
-        if (lastInput === 'tokenIn' && tokenInAmount !== undefined) {
-          const tokenOutAmount = getAmountOut(tokenPairState, tokenInInfo.tokenId, tokenInAmount)
-          setTokenOutAmount(tokenOutAmount)
-          setTokenOutInput(bigIntToString(tokenOutAmount, tokenOutInfo.decimals))
-        } else if (lastInput === 'tokenOut' && tokenOutAmount !== undefined) {
-          const tokenInAmount = getAmountIn(tokenPairState, tokenOutInfo.tokenId, tokenOutAmount)
-          setTokenInAmount(tokenInAmount)
-          setTokenInInput(bigIntToString(tokenInAmount, tokenInInfo.decimals))
-        } else {
-          setTokenInAmount(undefined)
-          setTokenInInput(undefined)
-          setTokenOutAmount(undefined)
-          setTokenOutInput(undefined)
-        }
-      }
-    } catch (error) {
-      setError(`${error}`)
-      console.error(`failed to update token amounts: ${error}`)
-    }
-  }, [tokenPairState, tokenInInfo, tokenOutInfo, tokenInAmount, tokenOutAmount, lastInput])
+  const handleTokenInAmountChange = useCallback((event) => {
+    dispatch(typeInput({ type: 'TokenIn', value: event.target.value }))
+  }, [dispatch])
 
-  const handleTokenInAmountChange = useCallback(
-    (event) => {
-      setError(undefined)
-      setLastInput('tokenIn')
-      if (event.target.value === '') {
-        setTokenInAmount(undefined)
-        setTokenInInput(undefined)
-        return
-      }
-      setTokenInInput(event.target.value)
-      try {
-        if (tokenInInfo !== undefined) {
-          setTokenInAmount(stringToBigInt(event.target.value, tokenInInfo.decimals))
-        }
-      } catch (error) {
-        console.log(`Invalid tokenIn input: ${event.target.value}, error: ${error}`)
-        setError(`${error}`)
-      }
-    }, [tokenInInfo]
-  )
+  const handleTokenOutAmountChange = useCallback((event) => {
+    dispatch(typeInput({ type: 'TokenOut', value: event.target.value }))
+  }, [dispatch])
 
-  const handleTokenOutAmountChange = useCallback(
-    (event) => {
-      setError(undefined)
-      setLastInput('tokenOut')
-      if (event.target.value === '') {
-        setTokenOutAmount(undefined)
-        setTokenOutInput(undefined)
-        return
-      }
-      setTokenOutInput(event.target.value)
-      try {
-        if (tokenOutInfo !== undefined) {
-          setTokenOutAmount(stringToBigInt(event.target.value, tokenOutInfo.decimals))
-        }
-      } catch (error) {
-        console.log(`Invalid tokenOut input: ${event.target.value}, error: ${error}`)
-        setError(`${error}`)
-      }
-    }, [tokenOutInfo]
-  )
-
-  const swapTokens = useCallback(() => {
-    setTokenInInfo(tokenOutInfo)
-    setTokenOutInfo(tokenInInfo)
-    setTokenInAmount(tokenOutAmount)
-    setTokenOutAmount(tokenInAmount)
-    setTokenInInput(tokenOutInput)
-    setTokenOutInput(tokenInInput)
-    if (lastInput === 'tokenIn') setLastInput('tokenOut')
-    else if (lastInput === 'tokenOut') setLastInput('tokenIn')
-  }, [tokenInInfo, tokenOutInfo, tokenInAmount, tokenOutAmount, tokenInInput, tokenOutInput, lastInput]);
+  const switchCallback = useCallback(() => {
+    dispatch(switchTokens())
+  }, [dispatch]);
 
   const handleReset = useCallback(() => {
-    setTokenInInfo(undefined)
-    setTokenOutInfo(undefined)
-    setTokenInAmount(undefined)
-    setTokenInInput(undefined)
-    setTokenOutAmount(undefined)
-    setTokenOutInput(undefined)
-    setTokenPairState(undefined)
-    setLastInput(undefined)
+    dispatch(reset())
     setCompleted(false)
     setSwapping(false)
     setError(undefined)
-  }, [])
+  }, [dispatch])
 
   const sourceContent = (
     <div className={classes.tokenContainer}>
@@ -270,7 +168,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       />
     </div>
   );
-  const middleButton = <HoverIcon onClick={swapTokens} />;
+  const middleButton = <HoverIcon onClick={switchCallback} />;
   const targetContent = (
     <div className={classes.tokenContainer}>
       <TokenSelectDialog
@@ -293,7 +191,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
     try {
       setSwapping(true)
       if (
-        lastInput !== undefined &&
+        swapType !== undefined &&
         wallet !== undefined &&
         wallet.signer !== undefined &&
         tokenPairState !== undefined &&
@@ -306,7 +204,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
         }
 
         const result = await swap(
-          lastInput === 'tokenIn' ? 'ExactInput' : 'ExactOutput',
+          swapType,
           wallet.signer,
           wallet.address,
           tokenPairState.tokenPairId,
@@ -325,7 +223,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       setSwapping(false)
       console.error(`failed to swap, error: ${error}`)
     }
-  }, [lastInput, wallet, tokenPairState, tokenInInfo, tokenInAmount, tokenOutAmount, slippage, deadline])
+  }, [wallet, tokenPairState, tokenInInfo, tokenInAmount, tokenOutAmount, slippage, deadline, swapType])
 
   const readyToSwap =
     wallet !== undefined &&
@@ -334,6 +232,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
     tokenOutInfo !== undefined &&
     tokenInAmount !== undefined &&
     tokenOutAmount !== undefined &&
+    swapType !== undefined &&
     !swapping && !completed &&
     error === undefined
   const swapButton = (
