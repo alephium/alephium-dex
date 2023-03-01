@@ -11,46 +11,10 @@ import {
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 import Collapse from "@material-ui/core/Collapse";
 import { useState, useCallback } from "react";
-import { COLORS } from "../muiTheme";
 import { getTokenPairState, TokenPairState, DexTokens, TokenPair, bigIntToString, PairTokenDecimals } from "../utils/dex";
+import { commonStyles } from "./style";
 
-const useStyles = makeStyles((theme) => ({
-  centeredContainer: {
-    textAlign: "center",
-    width: "100%",
-  },
-  spacer: {
-    height: "1rem",
-  },
-  mainPaper: {
-    padding: "2rem",
-    backgroundColor: COLORS.nearBlackWithMinorTransparency,
-  },
-  titleBar: {
-    marginTop: "10rem",
-    "& > *": {
-      margin: ".5rem",
-      alignSelf: "flex-end",
-    },
-  },
-  error: {
-    marginTop: theme.spacing(1),
-    textAlign: "center",
-  },
-  notification: {
-    display: 'flex',
-    justifyContent: 'space-between'
-  },
-  leftAlign: {
-    textAlign: "left",
-    fontSize: "15px",
-    fontFamily: "monospace"
-  },
-  rightAlign: {
-    textAlign: "right",
-    fontSize: "15px",
-    fontFamily: "monospace"
-  },
+const useStyles = makeStyles(() => ({
   text: {
     fontFamily: "monospace",
     whiteSpace: "pre",
@@ -62,6 +26,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ListTokenPair({ tokenPair, onError, dexTokens }: { tokenPair: TokenPair, onError: any, dexTokens: DexTokens }) {
+  const commonClasses = commonStyles()
   const classes = useStyles()
   const [open, setOpen] = useState(false)
   const [tokenPairState, setTokenPairState] = useState<TokenPairState | undefined>(undefined)
@@ -89,29 +54,29 @@ function ListTokenPair({ tokenPair, onError, dexTokens }: { tokenPair: TokenPair
     <Collapse in={open}>
       {tokenPairState && token0Info && token1Info ? (
         <>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>Token Pair Id:</p>
-          <p className={classes.rightAlign}>{tokenPair.tokenPairId}</p>
+        <div className={commonClasses.notification}>
+          <p className={commonClasses.leftAlign}>Token Pair Id:</p>
+          <p className={commonClasses.rightAlign}>{tokenPair.tokenPairId}</p>
         </div>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>{token0Info.name}</p>
-          <p className={classes.rightAlign}>{tokenPair.token0Id}</p>
+        <div className={commonClasses.notification}>
+          <p className={commonClasses.leftAlign}>{token0Info.name}</p>
+          <p className={commonClasses.rightAlign}>{tokenPair.token0Id}</p>
         </div>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>{token1Info.name}</p>
-          <p className={classes.rightAlign}>{tokenPair.token1Id}</p>
+        <div className={commonClasses.notification}>
+          <p className={commonClasses.leftAlign}>{token1Info.name}</p>
+          <p className={commonClasses.rightAlign}>{tokenPair.token1Id}</p>
         </div>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>{token0Info.name} Reserve:</p>
-          <p className={classes.rightAlign}>{bigIntToString(tokenPairState.reserve0, token0Info.decimals)}</p>
+        <div className={commonClasses.notification}>
+          <p className={commonClasses.leftAlign}>{token0Info.name} Reserve:</p>
+          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve0, token0Info.decimals)}</p>
         </div>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>{token1Info.name} Reserve:</p>
-          <p className={classes.rightAlign}>{bigIntToString(tokenPairState.reserve1, token1Info.decimals)}</p>
+        <div className={commonClasses.notification}>
+          <p className={commonClasses.leftAlign}>{token1Info.name} Reserve:</p>
+          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve1, token1Info.decimals)}</p>
         </div>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>Total Supply:</p>
-          <p className={classes.rightAlign}>{bigIntToString(tokenPairState.totalSupply, PairTokenDecimals)}</p>
+        <div className={commonClasses.notification}>
+          <p className={commonClasses.leftAlign}>Total Supply:</p>
+          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.totalSupply, PairTokenDecimals)}</p>
         </div>
         </>
       ) : null}
@@ -120,7 +85,8 @@ function ListTokenPair({ tokenPair, onError, dexTokens }: { tokenPair: TokenPair
 }
 
 function Pools({ dexTokens }: { dexTokens: DexTokens }) {
-  const classes = useStyles();
+  const commonClasses = commonStyles()
+  const classes = useStyles()
   const [error, setError] = useState<string | undefined>(undefined)
 
   const tokenLists = dexTokens.tokenPairs.map((tokenPair) =>
@@ -133,27 +99,27 @@ function Pools({ dexTokens }: { dexTokens: DexTokens }) {
   )
 
   return (
-    <Container className={classes.centeredContainer}>
-      <div className={classes.titleBar}></div>
+    <Container className={commonClasses.centeredContainer}>
+      <div className={commonClasses.titleBar}></div>
       <Typography variant="h4" color="textSecondary">
         Pools
       </Typography>
-      <div className={classes.spacer} />
-      <Paper className={classes.mainPaper}>
+      <div className={commonClasses.spacer} />
+      <Paper className={commonClasses.mainPaper}>
         <div>
           <Collapse in={true}>
             {error === undefined ? (
               <List component="nav" className={classes.list} style={{maxHeight: 500, overflow: 'auto'}}>{tokenLists}</List>
             ) : null}
             {error ? (
-              <Typography variant="body2" color="error" className={classes.error}>
+              <Typography variant="body2" color="error" className={commonClasses.error}>
                 {error}
               </Typography>
             ) : null}
           </Collapse>
         </div>
       </Paper>
-      <div className={classes.spacer} />
+      <div className={commonClasses.spacer} />
     </Container>
   );
 }
