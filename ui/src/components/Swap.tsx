@@ -1,13 +1,13 @@
 import { Button, Container, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
 import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import ButtonWithLoader from "../components/ButtonWithLoader";
 import TokenSelectDialog from "../components/TokenSelectDialog";
 import CircleLoader from "../components/CircleLoader";
 import HoverIcon from "../components/HoverIcon";
 import NumberTextField from "../components/NumberTextField";
-import { swap, DexTokens } from "../utils/dex";
+import { swap, DexTokens, tryGetBalance } from "../utils/dex";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
 import { useDeadline } from "../hooks/useDeadline";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
@@ -58,41 +58,61 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
     setError(undefined)
   }, [dispatch])
 
+  const tokenInBalance = useMemo(() => {
+    return tryGetBalance(wallet?.balances, tokenInInfo)
+  }, [wallet, tokenInInfo])
+
+  const tokenOutBalance = useMemo(() => {
+    return tryGetBalance(wallet?.balances, tokenOutInfo)
+  }, [wallet, tokenOutInfo])
+
   const sourceContent = (
-    <div className={classes.tokenContainer}>
-      <TokenSelectDialog
-        dexTokens={dexTokens}
-        tokenAddress={tokenInInfo?.tokenAddress}
-        counterpart={tokenOutInfo?.tokenAddress}
-        onChange={handleTokenInChange}
-        style2={true}
-      />
-      <NumberTextField
-        className={classes.numberField}
-        value={tokenInInput !== undefined ? tokenInInput : ''}
-        onChange={handleTokenInAmountChange}
-        autoFocus={true}
-        InputProps={{ disableUnderline: true }}
-        disabled={!!swapping || !!completed}
-      />
+    <div className={classes.tokenContainerWithBalance}>
+      <div className={classes.inputRow}>
+        <TokenSelectDialog
+          dexTokens={dexTokens}
+          tokenAddress={tokenInInfo?.tokenAddress}
+          counterpart={tokenOutInfo?.tokenAddress}
+          onChange={handleTokenInChange}
+          style2={true}
+        />
+        <NumberTextField
+          className={classes.numberField}
+          value={tokenInInput !== undefined ? tokenInInput : ''}
+          onChange={handleTokenInAmountChange}
+          autoFocus={true}
+          InputProps={{ disableUnderline: true }}
+          disabled={!!swapping || !!completed}
+        />
+      </div>
+      {tokenInBalance ?
+        (<Typography className={classes.balance}>
+          Balance: {tokenInBalance}
+        </Typography>) : null}
     </div>
   );
   const middleButton = <HoverIcon onClick={switchCallback} />;
   const targetContent = (
-    <div className={classes.tokenContainer}>
-      <TokenSelectDialog
-        dexTokens={dexTokens}
-        tokenAddress={tokenOutInfo?.tokenAddress}
-        counterpart={tokenInInfo?.tokenAddress}
-        onChange={handleTokenOutChange}
-      />
-      <NumberTextField
-        className={classes.numberField}
-        value={tokenOutInput !== undefined ? tokenOutInput : ''}
-        onChange={handleTokenOutAmountChange}
-        InputProps={{ disableUnderline: true }}
-        disabled={!!swapping || !!completed}
-      />
+    <div className={classes.tokenContainerWithBalance}>
+      <div className={classes.inputRow}>
+        <TokenSelectDialog
+          dexTokens={dexTokens}
+          tokenAddress={tokenOutInfo?.tokenAddress}
+          counterpart={tokenInInfo?.tokenAddress}
+          onChange={handleTokenOutChange}
+        />
+        <NumberTextField
+          className={classes.numberField}
+          value={tokenOutInput !== undefined ? tokenOutInput : ''}
+          onChange={handleTokenOutAmountChange}
+          InputProps={{ disableUnderline: true }}
+          disabled={!!swapping || !!completed}
+        />
+      </div>
+      {tokenOutBalance ?
+        (<Typography className={classes.balance}>
+          Balance: {tokenOutBalance}
+        </Typography>) : null}
     </div>
   );
 

@@ -1,12 +1,12 @@
 import { Button, Container, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
 import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import CircleLoader from "./CircleLoader";
 import NumberTextField from "./NumberTextField";
-import { addLiquidity, DexTokens, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityResult, TokenPairState } from "../utils/dex";
+import { addLiquidity, DexTokens, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityResult, TokenPairState, tryGetBalance } from "../utils/dex";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
@@ -55,40 +55,60 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     setError(undefined)
   }, [dispatch])
 
+  const tokenABalance = useMemo(() => {
+    return tryGetBalance(wallet?.balances, tokenAInfo)
+  }, [wallet, tokenAInfo])
+
+  const tokenBBalance = useMemo(() => {
+    return tryGetBalance(wallet?.balances, tokenBInfo)
+  }, [wallet, tokenBInfo])
+
   const sourceContent = (
-    <div className={classes.tokenContainer}>
-      <TokenSelectDialog
-        dexTokens={dexTokens}
-        tokenAddress={tokenAInfo?.tokenAddress}
-        counterpart={tokenBInfo?.tokenAddress}
-        onChange={handleTokenAChange}
-        style2={true}
-      />
-      <NumberTextField
-        className={classes.numberField}
-        value={tokenAInput !== undefined ? tokenAInput : ''}
-        onChange={handleTokenAAmountChange}
-        autoFocus={true}
-        InputProps={{ disableUnderline: true }}
-        disabled={!!addingLiquidity || !!completed}
-      />
+    <div className={classes.tokenContainerWithBalance}>
+      <div className={classes.inputRow}>
+        <TokenSelectDialog
+          dexTokens={dexTokens}
+          tokenAddress={tokenAInfo?.tokenAddress}
+          counterpart={tokenBInfo?.tokenAddress}
+          onChange={handleTokenAChange}
+          style2={true}
+        />
+        <NumberTextField
+          className={classes.numberField}
+          value={tokenAInput !== undefined ? tokenAInput : ''}
+          onChange={handleTokenAAmountChange}
+          autoFocus={true}
+          InputProps={{ disableUnderline: true }}
+          disabled={!!addingLiquidity || !!completed}
+        />
+      </div>
+      {tokenABalance ?
+        (<Typography className={classes.balance}>
+          Balance: {tokenABalance}
+        </Typography>) : null}
     </div>
   );
   const targetContent = (
-    <div className={classes.tokenContainer}>
-      <TokenSelectDialog
-        dexTokens={dexTokens}
-        tokenAddress={tokenBInfo?.tokenAddress}
-        counterpart={tokenAInfo?.tokenAddress}
-        onChange={handleTokenBChange}
-      />
-      <NumberTextField
-        className={classes.numberField}
-        value={tokenBInput !== undefined ? tokenBInput : ''}
-        onChange={handleTokenBAmountChange}
-        InputProps={{ disableUnderline: true }}
-        disabled={!!addingLiquidity || !!completed}
-      />
+    <div className={classes.tokenContainerWithBalance}>
+      <div className={classes.inputRow}>
+        <TokenSelectDialog
+          dexTokens={dexTokens}
+          tokenAddress={tokenBInfo?.tokenAddress}
+          counterpart={tokenAInfo?.tokenAddress}
+          onChange={handleTokenBChange}
+        />
+        <NumberTextField
+          className={classes.numberField}
+          value={tokenBInput !== undefined ? tokenBInput : ''}
+          onChange={handleTokenBAmountChange}
+          InputProps={{ disableUnderline: true }}
+          disabled={!!addingLiquidity || !!completed}
+        />
+      </div>
+      {tokenBBalance ?
+        (<Typography className={classes.balance}>
+          Balance: {tokenBBalance}
+        </Typography>) : null}
     </div>
   );
 

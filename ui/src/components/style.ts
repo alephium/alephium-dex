@@ -23,6 +23,24 @@ export const commonStyles = makeStyles((theme) => ({
       margin: "0",
     },
   },
+  tokenContainerWithBalance: {
+    minHeight: "44px",
+    padding: ".2rem .8rem",
+    border: "3px solid #333333",
+    borderRadius: "10px",
+    width: "initial",
+    height: "80px",
+  },
+  balance: {
+    display: 'flex',
+    padding: "0.1rem"
+  },
+  inputRow: {
+    display: "flex",
+    flexFlow: "row nowrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   tokenContainer: {
     display: "flex",
     justifyContent: "space-between",

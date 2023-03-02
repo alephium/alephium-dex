@@ -566,3 +566,11 @@ function shortString(str: string) {
   if (str.length <= 8) return str
   return `${str.slice(0, 8)}...`
 }
+
+export function tryGetBalance(balances: Map<string, bigint> | undefined, tokenInfo: TokenInfo | undefined): string | undefined {
+  if (balances === undefined || tokenInfo === undefined) {
+    return undefined
+  }
+  const balance = balances.get(tokenInfo.tokenId)
+  return balance === undefined ? '0' : bigIntToString(balance, tokenInfo.decimals)
+}
