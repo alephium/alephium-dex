@@ -4,5 +4,4 @@ lerna-debug.log
 artifacts/
 /dist
 /dev
-.deployments.devnet.json
 .project.json
