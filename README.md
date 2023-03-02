@@ -54,6 +54,6 @@ Build and run the UI:
 cd ui && npm install && npm run build && npm run start
 ```
 
-Now you can open the `http://localhost:3000`, you will see something like this: ![](./images/dex-ui.png)
+Now you can open the `http://localhost:3000/alephium-dex`, you will see something like this: ![](./images/dex-ui.png)
 
 And now you can test the DEX by creating token pool, adding liquidity to the token pool, swapping tokens, and removing liquidity from the token pool.

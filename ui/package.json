@@ -2,6 +2,7 @@
   "name": "UI",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://alephium.github.io/alephium-dex",
   "dependencies": {
     "@alephium/web3-react": "0.0.3-rc.9",
     "@alephium/web3": "0.5.1",
