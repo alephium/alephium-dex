@@ -5,14 +5,13 @@ import {
   SignExecuteScriptTxResult,
   NodeProvider,
   node,
-  web3,
   ALPH_TOKEN_ID,
   fromApiVal,
   isHexString,
   prettifyTokenAmount
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
-import { network } from "./consts"
+import { checkTxConfirmedFrequency, network } from "./consts"
 import BigNumber from "bignumber.js"
 import { parseUnits } from "ethers/lib/utils";
 import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, RemoveLiquidity, CreatePair } from "../contracts/ts"
@@ -160,6 +159,7 @@ function deadline(ttl: number): bigint {
 
 async function swapMinOut(
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   pairId: string,
   tokenInId: string,
@@ -179,12 +179,13 @@ async function swapMinOut(
     },
     tokens: [{ id: tokenInId, amount: amountIn }]
   })
-  await waitTxConfirmed(web3.getCurrentNodeProvider(), result.txId, 1)
+  await waitTxConfirmed(nodeProvider, result.txId, 1)
   return result
 }
 
 async function swapMaxIn(
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   pairId: string,
   tokenInId: string,
@@ -204,7 +205,7 @@ async function swapMaxIn(
     },
     tokens: [{ id: tokenInId, amount: amountInMax }]
   })
-  await waitTxConfirmed(web3.getCurrentNodeProvider(), result.txId, 1)
+  await waitTxConfirmed(nodeProvider, result.txId, 1)
   return result
 }
 
@@ -212,6 +213,7 @@ export async function swap(
   type: 'ExactIn' | 'ExactOut',
   balances: Map<string, bigint>,
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   pairId: string,
   tokenInInfo: TokenInfo,
@@ -227,11 +229,11 @@ export async function swap(
 
   if (type === 'ExactIn') {
     const amountOutMin = minimalAmount(amountOut, slippage)
-    return swapMinOut(signer, sender, pairId, tokenInInfo.tokenId, amountIn, amountOutMin, ttl)
+    return swapMinOut(signer, nodeProvider, sender, pairId, tokenInInfo.tokenId, amountIn, amountOutMin, ttl)
   }
 
   const amountInMax = maximalAmount(amountIn, slippage)
-  return swapMaxIn(signer, sender, pairId, tokenInInfo.tokenId, amountInMax, amountOut, ttl)
+  return swapMaxIn(signer, nodeProvider, sender, pairId, tokenInInfo.tokenId, amountInMax, amountOut, ttl)
 }
 
 function isConfirmed(txStatus: node.TxStatus): txStatus is node.Confirmed {
@@ -247,7 +249,7 @@ export async function waitTxConfirmed(
   if (isConfirmed(status) && status.chainConfirmations >= confirmations) {
     return status
   }
-  await new Promise((r) => setTimeout(r, 1000))
+  await new Promise((r) => setTimeout(r, checkTxConfirmedFrequency * 1000))
   return waitTxConfirmed(provider, txId, confirmations)
 }
 
@@ -320,6 +322,7 @@ function maximalAmount(amount: bigint, slippage: number): bigint {
 export async function addLiquidity(
   balances: Map<string, bigint>,
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   tokenPairState: TokenPairState,
   tokenAInfo: TokenInfo,
@@ -364,7 +367,7 @@ export async function addLiquidity(
       { id: tokenBInfo.tokenId, amount: amountBDesired }
     ]
   })
-  await waitTxConfirmed(web3.getCurrentNodeProvider(), result.txId, 1)
+  await waitTxConfirmed(nodeProvider, result.txId, 1)
   return result
 }
 
@@ -402,6 +405,7 @@ export function getRemoveLiquidityResult(
 
 export async function removeLiquidity(
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   pairId: string,
   liquidity: bigint,
@@ -424,25 +428,18 @@ export async function removeLiquidity(
     },
     tokens: [{ id: pairId, amount: liquidity }]
   })
-  await waitTxConfirmed(web3.getCurrentNodeProvider(), result.txId, 1)
+  await waitTxConfirmed(nodeProvider, result.txId, 1)
   return result
 }
 
-export async function getBalanceByTokenId(tokenId: string, address: string): Promise<bigint> {
-  const balances = await web3.getCurrentNodeProvider().addresses.getAddressesAddressBalance(address)
-  const balance = BigInt(balances.tokenBalances?.find((balance) => balance.id === tokenId)?.amount ?? '0')
-  const locked = BigInt(balances.lockedTokenBalances?.find((balance) => balance.id === tokenId)?.amount ?? '0')
-  return balance - locked
-}
-
-export async function tokenPairExist(tokenAId: string, tokenBId: string): Promise<boolean> {
+export async function tokenPairExist(nodeProvider: NodeProvider, tokenAId: string, tokenBId: string): Promise<boolean> {
   const factoryId = network.factoryId
   const groupIndex = network.groupIndex
   const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId)
   const path = token0Id + token1Id
   const pairContractId = subContractId(factoryId, path, groupIndex)
   const contractAddress = addressFromContractId(pairContractId)
-  return web3.getCurrentNodeProvider()
+  return nodeProvider
       .addresses
       .getAddressesAddressGroup(contractAddress)
       .then(_ => true)
@@ -456,6 +453,7 @@ export async function tokenPairExist(tokenAId: string, tokenBId: string): Promis
 
 export async function createTokenPair(
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   tokenAId: string,
   tokenBId: string
@@ -478,7 +476,7 @@ export async function createTokenPair(
       { id: tokenBId, amount: 1n },
     ]
   })
-  await waitTxConfirmed(web3.getCurrentNodeProvider(), result.txId, 1)
+  await waitTxConfirmed(nodeProvider, result.txId, 1)
   return { ...result, tokenPairId: pairContractId }
 }
 

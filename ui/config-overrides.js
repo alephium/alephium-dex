@@ -7,6 +7,7 @@ module.exports = function override(config, env) {
     if (plugin instanceof ModuleScopePlugin) {
       const cwd = process.cwd()
       plugin.allowedFiles.add(path.join(cwd, '..', '.deployments.devnet.json'))
+      plugin.allowedFiles.add(path.join(cwd, '..', '.deployments.testnet.json'))
     }
   })
 

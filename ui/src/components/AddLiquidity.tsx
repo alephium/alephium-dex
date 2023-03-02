@@ -117,7 +117,6 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       setAddingLiquidity(true)
       if (
         wallet !== undefined &&
-        wallet.signer !== undefined &&
         tokenPairState !== undefined &&
         tokenAInfo !== undefined &&
         tokenBInfo !== undefined &&
@@ -131,6 +130,7 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
         const result = await addLiquidity(
           wallet.balances,
           wallet.signer,
+          wallet.nodeProvider,
           wallet.address,
           tokenPairState,
           tokenAInfo,
@@ -153,7 +153,6 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
 
   const readyToAddLiquidity =
     wallet !== undefined &&
-    wallet.signer !== undefined &&
     tokenAInfo !== undefined &&
     tokenBInfo !== undefined &&
     tokenAAmount !== undefined &&

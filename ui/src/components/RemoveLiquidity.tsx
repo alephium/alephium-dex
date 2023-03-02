@@ -13,7 +13,6 @@ import {
   removeLiquidity,
   RemoveLiquidityResult,
   getRemoveLiquidityResult,
-  getBalanceByTokenId,
   DexTokens,
   PairTokenDecimals,
   stringToBigInt,
@@ -56,15 +55,13 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     if (
       tokenAInfo !== undefined &&
       tokenBInfo !== undefined &&
-      wallet !== undefined &&
-      wallet.signer !== undefined
+      wallet !== undefined
     ) {
       getTokenPairState(tokenAInfo, tokenBInfo)
         .then((state) => {
           setTokenPairState(state)
-          getBalanceByTokenId(state.tokenPairId, wallet.address)
-            .then((balance) => setTotalLiquidityAmount(balance))
-            .catch((error) => setError(error))
+          const balance = wallet.balances.get(state.tokenPairId)
+          setTotalLiquidityAmount(balance === undefined ? 0n : balance)
         })
         .catch((error) => setError(error))
     }
@@ -158,7 +155,6 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       setRemovingLiquidity(true)
       if (
         wallet !== undefined &&
-        wallet.signer !== undefined &&
         tokenPairState !== undefined &&
         removeLiquidityResult !== undefined &&
         tokenAInfo !== undefined &&
@@ -171,6 +167,7 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
 
         const result = await removeLiquidity(
           wallet.signer,
+          wallet.nodeProvider,
           wallet.address,
           tokenPairState.tokenPairId,
           amount,
@@ -192,7 +189,6 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
 
   const readyToRemoveLiquidity =
     wallet !== undefined &&
-    wallet.signer !== undefined &&
     tokenAInfo !== undefined &&
     tokenBInfo !== undefined &&
     amount !== undefined &&

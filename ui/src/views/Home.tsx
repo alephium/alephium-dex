@@ -1,8 +1,6 @@
 import { makeStyles, AppBar, Toolbar, Link, Hidden } from "@material-ui/core";
 import { NavLink, Switch, Route, Redirect } from "react-router-dom";
 import { COLORS } from "../muiTheme";
-import { network } from "../utils/consts";
-import { web3 } from "@alephium/web3";
 import Swap from "../components/Swap";
 import AddLiquidity from "../components/AddLiquidity";
 import RemoveLiquidity from "../components/RemoveLiquidity";
@@ -51,8 +49,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Home() {
   const classes = useStyles();
-  web3.setCurrentNodeProvider(network.nodeHost)
-  const { dexTokens } = useGetDexTokens(network.factoryId)
+  const dexTokens = useGetDexTokens()
   const dispatch = useDispatch()
 
   return (

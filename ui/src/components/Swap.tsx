@@ -122,7 +122,6 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       if (
         swapType !== undefined &&
         wallet !== undefined &&
-        wallet.signer !== undefined &&
         tokenPairState !== undefined &&
         tokenInInfo !== undefined &&
         tokenInAmount !== undefined &&
@@ -136,6 +135,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
           swapType,
           wallet.balances,
           wallet.signer,
+          wallet.nodeProvider,
           wallet.address,
           tokenPairState.tokenPairId,
           tokenInInfo,
@@ -157,7 +157,6 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
 
   const readyToSwap =
     wallet !== undefined &&
-    wallet.signer !== undefined &&
     tokenInInfo !== undefined &&
     tokenOutInfo !== undefined &&
     tokenInAmount !== undefined &&

@@ -23,8 +23,10 @@
     "typescript": "^4.4.2"
   },
   "scripts": {
-    "start": "rm -rf build && react-app-rewired start",
-    "build": "rm -rf build && react-app-rewired --max_old_space_size=4096 build",
+    "start": "rm -rf build && REACT_APP_NETWORK=devnet react-app-rewired start",
+    "build": "rm -rf build && REACT_APP_NETWORK=devnet react-app-rewired --max_old_space_size=4096 build",
+    "start:testnet": "rm -rf build && REACT_APP_NETWORK=testnet react-app-rewired start",
+    "build:testnet": "rm -rf build && REACT_APP_NETWORK=testnet react-app-rewired --max_old_space_size=4096 build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },

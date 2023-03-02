@@ -1,49 +1,49 @@
-import { SignerProvider, Address, groupOfAddress, web3, ALPH_TOKEN_ID, node } from '@alephium/web3'
-import { useEffect, useState } from 'react'
-import { useAccount, useContext } from "@alephium/web3-react"
+import { SignerProvider, Address, groupOfAddress, web3, ALPH_TOKEN_ID, node, NodeProvider } from '@alephium/web3'
+import { useMemo } from 'react'
+import { useAccount, useContext, useBalance } from "@alephium/web3-react"
 
 export class AlephiumWallet {
   signer: SignerProvider
   address: Address
   group: number
   balances: Map<string, bigint>
+  nodeProvider: NodeProvider
 
-  constructor(signerProvider: SignerProvider, address: Address, balances: Map<string, bigint>) {
+  constructor(signerProvider: SignerProvider, address: Address, balances: Map<string, bigint>, nodeProvider: NodeProvider) {
     this.signer = signerProvider
     this.address = address
     this.group = groupOfAddress(address)
     this.balances = balances
+    this.nodeProvider = nodeProvider
   }
 }
 
 export function useAlephiumWallet() {
+  const balance = useBalance()
   const context = useContext()
   const { account, isConnected } = useAccount()
-  const [wallet, setWallet] = useState<AlephiumWallet | undefined>(undefined)
 
-  useEffect(() => {
-    if (isConnected && account !== undefined) {
-      getBalance(account.address).then((balances) => {
-        if (context.signerProvider !== undefined) {
-          setWallet(new AlephiumWallet(context.signerProvider, account.address, balances))
-        }
-      })
-    } else {
-      setWallet(undefined)
+  return useMemo(() => {
+    if (context.signerProvider?.nodeProvider === undefined) {
+      return
     }
-  }, [account, isConnected, context])
-
-  return wallet
+    web3.setCurrentNodeProvider(context.signerProvider.nodeProvider)
+    if (isConnected && account !== undefined) {
+      const availableBalances = getAvailableBalances(balance.balance)
+      return new AlephiumWallet(context.signerProvider, account.address, availableBalances, context.signerProvider.nodeProvider)
+    }
+    return undefined
+  }, [account, isConnected, context, balance])
 }
 
-async function getBalance(address: string): Promise<Map<string, bigint>> {
+function getAvailableBalances(rawBalance: node.Balance | undefined): Map<string, bigint> {
+  if (rawBalance === undefined) return new Map<string, bigint>()
   const balances = new Map<string, bigint>()
-  const result = await web3.getCurrentNodeProvider().addresses.getAddressesAddressBalance(address)
-  const alphAmount = BigInt(result.balance) - BigInt(result.lockedBalance)
+  const alphAmount = BigInt(rawBalance.balance) - BigInt(rawBalance.lockedBalance)
   balances.set(ALPH_TOKEN_ID, alphAmount)
-  const tokens: node.Token[] = result.tokenBalances ?? []
+  const tokens: node.Token[] = rawBalance.tokenBalances ?? []
   for (const token of tokens) {
-    const locked = BigInt(result.lockedTokenBalances?.find((t) => t.id === token.id)?.amount ?? '0')
+    const locked = BigInt(rawBalance.lockedTokenBalances?.find((t) => t.id === token.id)?.amount ?? '0')
     const tokenAmount = BigInt(token.amount) - locked
     balances.set(token.id, tokenAmount)
   }

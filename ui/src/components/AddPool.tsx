@@ -43,19 +43,19 @@ function AddPool() {
   const wallet = useAlephiumWallet()
 
   useEffect(() => {
-    if (tokenAId !== undefined && tokenBId !== undefined) {
+    if (tokenAId !== undefined && tokenBId !== undefined && wallet !== undefined) {
       if (tokenAId === tokenBId) {
         setError('identical token ids')
         return
       }
 
-      tokenPairExist(tokenAId, tokenBId)
+      tokenPairExist(wallet.nodeProvider, tokenAId, tokenBId)
         .then((exist) => {
           if (exist) setError(`token pair already exist`)
         })
         .catch((err) => setError(err))
     }
-  }, [tokenAId, tokenBId])
+  }, [tokenAId, tokenBId, wallet])
 
   const handleTokenAChange = useCallback(
     (event) => {
@@ -130,14 +130,10 @@ function AddPool() {
   const handleAddPool = useCallback(async () => {
     try {
       setAddingPool(true)
-      if (
-        wallet !== undefined &&
-        wallet.signer !== undefined &&
-        tokenAId !== undefined &&
-        tokenBId !== undefined
-      ) {
+      if (wallet !== undefined && tokenAId !== undefined && tokenBId !== undefined) {
         const result = await createTokenPair(
           wallet.signer,
+          wallet.nodeProvider,
           wallet.address,
           tokenAId,
           tokenBId
@@ -155,7 +151,6 @@ function AddPool() {
 
   const readyToAddPool =
     wallet !== undefined &&
-    wallet.signer !== undefined &&
     tokenAId !== undefined &&
     tokenBId !== undefined &&
     !addingPool && !completed && 
