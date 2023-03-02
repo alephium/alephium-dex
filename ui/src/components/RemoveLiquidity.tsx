@@ -7,9 +7,7 @@ import TokenSelectDialog from "./TokenSelectDialog";
 import CircleLoader from "./CircleLoader";
 import NumberTextField from "./NumberTextField";
 import {
-  getTokenPairState,
   TokenInfo,
-  TokenPairState,
   removeLiquidity,
   RemoveLiquidityResult,
   getRemoveLiquidityResult,
@@ -24,6 +22,7 @@ import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
 import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
 import { commonStyles } from "./style";
+import { useTokenPairState } from "../state/useTokenPairState";
 
 function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const classes = commonStyles();
@@ -31,7 +30,6 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const [amount, setAmount] = useState<bigint | undefined>(undefined)
   const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
-  const [tokenPairState, setTokenPairState] = useState<TokenPairState | undefined>(undefined)
   const [totalLiquidityAmount, setTotalLiquidityAmount] = useState<bigint | undefined>(undefined)
   const [removeLiquidityResult, setRemoveLiquidityResult] = useState<RemoveLiquidityResult | undefined>(undefined)
   const [completed, setCompleted] = useState<boolean>(false)
@@ -49,23 +47,15 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     setTokenBInfo(tokenInfo)
   }, []);
 
+  const tokenPairState = useTokenPairState(tokenAInfo, tokenBInfo, setError)
+
   useEffect(() => {
-    setRemoveLiquidityResult(undefined)
     setTotalLiquidityAmount(undefined)
-    if (
-      tokenAInfo !== undefined &&
-      tokenBInfo !== undefined &&
-      wallet !== undefined
-    ) {
-      getTokenPairState(tokenAInfo, tokenBInfo)
-        .then((state) => {
-          setTokenPairState(state)
-          const balance = wallet.balances.get(state.tokenPairId)
-          setTotalLiquidityAmount(balance === undefined ? 0n : balance)
-        })
-        .catch((error) => setError(error))
+    if (tokenPairState !== undefined && wallet !== undefined) {
+      const balance = wallet.balances.get(tokenPairState.tokenPairId)
+      setTotalLiquidityAmount(balance === undefined ? 0n : balance)
     }
-  }, [tokenAInfo, tokenBInfo, wallet])
+  }, [tokenPairState, wallet])
 
   useEffect(() => {
     setRemoveLiquidityResult(undefined)
@@ -108,7 +98,6 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const handleReset = useCallback(() => {
     setTokenAInfo(undefined)
     setTokenBInfo(undefined)
-    setTokenPairState(undefined)
     setAmount(undefined)
     setAmountInput(undefined)
     setTotalLiquidityAmount(undefined)
