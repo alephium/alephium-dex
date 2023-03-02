@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/static/css/main.fd11770c.css",
+    "main.js": "/static/js/main.e2b872a4.js",
+    "static/media/alephium.svg": "/static/media/alephium.f7633ed3a80bb58caa3bdea7a1d4d96f.svg",
+    "index.html": "/index.html",
+    "main.fd11770c.css.map": "/static/css/main.fd11770c.css.map",
+    "main.e2b872a4.js.map": "/static/js/main.e2b872a4.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.fd11770c.css",
+    "static/js/main.e2b872a4.js"
+  ]
+}
