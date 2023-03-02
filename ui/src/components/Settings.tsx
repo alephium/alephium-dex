@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useDeadline } from '../hooks/useDeadline'
 import { useSlippageTolerance } from '../hooks/useSlippageTolerance'
-import { DEFAULT_DEADLINE_FROM_NOW } from '../state/settings/reducer'
+import { DEFAULT_DEADLINE_FROM_NOW, DEFAULT_SLIPPAGE } from '../state/settings/reducer'
 import SettingsIcon from '@material-ui/icons/Settings'
 import IconButton from '@material-ui/core/IconButton'
 import {
@@ -108,7 +108,7 @@ function SettingsDialog() {
             style={{ left: '30px', width: 140 }}
             inputProps={{ style: { height: "20px", 'color': slippageError ? 'red' : '' }}}
             InputProps={{ startAdornment: <InputAdornment position="start">%</InputAdornment> }}
-            placeholder='0.10'
+            placeholder={DEFAULT_SLIPPAGE.toString()}
             value={
               slippageInput.length > 0
                 ? slippageInput
