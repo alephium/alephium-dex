@@ -14,7 +14,8 @@ import {
   DexTokens,
   PairTokenDecimals,
   stringToBigInt,
-  bigIntToString
+  bigIntToString,
+  tokenPairMatch
 } from "../utils/dex";
 import { formatUnits } from "ethers/lib/utils";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
@@ -59,6 +60,9 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
 
   useEffect(() => {
     setRemoveLiquidityResult(undefined)
+    if (!tokenPairMatch(tokenPairState, tokenAInfo, tokenBInfo)) {
+      return
+    }
     try {
       if (
         tokenPairState !== undefined &&

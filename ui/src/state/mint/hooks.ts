@@ -6,7 +6,7 @@ import {
   TokenPairState,
   tryBigIntToString,
   tryStringToBigInt,
-  TokenInfo
+  tokenPairMatch
 } from '../../utils/dex'
 import { selectMintState } from './selectors'
 import { useMemo } from 'react'
@@ -85,9 +85,4 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
       return { tokenAInput: undefined, tokenBInput: undefined, tokenAAmount: undefined, tokenBAmount: undefined, tokenPairState, addLiquidityResult }
     }
   }, [tokenPairState, lastInput, inputValue, otherInputValue, parsedAmount, otherAmount, addLiquidityResult, tokenAInfo, tokenBInfo, setError])
-}
-
-function tokenPairMatch(tokenPairState: TokenPairState | undefined, token0Info: TokenInfo | undefined, token1Info: TokenInfo | undefined) {
-  return (tokenPairState?.token0Info.tokenId === token0Info?.tokenId || tokenPairState?.token1Info.tokenId === token1Info?.tokenId) ||
-    (tokenPairState?.token1Info.tokenId === token0Info?.tokenId && tokenPairState?.token0Info.tokenId === token1Info?.tokenId)
 }

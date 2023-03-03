@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux'
-import { getAmountIn, getAmountOut, TokenPairState, tryBigIntToString, tryStringToBigInt } from '../../utils/dex'
+import { getAmountIn, getAmountOut, tokenPairMatch, TokenPairState, tryBigIntToString, tryStringToBigInt } from '../../utils/dex'
 import { selectSwapState } from './selectors'
 import { useMemo } from 'react'
 import { useTokenPairState } from '../useTokenPairState'
@@ -15,15 +15,15 @@ export function useDerivedSwapInfo(setError: (err: string | undefined) => void):
   const { lastInput, inputValue, tokenInInfo, tokenOutInfo } = useSelector(selectSwapState)
   const tokenPairState = useTokenPairState(tokenInInfo, tokenOutInfo, setError)
 
-  const [parsedAmount, tokenInfo] = useMemo(() => {
+  const parsedAmount = useMemo(() => {
     const tokenInfo = lastInput === 'TokenIn' ? tokenInInfo : tokenOutInfo
     try {
       setError(undefined)
-      return [tryStringToBigInt(inputValue, tokenInfo?.decimals), tokenInfo]
+      return tryStringToBigInt(inputValue, tokenInfo?.decimals)
     } catch (error) {
       console.log(`Invalid input: ${inputValue}, ${tokenInfo?.decimals}`)
       setError(`${error}`)
-      return [undefined, undefined]
+      return undefined
     }
   }, [lastInput, tokenInInfo, tokenOutInfo, inputValue, setError])
 
@@ -33,11 +33,15 @@ export function useDerivedSwapInfo(setError: (err: string | undefined) => void):
 
   const swapAmount = useMemo(() => {
     try {
+      if (!tokenPairMatch(tokenPairState, tokenInInfo, tokenOutInfo)) {
+        return undefined
+      }
       if (tokenPairState?.reserve0 === 0n) {
         throw new Error('This pool has no liquidity yet, please add liquidity to this pool first')
       }
 
       setError(undefined)
+      const tokenInfo = lastInput === 'TokenIn' ? tokenInInfo : tokenOutInfo
       return parsedAmount && tokenInfo && tokenPairState && swapType
         ? getSwapAmount(tokenPairState, swapType, parsedAmount, tokenInfo.tokenId)
         : undefined
@@ -46,7 +50,7 @@ export function useDerivedSwapInfo(setError: (err: string | undefined) => void):
       setError(`${error}`)
       return undefined
     }
-  }, [tokenPairState, parsedAmount, tokenInfo, setError, swapType])
+  }, [tokenPairState, parsedAmount, lastInput, tokenInInfo, tokenOutInfo, setError, swapType])
 
   const [tokenInInput, tokenOutInput, tokenInAmount, tokenOutAmount] = useMemo(() => {
     try {
