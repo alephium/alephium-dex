@@ -37,6 +37,7 @@ export function useDerivedSwapInfo(setError: (err: string | undefined) => void):
         throw new Error('This pool has no liquidity yet, please add liquidity to this pool first')
       }
 
+      setError(undefined)
       return parsedAmount && tokenInfo && tokenPairState && swapType
         ? getSwapAmount(tokenPairState, swapType, parsedAmount, tokenInfo.tokenId)
         : undefined
