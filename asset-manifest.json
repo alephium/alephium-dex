@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.css": "/alephium-dex/static/css/main.fd11770c.css",
-    "main.js": "/alephium-dex/static/js/main.8c75340b.js",
+    "main.css": "/alephium-dex/static/css/main.26dbe6de.css",
+    "main.js": "/alephium-dex/static/js/main.c5b5802f.js",
     "static/media/alephium.svg": "/alephium-dex/static/media/alephium.f7633ed3a80bb58caa3bdea7a1d4d96f.svg",
     "index.html": "/alephium-dex/index.html",
-    "main.fd11770c.css.map": "/alephium-dex/static/css/main.fd11770c.css.map",
-    "main.8c75340b.js.map": "/alephium-dex/static/js/main.8c75340b.js.map"
+    "main.26dbe6de.css.map": "/alephium-dex/static/css/main.26dbe6de.css.map",
+    "main.c5b5802f.js.map": "/alephium-dex/static/js/main.c5b5802f.js.map"
   },
   "entrypoints": [
-    "static/css/main.fd11770c.css",
-    "static/js/main.8c75340b.js"
+    "static/css/main.26dbe6de.css",
+    "static/js/main.c5b5802f.js"
   ]
 }
