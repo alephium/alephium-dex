@@ -18,7 +18,7 @@ import {
   tokenPairMatch
 } from "../utils/dex";
 import { formatUnits } from "ethers/lib/utils";
-import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
+import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
 import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
@@ -39,6 +39,7 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const [deadline,] = useDeadline()
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
+  const availableBalance = useAvailableBalances()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     setTokenAInfo(tokenInfo);
@@ -52,11 +53,11 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
 
   useEffect(() => {
     setTotalLiquidityAmount(undefined)
-    if (tokenPairState !== undefined && wallet !== undefined) {
-      const balance = wallet.balances.get(tokenPairState.tokenPairId)
+    if (tokenPairState !== undefined) {
+      const balance = availableBalance.get(tokenPairState.tokenPairId)
       setTotalLiquidityAmount(balance === undefined ? 0n : balance)
     }
-  }, [tokenPairState, wallet])
+  }, [tokenPairState, availableBalance])
 
   useEffect(() => {
     setRemoveLiquidityResult(undefined)

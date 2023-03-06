@@ -7,7 +7,7 @@ import TokenSelectDialog from "./TokenSelectDialog";
 import CircleLoader from "./CircleLoader";
 import NumberTextField from "./NumberTextField";
 import { addLiquidity, DexTokens, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityResult, TokenPairState, tryGetBalance } from "../utils/dex";
-import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
+import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
 import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
@@ -26,6 +26,7 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const dispatch = useDispatch()
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
+  const balance = useAvailableBalances()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     dispatch(selectTokenA(tokenInfo))
@@ -56,12 +57,12 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   }, [dispatch])
 
   const tokenABalance = useMemo(() => {
-    return tryGetBalance(wallet?.balances, tokenAInfo)
-  }, [wallet, tokenAInfo])
+    return tryGetBalance(balance, tokenAInfo)
+  }, [balance, tokenAInfo])
 
   const tokenBBalance = useMemo(() => {
-    return tryGetBalance(wallet?.balances, tokenBInfo)
-  }, [wallet, tokenBInfo])
+    return tryGetBalance(balance, tokenBInfo)
+  }, [balance, tokenBInfo])
 
   const sourceContent = (
     <div className={classes.tokenContainerWithBalance}>
@@ -128,7 +129,7 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
         }
 
         const result = await addLiquidity(
-          wallet.balances,
+          balance,
           wallet.signer,
           wallet.nodeProvider,
           wallet.address,
@@ -149,7 +150,7 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       setAddingLiquidity(false)
       console.error(`failed to add liquidity, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline])
+  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline, balance])
 
   const readyToAddLiquidity =
     wallet !== undefined &&

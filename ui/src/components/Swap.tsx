@@ -8,7 +8,7 @@ import CircleLoader from "../components/CircleLoader";
 import HoverIcon from "../components/HoverIcon";
 import NumberTextField from "../components/NumberTextField";
 import { swap, DexTokens, tryGetBalance } from "../utils/dex";
-import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
+import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useDeadline } from "../hooks/useDeadline";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
@@ -27,6 +27,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
   const wallet = useAlephiumWallet()
+  const balance = useAvailableBalances()
 
   const handleTokenInChange = useCallback((tokenInfo) => {
     dispatch(selectTokenIn(tokenInfo))
@@ -59,12 +60,12 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
   }, [dispatch])
 
   const tokenInBalance = useMemo(() => {
-    return tryGetBalance(wallet?.balances, tokenInInfo)
-  }, [wallet, tokenInInfo])
+    return tryGetBalance(balance, tokenInInfo)
+  }, [balance, tokenInInfo])
 
   const tokenOutBalance = useMemo(() => {
-    return tryGetBalance(wallet?.balances, tokenOutInfo)
-  }, [wallet, tokenOutInfo])
+    return tryGetBalance(balance, tokenOutInfo)
+  }, [balance, tokenOutInfo])
 
   const sourceContent = (
     <div className={classes.tokenContainerWithBalance}>
@@ -133,7 +134,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
 
         const result = await swap(
           swapType,
-          wallet.balances,
+          balance,
           wallet.signer,
           wallet.nodeProvider,
           wallet.address,
@@ -153,7 +154,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       setSwapping(false)
       console.error(`failed to swap, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenInInfo, tokenInAmount, tokenOutAmount, slippage, deadline, swapType])
+  }, [wallet, tokenPairState, tokenInInfo, tokenInAmount, tokenOutAmount, slippage, deadline, swapType, balance])
 
   const readyToSwap =
     wallet !== undefined &&

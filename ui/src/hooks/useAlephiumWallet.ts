@@ -6,20 +6,17 @@ export class AlephiumWallet {
   signer: SignerProvider
   address: Address
   group: number
-  balances: Map<string, bigint>
   nodeProvider: NodeProvider
 
-  constructor(signerProvider: SignerProvider, address: Address, balances: Map<string, bigint>, nodeProvider: NodeProvider) {
+  constructor(signerProvider: SignerProvider, address: Address, nodeProvider: NodeProvider) {
     this.signer = signerProvider
     this.address = address
     this.group = groupOfAddress(address)
-    this.balances = balances
     this.nodeProvider = nodeProvider
   }
 }
 
 export function useAlephiumWallet() {
-  const balance = useBalance()
   const context = useContext()
   const { account, isConnected } = useAccount()
 
@@ -29,11 +26,15 @@ export function useAlephiumWallet() {
     }
     web3.setCurrentNodeProvider(context.signerProvider.nodeProvider)
     if (isConnected && account !== undefined) {
-      const availableBalances = getAvailableBalances(balance.balance)
-      return new AlephiumWallet(context.signerProvider, account.address, availableBalances, context.signerProvider.nodeProvider)
+      return new AlephiumWallet(context.signerProvider, account.address, context.signerProvider.nodeProvider)
     }
     return undefined
-  }, [account, isConnected, context, balance])
+  }, [account, isConnected, context])
+}
+
+export function useAvailableBalances() {
+  const balance = useBalance()
+  return useMemo(() => getAvailableBalances(balance.balance), [balance])
 }
 
 function getAvailableBalances(rawBalance: node.Balance | undefined): Map<string, bigint> {
