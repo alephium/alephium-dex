@@ -1,142 +1,87 @@
-import { TextField, Button, Container, Paper, Typography, makeStyles } from "@material-ui/core";
+import { Button, Container, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
 import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
+import { TokenInfo } from "@alephium/token-list"
 import { useCallback, useEffect, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import CircleLoader from "./CircleLoader";
-import { tokenPairExist, createTokenPair, checkContractId } from "../utils/dex";
+import { tokenPairExist, createTokenPair, DexTokens } from "../utils/dex";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
 import { commonStyles } from "./style";
-
-export const useStyles = makeStyles(() => ({
-  textField: {
-    flexGrow: 1,
-    "& > * > .MuiInputBase-input": {
-      textAlign: "right",
-      height: "100%",
-      flexGrow: "1",
-      fontSize: "1.2rem",
-      fontFamily: "Roboto Mono, monospace",
-      caretShape: "block",
-      width: "0",
-      "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {
-        "-webkit-appearance": "none",
-        "-moz-appearance": "none",
-        margin: 0,
-      }
-    },
-    "& > * > input::-webkit-inner-spin-button": {
-      webkitAppearance: "none",
-      margin: "0",
-    },
-  },
-}))
+import TokenSelectDialog from "./TokenSelectDialog";
 
 function AddPool() {
   const commonClasses = commonStyles();
-  const classes = useStyles();
-  const [tokenAId, setTokenAId] = useState<string | undefined>(undefined)
-  const [tokenBId, setTokenBId] = useState<string | undefined>(undefined)
+  const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
+  const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
   const [completed, setCompleted] = useState<boolean>(false)
   const [addingPool, setAddingPool] = useState<boolean>(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
 
   useEffect(() => {
-    if (tokenAId !== undefined && tokenBId !== undefined && wallet !== undefined) {
-      if (tokenAId === tokenBId) {
-        setError('identical token ids')
-        return
-      }
-
-      tokenPairExist(wallet.nodeProvider, tokenAId, tokenBId)
-        .then((exist) => {
+    async function checkContractExist() {
+      if (tokenAInfo !== undefined && tokenBInfo !== undefined && wallet !== undefined) {
+        try {
+          const exist = await tokenPairExist(wallet.nodeProvider, tokenAInfo.id, tokenBInfo.id)
           if (exist) setError(`token pair already exist`)
-        })
-        .catch((err) => setError(err))
+        } catch (err) {
+          setError(`${err}`)
+        }
+      }
     }
-  }, [tokenAId, tokenBId, wallet])
 
-  const handleTokenAChange = useCallback(
-    (event) => {
-      setError(undefined)
-      if (event.target.value === '') {
-        setTokenAId(undefined)
-        return
-      }
-      setTokenAId(event.target.value)
-      try {
-        checkContractId(event.target.value)
-      } catch (error) {
-        setError(`${error}`)
-        console.log(`handleTokenAChange error: ${error}`)
-      }
-    }, []
-  )
+    setError(undefined)
+    checkContractExist()
+  }, [tokenAInfo, tokenBInfo, wallet])
 
-  const handleTokenBChange = useCallback(
-    (event) => {
-      setError(undefined)
-      if (event.target.value === '') {
-        setTokenBId(undefined)
-        return
-      }
-      setTokenBId(event.target.value)
-      try {
-        checkContractId(event.target.value)
-      } catch (error) {
-        setError(`${error}`)
-        console.log(`handleTokenBChange error: ${error}`)
-      }
-    }, []
-  )
+  const handleTokenAChange = useCallback((tokenInfo) => {
+    setTokenAInfo(tokenInfo)
+  }, [])
+
+  const handleTokenBChange = useCallback((tokenInfo) => {
+    setTokenBInfo(tokenInfo)
+  }, [])
 
   const handleReset = useCallback(() => {
-    setTokenAId(undefined)
-    setTokenBId(undefined)
+    setTokenAInfo(undefined)
+    setTokenBInfo(undefined)
     setCompleted(false)
     setAddingPool(false)
     setError(undefined)
   }, [])
 
-  const sourceContent = (
-    <div className={commonClasses.tokenContainer}>
-      <TextField
-        multiline
-        className={classes.textField}
-        style={{ fontSize: '1.2 rem' }}
-        value={tokenAId !== undefined ? tokenAId : ''}
+  const tokenPairContent = (
+    <div className={commonClasses.tokenPairContainer}>
+      <TokenSelectDialog
+        dexTokens={DexTokens.empty}
+        tokenId={tokenAInfo?.id}
+        counterpart={tokenBInfo?.id}
         onChange={handleTokenAChange}
-        autoFocus={true}
-        InputProps={{ disableUnderline: true }}
-        disabled={!!addingPool || !!completed}
+        mediumSize={true}
+        selectFromTokenList={true}
       />
-    </div>
-  );
-  const targetContent = (
-    <div className={commonClasses.tokenContainer}>
-      <TextField
-        multiline
-        className={classes.textField}
-        style={{ fontSize: '1.2 rem' }}
-        value={tokenBId !== undefined ? tokenBId : ''}
+      <TokenSelectDialog
+        dexTokens={DexTokens.empty}
+        tokenId={tokenBInfo?.id}
+        counterpart={tokenAInfo?.id}
         onChange={handleTokenBChange}
-        InputProps={{ disableUnderline: true }}
-        disabled={!!addingPool || !!completed}
+        mediumSize={true}
+        selectFromTokenList={true}
       />
     </div>
-  );
+  )
 
   const handleAddPool = useCallback(async () => {
     try {
       setAddingPool(true)
-      if (wallet !== undefined && tokenAId !== undefined && tokenBId !== undefined) {
+      if (wallet !== undefined && tokenAInfo !== undefined && tokenBInfo !== undefined) {
         const result = await createTokenPair(
           wallet.signer,
           wallet.nodeProvider,
           wallet.address,
-          tokenAId,
-          tokenBId
+          tokenAInfo.id,
+          tokenBInfo.id
         )
         console.log(`add pool succeed, tx id: ${result.txId}, token pair id: ${result.tokenPairId}`)
         setCompleted(true)
@@ -147,12 +92,12 @@ function AddPool() {
       setAddingPool(false)
       console.error(`failed to add pool, error: ${error}`)
     }
-  }, [wallet, tokenAId, tokenBId])
+  }, [wallet, tokenAInfo, tokenBInfo])
 
   const readyToAddPool =
     wallet !== undefined &&
-    tokenAId !== undefined &&
-    tokenBId !== undefined &&
+    tokenAInfo !== undefined &&
+    tokenBInfo !== undefined &&
     !addingPool && !completed && 
     error === undefined
   const addPoolButton = (
@@ -206,9 +151,8 @@ function AddPool() {
           <Collapse in={!addingPool && !completed}>
             {
               <>
-                {sourceContent}
+                {tokenPairContent}
                 <div className={commonClasses.spacer} />
-                {targetContent}
                 {error ? (
                   <Typography variant="body2" color="error" className={commonClasses.error}>
                     {error}

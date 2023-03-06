@@ -14,11 +14,14 @@ import { program } from 'commander'
 import { randomInt } from 'crypto'
 import { default as devnetDeployment } from '../.deployments.devnet.json'
 import { AddLiquidity, CreatePair, GetToken, TestToken } from '../artifacts/ts'
+import { TokenInfo } from '@alephium/token-list'
+import * as fs from 'fs'
+import * as path from 'path'
 
 const oneAlph = 10n ** 18n
 
-async function createTokens(signer: SignerProvider, num: number): Promise<string[]> {
-  const tokenIds: string[] = []
+async function createTokens(signer: SignerProvider, num: number): Promise<TokenInfo[]> {
+  const tokenInfos: TokenInfo[] = []
   const account = await signer.getSelectedAccount()
   const nodeProvider = signer.nodeProvider ?? web3.getCurrentNodeProvider()
   for (let i = 0; i < num; i++) {
@@ -34,7 +37,12 @@ async function createTokens(signer: SignerProvider, num: number): Promise<string
       issueTokenAmount: 1n << 255n
     })
     await waitTxConfirmed(nodeProvider, deployResult.txId, 1)
-    tokenIds.push(deployResult.contractId)
+    tokenInfos.push({
+      id: deployResult.contractId,
+      symbol: symbol,
+      name: name,
+      decimals: 18
+    })
 
     const scriptResult = await GetToken.execute(signer, {
       initialFields: {
@@ -49,13 +57,7 @@ async function createTokens(signer: SignerProvider, num: number): Promise<string
       `Create test token succeed, name: ${name}, symbol: ${symbol}, token id: ${deployResult.contractId}, token address: ${deployResult.contractAddress}`
     )
   }
-  return [ALPH_TOKEN_ID].concat(tokenIds.sort(sortToken))
-}
-
-function sortToken(tokenAId: string, tokenBId: string): number {
-  const tokenA = BigInt('0x' + tokenAId)
-  const tokenB = BigInt('0x' + tokenBId)
-  return tokenA > tokenB ? 1 : -1
+  return tokenInfos
 }
 
 interface TokenPair {
@@ -203,7 +205,11 @@ program
       const signer = getSigner(env.network.privateKeys, opts.keyIndex === undefined ? 0 : (opts.keyIndex as number))
       const factoryId = devnetDeployment.contracts.TokenPairFactory.contractId
       console.log(`ALPH token id: ${ALPH_TOKEN_ID}, address: ${addressFromContractId(ALPH_TOKEN_ID)}`)
-      const tokenIds = await createTokens(signer, tokenNumber)
+      const tokenInfos = await createTokens(signer, tokenNumber)
+      const content = JSON.stringify(tokenInfos, null, 2)
+      const filepath = path.join(process.cwd(), 'ui', 'src', 'utils', 'devnet-token-list.json')
+      fs.writeFileSync(filepath, content)
+      const tokenIds = tokenInfos.map((tokenInfo) => tokenInfo.id)
       if (opts.createPair && opts.init) {
         const tokenPairs = await createPairs(signer, factoryId, tokenIds)
         const ratios = calcRatios(tokenIds)

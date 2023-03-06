@@ -6,8 +6,6 @@ import {
   NodeProvider,
   node,
   ALPH_TOKEN_ID,
-  fromApiVal,
-  isHexString,
   prettifyTokenAmount
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
@@ -17,6 +15,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, RemoveLiquidity, CreatePair } from "../contracts/ts"
 import { genLogo } from "./avatar_images";
 import { mainnetTokensMetadata, testnetTokensMetadata, TokenInfo } from "@alephium/token-list";
+import { default as devnetTokenList } from './devnet-token-list.json'
 
 const MINIMUM_LIQUIDITY = 1000n
 export const PairTokenDecimals = 18
@@ -29,6 +28,8 @@ export interface TokenPair {
 }
 
 export class DexTokens {
+  static empty: DexTokens = new DexTokens()
+
   tokenInfos: TokenInfo[]
   tokenPairs: TokenPair[]
   mapping: Map<string, string[]>
@@ -477,51 +478,26 @@ export const ALPHTokenInfo: TokenInfo = {
   logoURI: alephiumIcon
 }
 
-export async function getTokenInfo(nodeProvider: NodeProvider, tokenId: string): Promise<TokenInfo | undefined> {
-  if (tokenId === ALPH_TOKEN_ID) {
-    return ALPHTokenInfo
-  }
+export const TokenList = getTokenInfos()
 
-  if (networkName === 'mainnet') {
-    return mainnetTokensMetadata.tokens.find((t) => t.id.toLowerCase() === tokenId)
-  }
-  if (networkName === 'testnet') {
-    return testnetTokensMetadata.tokens.find((t) => t.id.toLowerCase() === tokenId)
-  }
-  return getDevnetTokenInfo(nodeProvider, tokenId)
+export function getTokenInfo(tokenId: string): TokenInfo | undefined {
+  return TokenList.find((t) => t.id.toLowerCase() === tokenId )
 }
 
-export async function getDevnetTokenInfo(nodeProvider: NodeProvider, tokenId: string): Promise<TokenInfo | undefined> {
-  const groupIndex = parseInt(tokenId.slice(-2), 16)
-  const contractAddress = addressFromContractId(tokenId)
-  const callData: node.CallContract = {
-    group: groupIndex,
-    address: contractAddress,
-    methodIndex: 0
+export function getTokenInfos(): TokenInfo[] {
+  if (networkName === 'mainnet') {
+    return mainnetTokensMetadata.tokens.concat([ALPHTokenInfo])
   }
-  const getSymbolResult = await nodeProvider.contracts.postContractsCallContract(callData)
-  const getNameResult = await nodeProvider.contracts.postContractsCallContract({ ...callData, methodIndex: 1 })
-  const getDecimalsResult = await nodeProvider.contracts.postContractsCallContract({ ...callData, methodIndex: 2 })
-
-  if (
-    getSymbolResult.returns.length !== 1 ||
-    getNameResult.returns.length !== 1 ||
-    getDecimalsResult.returns.length !== 1
-  ) {
-    return undefined
+  if (networkName === 'testnet') {
+    return testnetTokensMetadata.tokens.concat([ALPHTokenInfo])
   }
-
-  const symbolHex = fromApiVal(getSymbolResult.returns[0], 'ByteVec') as string
-  const nameHex = fromApiVal(getNameResult.returns[0], 'ByteVec') as string
-  const decimals = fromApiVal(getDecimalsResult.returns[0], 'U256') as bigint
-  const name = Buffer.from(nameHex, 'hex').toString('utf8')
-  return {
-    id: tokenId,
-    symbol: Buffer.from(symbolHex, 'hex').toString('utf8'),
-    name: name,
-    decimals: Number(decimals),
-    logoURI: genLogo(name)
-  }
+  const tokenInfos = (devnetTokenList as TokenInfo[]).concat([ALPHTokenInfo])
+  return tokenInfos.map((tokenInfo) => {
+    return {
+      ...tokenInfo,
+      logoURI: genLogo(tokenInfo.name)
+    }
+  })
 }
 
 // This is only used for user inputs
@@ -549,17 +525,6 @@ export function tryBigIntToString(amount: bigint | undefined, decimals: number |
     return undefined
   }
   return bigIntToString(amount, decimals)
-}
-
-export function checkContractId(contractId: string) {
-  if (!isHexString(contractId) || contractId.length !== 64) {
-    throw new Error(`invalid token id: ${shortString(contractId)}, expected length 64 hex-string`)
-  }
-}
-
-function shortString(str: string) {
-  if (str.length <= 8) return str
-  return `${str.slice(0, 8)}...`
 }
 
 export function tryGetBalance(balances: Map<string, bigint> | undefined, tokenInfo: TokenInfo | undefined): string | undefined {

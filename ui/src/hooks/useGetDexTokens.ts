@@ -10,7 +10,7 @@ function useGetDexTokens(): DexTokens {
   const [dexTokens, setDexTokens] = useState<DexTokens>(new DexTokens())
   const [, setSubscription] = useState<EventSubscription | undefined>(undefined)
   const [nodeProvider, setNodeProvider] = useState<NodeProvider | undefined>(undefined)
-  const [error, setError] = useState<string | undefined>(undefined)
+  const [error, setError] = useState<any>(null)
   const wallet = useAlephiumWallet()
 
   useEffect(() => setNodeProvider(wallet?.signer.nodeProvider), [wallet])
@@ -23,12 +23,12 @@ function useGetDexTokens(): DexTokens {
       const token0Id = event.fields.token0.toLowerCase()
       const token1Id = event.fields.token1.toLowerCase()
       const tokenPairId = event.fields.pair.toLowerCase()
-      const token0Info = await getTokenInfo(nodeProvider, token0Id)
+      const token0Info = getTokenInfo(token0Id)
       if (token0Info === undefined) {
         console.log(`Ignore invalid token info, token id: ${token0Id}`)
         return
       }
-      const token1Info = await getTokenInfo(nodeProvider, token1Id)
+      const token1Info = getTokenInfo(token1Id)
       if (token1Info === undefined) {
         console.log(`Ignore invalid token info, token id: ${token1Id}`)
         return
@@ -44,7 +44,7 @@ function useGetDexTokens(): DexTokens {
     const errorCallback = (error: any, s: Subscription<TokenPairFactoryTypes.PairCreatedEvent>) => {
       s.unsubscribe()
       setSubscription(undefined)
-      setError(`${error}`)
+      setError(error)
       console.error(`Subscription error: ${error}`)
       return Promise.resolve()
     }

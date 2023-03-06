@@ -13,7 +13,7 @@ import {
 } from "@material-ui/core";
 import { useCallback, useState } from "react";
 import CloseIcon from "@material-ui/icons/Close";
-import { DexTokens } from "../utils/dex";
+import { DexTokens, TokenList } from "../utils/dex";
 import { TokenInfo } from '@alephium/token-list'
 
 const useStyles = makeStyles((theme) => ({
@@ -66,6 +66,7 @@ interface TokenSelectProps {
   onChange: any
   style2?: boolean
   mediumSize?: boolean
+  selectFromTokenList?: boolean
 }
 
 const TokenOptions = ({
@@ -106,7 +107,8 @@ export default function TokenSelectDialog({
   counterpart,
   onChange,
   style2,
-  mediumSize
+  mediumSize,
+  selectFromTokenList
 }: TokenSelectProps) {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
@@ -118,8 +120,13 @@ export default function TokenSelectDialog({
     setOpen(true)
   }, [])
 
-  const info = dexTokens.tokenInfos.find((x) => x.id === tokenId)
-  const availableTokens = dexTokens.getAllowedTokenInfos(counterpart).map((token) =>
+  const info = selectFromTokenList
+    ? TokenList.find((tokenInfo) => tokenInfo.id === tokenId)
+    : dexTokens.tokenInfos.find((x) => x.id === tokenId)
+  const availableTokens = selectFromTokenList
+    ? TokenList.filter((tokenInfo) => tokenInfo.id !== tokenId && tokenInfo.id !== counterpart)
+    : dexTokens.getAllowedTokenInfos(counterpart).filter((tokenInfo) => tokenInfo.id !== tokenId)
+  const tokenOptions = availableTokens.map((token) =>
     <TokenOptions
       key={token.id}
       tokenInfo={token}
@@ -165,7 +172,7 @@ export default function TokenSelectDialog({
             </IconButton>
           </div>
         </DialogTitle>
-        <List>{availableTokens}</List>
+        <List>{tokenOptions}</List>
       </Dialog>
     </>
   );
