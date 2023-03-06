@@ -23,7 +23,7 @@ function getNetworkConfig(network: NetworkName): NetworkConfig {
     throw new Error('Not support now')
   }
 
-  const deployment = network === 'testnet' ? testnetDeployment : devnetDeployment
+  const deployment = (network === 'testnet' ? testnetDeployment : devnetDeployment) as any
   return {
     networkId: network === 'testnet' ? 1 : 4,
     groupIndex: groupOfAddress(deployment.deployerAddress),
