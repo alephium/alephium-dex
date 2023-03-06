@@ -24,10 +24,11 @@
     "trailingComma": "none"
   },
   "dependencies": {
-    "@alephium/cli": "0.5.1",
-    "@alephium/web3": "0.5.1",
-    "@alephium/web3-test": "0.5.1",
-    "@alephium/web3-wallet": "0.5.1",
+    "@alephium/cli": "0.6.2",
+    "@alephium/web3": "0.6.2",
+    "@alephium/web3-test": "0.6.2",
+    "@alephium/web3-wallet": "0.6.2",
+    "@alephium/token-list": "0.0.4",
     "bignumber.js": "^9.1.1",
     "commander": "^9.4.0"
   },

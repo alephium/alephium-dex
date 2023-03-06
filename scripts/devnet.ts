@@ -12,11 +12,10 @@ import {
 import { PrivateKeyWallet } from '@alephium/web3-wallet'
 import { program } from 'commander'
 import { randomInt } from 'crypto'
-import { default as devnetDeploymentJson } from '../.deployments.devnet.json'
+import { default as devnetDeployment } from '../.deployments.devnet.json'
 import { AddLiquidity, CreatePair, GetToken, TestToken } from '../artifacts/ts'
 
 const oneAlph = 10n ** 18n
-const devnetDeployment = devnetDeploymentJson[`${Object.keys(devnetDeploymentJson)[0]}`]
 
 async function createTokens(signer: SignerProvider, num: number): Promise<string[]> {
   const tokenIds: string[] = []
@@ -127,7 +126,7 @@ async function addInitialLiquidity(
 ): Promise<void> {
   const account = await signer.getSelectedAccount()
   const nodeProvider = signer.nodeProvider ?? web3.getCurrentNodeProvider()
-  const routerId = devnetDeployment.deployContractResults.Router.contractId
+  const routerId = devnetDeployment.contracts.Router.contractId
   for (let index = 0; index < tokenPairs.length; index++) {
     const tokenPair = tokenPairs[index]
     const ratio = ratios.get(tokenPair.token0Id + tokenPair.token1Id) as bigint
@@ -202,7 +201,7 @@ program
       const tokenNumber = opts.num as number
       const env = await getEnv()
       const signer = getSigner(env.network.privateKeys, opts.keyIndex === undefined ? 0 : (opts.keyIndex as number))
-      const factoryId = devnetDeployment.deployContractResults.TokenPairFactory.contractId
+      const factoryId = devnetDeployment.contracts.TokenPairFactory.contractId
       console.log(`ALPH token id: ${ALPH_TOKEN_ID}, address: ${addressFromContractId(ALPH_TOKEN_ID)}`)
       const tokenIds = await createTokens(signer, tokenNumber)
       if (opts.createPair && opts.init) {

@@ -1,6 +1,6 @@
 import { groupOfAddress } from '@alephium/web3'
-import { default as devnetDeploymentJson } from '../../../.deployments.devnet.json'
-import { default as testnetDeploymentJson } from '../../../.deployments.testnet.json'
+import { default as devnetDeployment } from '../../../.deployments.devnet.json'
+import { default as testnetDeployment } from '../../../.deployments.testnet.json'
 
 export interface NetworkConfig {
   networkId: number
@@ -23,13 +23,11 @@ function getNetworkConfig(network: NetworkName): NetworkConfig {
     throw new Error('Not support now')
   }
 
-  const deploymentJson = network === 'testnet' ? testnetDeploymentJson : devnetDeploymentJson
-  const deployAddress = Object.keys(deploymentJson)[0]
-  const deployment = (deploymentJson as any)[deployAddress]
+  const deployment = network === 'testnet' ? testnetDeployment : devnetDeployment
   return {
     networkId: network === 'testnet' ? 1 : 4,
-    groupIndex: groupOfAddress(deployAddress),
-    factoryId: deployment.deployContractResults.TokenPairFactory.contractId,
-    routerId: deployment.deployContractResults.Router.contractId
+    groupIndex: groupOfAddress(deployment.deployerAddress),
+    factoryId: deployment.contracts.TokenPairFactory.contractId,
+    routerId: deployment.contracts.Router.contractId
   }
 }
