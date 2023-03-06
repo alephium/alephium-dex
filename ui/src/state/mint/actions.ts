@@ -1,5 +1,5 @@
 import { createAction } from '@reduxjs/toolkit'
-import { TokenInfo } from '../../utils/dex';
+import { TokenInfo } from '@alephium/token-list';
 
 export const selectTokenA = createAction<TokenInfo>('mint/selectTokenA')
 export const selectTokenB = createAction<TokenInfo>('mint/selectTokenB')

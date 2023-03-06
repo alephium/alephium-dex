@@ -43,7 +43,7 @@ export function useDerivedSwapInfo(setError: (err: string | undefined) => void):
       setError(undefined)
       const tokenInfo = lastInput === 'TokenIn' ? tokenInInfo : tokenOutInfo
       return parsedAmount && tokenInfo && tokenPairState && swapType
-        ? getSwapAmount(tokenPairState, swapType, parsedAmount, tokenInfo.tokenId)
+        ? getSwapAmount(tokenPairState, swapType, parsedAmount, tokenInfo.id)
         : undefined
     } catch (error) {
       console.log(`${error}`)

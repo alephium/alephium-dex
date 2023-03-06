@@ -68,8 +68,8 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       <div className={classes.inputRow}>
         <TokenSelectDialog
           dexTokens={dexTokens}
-          tokenAddress={tokenAInfo?.tokenAddress}
-          counterpart={tokenBInfo?.tokenAddress}
+          tokenId={tokenAInfo?.id}
+          counterpart={tokenBInfo?.id}
           onChange={handleTokenAChange}
           style2={true}
         />
@@ -93,8 +93,8 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
       <div className={classes.inputRow}>
         <TokenSelectDialog
           dexTokens={dexTokens}
-          tokenAddress={tokenBInfo?.tokenAddress}
-          counterpart={tokenAInfo?.tokenAddress}
+          tokenId={tokenBInfo?.id}
+          counterpart={tokenAInfo?.id}
           onChange={handleTokenBChange}
         />
         <NumberTextField

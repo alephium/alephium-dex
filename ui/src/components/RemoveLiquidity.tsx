@@ -6,8 +6,8 @@ import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import CircleLoader from "./CircleLoader";
 import NumberTextField from "./NumberTextField";
+import { TokenInfo } from '@alephium/token-list'
 import {
-  TokenInfo,
   removeLiquidity,
   RemoveLiquidityResult,
   getRemoveLiquidityResult,
@@ -115,15 +115,15 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     <div className={classes.tokenPairContainer}>
       <TokenSelectDialog
         dexTokens={dexTokens}
-        tokenAddress={tokenAInfo?.tokenAddress}
-        counterpart={tokenBInfo?.tokenAddress}
+        tokenId={tokenAInfo?.id}
+        counterpart={tokenBInfo?.id}
         onChange={handleTokenAChange}
         mediumSize={true}
       />
       <TokenSelectDialog
         dexTokens={dexTokens}
-        tokenAddress={tokenBInfo?.tokenAddress}
-        counterpart={tokenAInfo?.tokenAddress}
+        tokenId={tokenBInfo?.id}
+        counterpart={tokenAInfo?.id}
         onChange={handleTokenBChange}
         mediumSize={true}
       />
@@ -202,7 +202,7 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   );
 
   const getTokenAmount = (removeLiquidityResult: RemoveLiquidityResult, tokenInfo: TokenInfo): string => {
-    const amount = tokenInfo.tokenId === removeLiquidityResult.token0Id ? removeLiquidityResult.amount0 : removeLiquidityResult.amount1
+    const amount = tokenInfo.id === removeLiquidityResult.token0Id ? removeLiquidityResult.amount0 : removeLiquidityResult.amount1
     return formatUnits(amount, tokenInfo.decimals)
   }
 

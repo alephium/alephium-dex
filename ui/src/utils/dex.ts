@@ -11,11 +11,12 @@ import {
   prettifyTokenAmount
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
-import { checkTxConfirmedFrequency, network } from "./consts"
+import { checkTxConfirmedFrequency, network, networkName } from "./consts"
 import BigNumber from "bignumber.js"
 import { parseUnits } from "ethers/lib/utils";
 import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, RemoveLiquidity, CreatePair } from "../contracts/ts"
 import { genLogo } from "./avatar_images";
+import { mainnetTokensMetadata, testnetTokensMetadata, TokenInfo } from "@alephium/token-list";
 
 const MINIMUM_LIQUIDITY = 1000n
 export const PairTokenDecimals = 18
@@ -24,19 +25,7 @@ export const numberRegex = new RegExp('^[0-9]*[.]?[0-9]*$')
 export interface TokenPair {
   token0Id: string
   token1Id: string
-  token0Address: string
-  token1Address: string
   tokenPairId: string
-}
-
-// TODO: load from config
-export interface TokenInfo {
-  tokenId: string
-  tokenAddress: string
-  name: string
-  symbol: string
-  decimals: number
-  logo: string
 }
 
 export class DexTokens {
@@ -51,7 +40,7 @@ export class DexTokens {
   }
 
   addTokenInfos(tokenInfos: TokenInfo[]): DexTokens {
-    const notExists = tokenInfos.filter((a) => !this.tokenInfos.some(b => a.tokenId === b.tokenId))
+    const notExists = tokenInfos.filter((a) => !this.tokenInfos.some(b => a.id === b.id))
     const newTokenInfos = this.tokenInfos.concat(notExists)
     return new DexTokens(newTokenInfos, this.tokenPairs, this.mapping)
   }
@@ -75,11 +64,11 @@ export class DexTokens {
     return new DexTokens(this.tokenInfos, this.tokenPairs, newMapping)
   }
 
-  getAllowedTokenInfos(tokenAddress: string | undefined): TokenInfo[] {
-    if (tokenAddress === undefined) return this.tokenInfos
-    const allowed = this.mapping.get(tokenAddress)
+  getAllowedTokenInfos(tokenId: string | undefined): TokenInfo[] {
+    if (tokenId === undefined) return this.tokenInfos
+    const allowed = this.mapping.get(tokenId)
     if (allowed === undefined) return []
-    return this.tokenInfos.filter((tokenInfo) => allowed.includes(tokenInfo.tokenAddress))
+    return this.tokenInfos.filter((tokenInfo) => allowed.includes(tokenInfo.id))
   }
 }
 
@@ -101,7 +90,7 @@ export interface TokenPairState {
 export async function getTokenPairState(tokenAInfo: TokenInfo, tokenBInfo: TokenInfo): Promise<TokenPairState> {
   const factoryId = network.factoryId
   const groupIndex = network.groupIndex
-  const [token0Id, token1Id] = sortTokens(tokenAInfo.tokenId, tokenBInfo.tokenId)
+  const [token0Id, token1Id] = sortTokens(tokenAInfo.id, tokenBInfo.id)
   const path = token0Id + token1Id
   const pairContractId = subContractId(factoryId, path, groupIndex)
   const contractAddress = addressFromContractId(pairContractId)
@@ -111,8 +100,8 @@ export async function getTokenPairState(tokenAInfo: TokenInfo, tokenBInfo: Token
     tokenPairId: pairContractId,
     reserve0: state.fields.reserve0,
     reserve1: state.fields.reserve1,
-    token0Info: token0Id === tokenAInfo.tokenId ? tokenAInfo : tokenBInfo,
-    token1Info: token1Id === tokenBInfo.tokenId ? tokenBInfo : tokenAInfo,
+    token0Info: token0Id === tokenAInfo.id ? tokenAInfo : tokenBInfo,
+    token1Info: token1Id === tokenBInfo.id ? tokenBInfo : tokenAInfo,
     totalSupply: state.fields.totalSupply
   }
 }
@@ -122,7 +111,7 @@ export function getAmountIn(
   tokenOutId: string,
   amountOut: bigint
 ): bigint {
-  const [tokenOutInfo, reserveIn, reserveOut] = tokenOutId === state.token0Info.tokenId
+  const [tokenOutInfo, reserveIn, reserveOut] = tokenOutId === state.token0Info.id
     ? [state.token0Info, state.reserve1, state.reserve0]
     : [state.token1Info, state.reserve0, state.reserve1]
   return _getAmountIn(amountOut, reserveIn, reserveOut, tokenOutInfo)
@@ -142,7 +131,7 @@ export function getAmountOut(
   tokenInId: string,
   amountIn: bigint
 ): bigint {
-  if (tokenInId === state.token0Info.tokenId) return _getAmountOut(amountIn, state.reserve0, state.reserve1)
+  if (tokenInId === state.token0Info.id) return _getAmountOut(amountIn, state.reserve0, state.reserve1)
   else return _getAmountOut(amountIn, state.reserve1, state.reserve0)
 }
 
@@ -222,18 +211,18 @@ export async function swap(
   slippage: number,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  const available = balances.get(tokenInInfo.tokenId) ?? 0n
+  const available = balances.get(tokenInInfo.id) ?? 0n
   if (available < amountIn) {
     throw new Error(`not enough balance, available: ${bigIntToString(available, tokenInInfo.decimals)}`)
   }
 
   if (type === 'ExactIn') {
     const amountOutMin = minimalAmount(amountOut, slippage)
-    return swapMinOut(signer, nodeProvider, sender, pairId, tokenInInfo.tokenId, amountIn, amountOutMin, ttl)
+    return swapMinOut(signer, nodeProvider, sender, pairId, tokenInInfo.id, amountIn, amountOutMin, ttl)
   }
 
   const amountInMax = maximalAmount(amountIn, slippage)
-  return swapMaxIn(signer, nodeProvider, sender, pairId, tokenInInfo.tokenId, amountInMax, amountOut, ttl)
+  return swapMaxIn(signer, nodeProvider, sender, pairId, tokenInInfo.id, amountInMax, amountOut, ttl)
 }
 
 function isConfirmed(txStatus: node.TxStatus): txStatus is node.Confirmed {
@@ -274,7 +263,7 @@ export function getInitAddLiquidityResult(amountA: bigint, amountB: bigint): Add
 }
 
 export function getAddLiquidityResult(state: TokenPairState, tokenId: string, amountA: bigint, type: 'TokenA' | 'TokenB'): AddLiquidityResult {
-  const [reserveA, reserveB] = tokenId === state.token0Info.tokenId
+  const [reserveA, reserveB] = tokenId === state.token0Info.id
     ? [state.reserve0, state.reserve1]
     : [state.reserve1, state.reserve0]
   const amountB = amountA * reserveB / reserveA
@@ -336,11 +325,11 @@ export async function addLiquidity(
     throw new Error('the input amount must be greater than 0')
   }
 
-  const tokenAAvailable = balances.get(tokenAInfo.tokenId) ?? 0n
+  const tokenAAvailable = balances.get(tokenAInfo.id) ?? 0n
   if (tokenAAvailable < amountADesired) {
     throw new Error(`not enough balance for token ${tokenAInfo.name}, available: ${bigIntToString(tokenAAvailable, tokenAInfo.decimals)}`)
   }
-  const tokenBAvailable = balances.get(tokenBInfo.tokenId) ?? 0n
+  const tokenBAvailable = balances.get(tokenBInfo.id) ?? 0n
   if (tokenBAvailable < amountBDesired) {
     throw new Error(`not enough balance for token ${tokenBInfo.name}, available: ${bigIntToString(tokenBAvailable, tokenBInfo.decimals)}`)
   }
@@ -348,7 +337,7 @@ export async function addLiquidity(
   const isInitial = tokenPairState.reserve0 === 0n && tokenPairState.reserve1 === 0n
   const amountAMin = isInitial ? amountADesired : minimalAmount(amountADesired, slippage)
   const amountBMin = isInitial ? amountBDesired : minimalAmount(amountBDesired, slippage)
-  const [amount0Desired, amount1Desired, amount0Min, amount1Min] = tokenAInfo.tokenId === tokenPairState.token0Info.tokenId
+  const [amount0Desired, amount1Desired, amount0Min, amount1Min] = tokenAInfo.id === tokenPairState.token0Info.id
     ? [amountADesired, amountBDesired, amountAMin, amountBMin]
     : [amountBDesired, amountADesired, amountBMin, amountAMin]
   const result = await AddLiquidity.execute(signer, {
@@ -363,8 +352,8 @@ export async function addLiquidity(
       deadline: deadline(ttl)
     },
     tokens: [
-      { id: tokenAInfo.tokenId, amount: amountADesired },
-      { id: tokenBInfo.tokenId, amount: amountBDesired }
+      { id: tokenAInfo.id, amount: amountADesired },
+      { id: tokenBInfo.id, amount: amountBDesired }
     ]
   })
   await waitTxConfirmed(nodeProvider, result.txId, 1)
@@ -394,9 +383,9 @@ export function getRemoveLiquidityResult(
     .div(BigNumber(remainSupply.toString()))
     .toFixed(5)
   return {
-    token0Id: tokenPairState.token0Info.tokenId,
+    token0Id: tokenPairState.token0Info.id,
     amount0,
-    token1Id: tokenPairState.token1Info.tokenId,
+    token1Id: tokenPairState.token1Info.id,
     amount1,
     remainShareAmount,
     remainSharePercentage: parseFloat(remainSharePercentage)
@@ -481,12 +470,11 @@ export async function createTokenPair(
 }
 
 export const ALPHTokenInfo: TokenInfo = {
-  tokenId: ALPH_TOKEN_ID,
-  tokenAddress: addressFromContractId(ALPH_TOKEN_ID),
+  id: ALPH_TOKEN_ID,
   name: 'ALPH',
   symbol: 'ALPH',
   decimals: 18,
-  logo: alephiumIcon
+  logoURI: alephiumIcon
 }
 
 export async function getTokenInfo(nodeProvider: NodeProvider, tokenId: string): Promise<TokenInfo | undefined> {
@@ -494,6 +482,16 @@ export async function getTokenInfo(nodeProvider: NodeProvider, tokenId: string):
     return ALPHTokenInfo
   }
 
+  if (networkName === 'mainnet') {
+    return mainnetTokensMetadata.tokens.find((t) => t.id.toLowerCase() === tokenId)
+  }
+  if (networkName === 'testnet') {
+    return testnetTokensMetadata.tokens.find((t) => t.id.toLowerCase() === tokenId)
+  }
+  return getDevnetTokenInfo(nodeProvider, tokenId)
+}
+
+export async function getDevnetTokenInfo(nodeProvider: NodeProvider, tokenId: string): Promise<TokenInfo | undefined> {
   const groupIndex = parseInt(tokenId.slice(-2), 16)
   const contractAddress = addressFromContractId(tokenId)
   const callData: node.CallContract = {
@@ -518,12 +516,11 @@ export async function getTokenInfo(nodeProvider: NodeProvider, tokenId: string):
   const decimals = fromApiVal(getDecimalsResult.returns[0], 'U256') as bigint
   const name = Buffer.from(nameHex, 'hex').toString('utf8')
   return {
-    tokenId: tokenId,
-    tokenAddress: contractAddress,
+    id: tokenId,
     symbol: Buffer.from(symbolHex, 'hex').toString('utf8'),
     name: name,
     decimals: Number(decimals),
-    logo: genLogo(name)  // TODO: load logo from configs
+    logoURI: genLogo(name)
   }
 }
 
@@ -569,11 +566,11 @@ export function tryGetBalance(balances: Map<string, bigint> | undefined, tokenIn
   if (balances === undefined || tokenInfo === undefined) {
     return undefined
   }
-  const balance = balances.get(tokenInfo.tokenId)
+  const balance = balances.get(tokenInfo.id)
   return balance === undefined ? '0' : bigIntToString(balance, tokenInfo.decimals)
 }
 
 export function tokenPairMatch(tokenPairState: TokenPairState | undefined, token0Info: TokenInfo | undefined, token1Info: TokenInfo | undefined) {
-  return (tokenPairState?.token0Info.tokenId === token0Info?.tokenId || tokenPairState?.token1Info.tokenId === token1Info?.tokenId) ||
-    (tokenPairState?.token1Info.tokenId === token0Info?.tokenId && tokenPairState?.token0Info.tokenId === token1Info?.tokenId)
+  return (tokenPairState?.token0Info.id === token0Info?.id || tokenPairState?.token1Info.id === token1Info?.id) ||
+    (tokenPairState?.token1Info.id === token0Info?.id && tokenPairState?.token0Info.id === token1Info?.id)
 }

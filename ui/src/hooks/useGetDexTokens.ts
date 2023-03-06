@@ -5,7 +5,7 @@ import { eventPollingInterval, network } from "../utils/consts";
 import { DexTokens, getTokenInfo } from "../utils/dex";
 import { useAlephiumWallet } from "./useAlephiumWallet";
 
-// TODO: remove this after integrated with token-lists
+// TODO: query from explorer-backend?
 function useGetDexTokens(): DexTokens {
   const [dexTokens, setDexTokens] = useState<DexTokens>(new DexTokens())
   const [, setSubscription] = useState<EventSubscription | undefined>(undefined)
@@ -20,11 +20,9 @@ function useGetDexTokens(): DexTokens {
       return
     }
     const messageCallback = async (event: TokenPairFactoryTypes.PairCreatedEvent) => {
-      const token0Id = event.fields.token0
-      const token1Id = event.fields.token1
-      const token0Address = addressFromContractId(token0Id)
-      const token1Address = addressFromContractId(token1Id)
-      const tokenPairId = event.fields.pair
+      const token0Id = event.fields.token0.toLowerCase()
+      const token1Id = event.fields.token1.toLowerCase()
+      const tokenPairId = event.fields.pair.toLowerCase()
       const token0Info = await getTokenInfo(nodeProvider, token0Id)
       if (token0Info === undefined) {
         console.log(`Ignore invalid token info, token id: ${token0Id}`)
@@ -36,11 +34,11 @@ function useGetDexTokens(): DexTokens {
         return
       }
       setDexTokens((current) => {
-        const tokenPairs = [{ token0Id, token1Id, token0Address, token1Address, tokenPairId }]
+        const tokenPairs = [{ token0Id, token1Id, tokenPairId }]
         return current
           .addTokenInfos([token0Info, token1Info])
           .addTokenPairs(tokenPairs)
-          .addMappings([[token0Address, [token1Address]], [token1Address, [token0Address]]])
+          .addMappings([[token0Id, [token1Id]], [token1Id, [token0Id]]])
       })
     }
     const errorCallback = (error: any, s: Subscription<TokenPairFactoryTypes.PairCreatedEvent>) => {

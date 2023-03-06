@@ -30,8 +30,8 @@ function ListTokenPair({ tokenPair, onError, dexTokens }: { tokenPair: TokenPair
   const classes = useStyles()
   const [open, setOpen] = useState(false)
   const [tokenPairState, setTokenPairState] = useState<TokenPairState | undefined>(undefined)
-  const token0Info = dexTokens.tokenInfos.find((info) => info.tokenId === tokenPair.token0Id)
-  const token1Info = dexTokens.tokenInfos.find((info) => info.tokenId === tokenPair.token1Id)
+  const token0Info = dexTokens.tokenInfos.find((info) => info.id === tokenPair.token0Id)
+  const token1Info = dexTokens.tokenInfos.find((info) => info.id === tokenPair.token1Id)
 
   const handleClick = useCallback(() => {
     if (token0Info !== undefined && token1Info !== undefined) {

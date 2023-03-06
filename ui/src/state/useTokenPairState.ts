@@ -1,4 +1,5 @@
-import { getTokenPairState, TokenInfo, TokenPairState } from "../utils/dex"
+import { TokenInfo } from "@alephium/token-list"
+import { getTokenPairState, TokenPairState } from "../utils/dex"
 import { useState, useEffect } from 'react'
 
 export function useTokenPairState(

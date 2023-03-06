@@ -56,7 +56,7 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
       }
       const tokenInfo = lastInput === 'TokenA' ? tokenAInfo : tokenBInfo
       return tokenInfo && parsedAmount && tokenPairState && lastInput
-        ? getAddLiquidityResult(tokenPairState, tokenInfo.tokenId, parsedAmount, lastInput)
+        ? getAddLiquidityResult(tokenPairState, tokenInfo.id, parsedAmount, lastInput)
         : undefined
     } catch (error) {
       console.log(`${error}`)

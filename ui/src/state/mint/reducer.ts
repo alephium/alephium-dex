@@ -1,4 +1,4 @@
-import { TokenInfo } from '../../utils/dex'
+import { TokenInfo } from '@alephium/token-list'
 import { createReducer } from '@reduxjs/toolkit'
 import { reset, selectTokenA, selectTokenB, typeInput } from './actions'
 

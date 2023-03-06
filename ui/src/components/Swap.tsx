@@ -71,8 +71,8 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       <div className={classes.inputRow}>
         <TokenSelectDialog
           dexTokens={dexTokens}
-          tokenAddress={tokenInInfo?.tokenAddress}
-          counterpart={tokenOutInfo?.tokenAddress}
+          tokenId={tokenInInfo?.id}
+          counterpart={tokenOutInfo?.id}
           onChange={handleTokenInChange}
           style2={true}
         />
@@ -97,8 +97,8 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
       <div className={classes.inputRow}>
         <TokenSelectDialog
           dexTokens={dexTokens}
-          tokenAddress={tokenOutInfo?.tokenAddress}
-          counterpart={tokenInInfo?.tokenAddress}
+          tokenId={tokenOutInfo?.id}
+          counterpart={tokenInInfo?.id}
           onChange={handleTokenOutChange}
         />
         <NumberTextField

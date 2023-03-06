@@ -13,7 +13,8 @@ import {
 } from "@material-ui/core";
 import { useCallback, useState } from "react";
 import CloseIcon from "@material-ui/icons/Close";
-import { DexTokens, TokenInfo } from "../utils/dex";
+import { DexTokens } from "../utils/dex";
+import { TokenInfo } from '@alephium/token-list'
 
 const useStyles = makeStyles((theme) => ({
   flexTitle: {
@@ -60,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
 
 interface TokenSelectProps {
   dexTokens: DexTokens
-  tokenAddress: string | undefined
+  tokenId: string | undefined
   counterpart: string | undefined
   onChange: any
   style2?: boolean
@@ -84,16 +85,16 @@ const TokenOptions = ({
   }, [tokenInfo, onSelect, close]);
 
   return (
-    <ListItem button onClick={handleClick} key={tokenInfo.tokenId}>
+    <ListItem button onClick={handleClick} key={tokenInfo.id}>
       <ListItemIcon>
         <img
-          src={tokenInfo.logo}
+          src={tokenInfo.logoURI}
           alt={tokenInfo.name}
           className={classes.icon}
         />
       </ListItemIcon>
       <ListItemText>
-        <Box fontFamily="Monospace" fontWeight="fontWeightMedium">{tokenInfo.tokenId}</Box>
+        <Box fontFamily="Monospace" fontWeight="fontWeightMedium">{tokenInfo.id}</Box>
       </ListItemText>
     </ListItem>
   );
@@ -101,7 +102,7 @@ const TokenOptions = ({
 
 export default function TokenSelectDialog({
   dexTokens,
-  tokenAddress,
+  tokenId,
   counterpart,
   onChange,
   style2,
@@ -117,10 +118,10 @@ export default function TokenSelectDialog({
     setOpen(true)
   }, [])
 
-  const info = dexTokens.tokenInfos.find((x) => x.tokenAddress === tokenAddress);
+  const info = dexTokens.tokenInfos.find((x) => x.id === tokenId)
   const availableTokens = dexTokens.getAllowedTokenInfos(counterpart).map((token) =>
     <TokenOptions
-      key={token.tokenId}
+      key={token.id}
       tokenInfo={token}
       onSelect={onChange}
       close={handleClose}
@@ -140,7 +141,7 @@ export default function TokenSelectDialog({
         {info ? (
           <>
             <img
-              src={info.logo}
+              src={info.logoURI}
               className={classes.icon}
               alt={info.name}
             />
