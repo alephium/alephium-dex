@@ -536,6 +536,6 @@ export function tryGetBalance(balances: Map<string, bigint> | undefined, tokenIn
 }
 
 export function tokenPairMatch(tokenPairState: TokenPairState | undefined, token0Info: TokenInfo | undefined, token1Info: TokenInfo | undefined) {
-  return (tokenPairState?.token0Info.id === token0Info?.id || tokenPairState?.token1Info.id === token1Info?.id) ||
+  return (tokenPairState?.token0Info.id === token0Info?.id && tokenPairState?.token1Info.id === token1Info?.id) ||
     (tokenPairState?.token1Info.id === token0Info?.id && tokenPairState?.token0Info.id === token1Info?.id)
 }
