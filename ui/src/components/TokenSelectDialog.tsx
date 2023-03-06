@@ -95,7 +95,7 @@ const TokenOptions = ({
         />
       </ListItemIcon>
       <ListItemText>
-        <Box fontFamily="Monospace" fontWeight="fontWeightMedium">{tokenInfo.id}</Box>
+        <Box fontFamily="Monospace" fontWeight="fontWeightMedium">{tokenInfo.name}</Box>
       </ListItemText>
     </ListItem>
   );

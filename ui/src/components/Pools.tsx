@@ -25,54 +25,42 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-function ListTokenPair({ tokenPair, onError, dexTokens }: { tokenPair: TokenPair, onError: any, dexTokens: DexTokens }) {
+function ListTokenPair({ tokenPair, onError }: { tokenPair: TokenPair, onError: any }) {
   const commonClasses = commonStyles()
   const classes = useStyles()
   const [open, setOpen] = useState(false)
   const [tokenPairState, setTokenPairState] = useState<TokenPairState | undefined>(undefined)
-  const token0Info = dexTokens.tokenInfos.find((info) => info.id === tokenPair.token0Id)
-  const token1Info = dexTokens.tokenInfos.find((info) => info.id === tokenPair.token1Id)
 
   const handleClick = useCallback(() => {
-    if (token0Info !== undefined && token1Info !== undefined) {
-      setOpen(!open)
-      getTokenPairState(token0Info, token1Info)
-        .then((state) => {
-          setTokenPairState(state)
-        })
-        .catch((error) => onError(error))
-    }
-  }, [token0Info, token1Info, onError, open])
+    setOpen(!open)
+    getTokenPairState(tokenPair.token0Info, tokenPair.token1Info)
+      .then((state) => {
+        setTokenPairState(state)
+      })
+      .catch((error) => onError(error))
+  }, [onError, open, tokenPair])
 
   return (<>
     <ListItem key={tokenPair.tokenPairId} button onClick={handleClick}>
       <ListItemText>
-        <Box className={classes.text}>{tokenPair.tokenPairId.slice(0, 8)}</Box>
+        <Box className={classes.text}>{`${tokenPair.token0Info.name} -> ${tokenPair.token1Info.name}`}</Box>
       </ListItemText>
       {open ? <ExpandLess /> : <ExpandMore />}
     </ListItem>
     <Collapse in={open}>
-      {tokenPairState && token0Info && token1Info ? (
+      {tokenPairState ? (
         <>
         <div className={commonClasses.notification}>
           <p className={commonClasses.leftAlign}>Token Pair Id:</p>
           <p className={commonClasses.rightAlign}>{tokenPair.tokenPairId}</p>
         </div>
         <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>{token0Info.name}</p>
-          <p className={commonClasses.rightAlign}>{tokenPair.token0Id}</p>
+          <p className={commonClasses.leftAlign}>{tokenPair.token0Info.name} Reserve:</p>
+          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve0, tokenPair.token0Info.decimals)}</p>
         </div>
         <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>{token1Info.name}</p>
-          <p className={commonClasses.rightAlign}>{tokenPair.token1Id}</p>
-        </div>
-        <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>{token0Info.name} Reserve:</p>
-          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve0, token0Info.decimals)}</p>
-        </div>
-        <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>{token1Info.name} Reserve:</p>
-          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve1, token1Info.decimals)}</p>
+          <p className={commonClasses.leftAlign}>{tokenPair.token1Info.name} Reserve:</p>
+          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve1, tokenPair.token1Info.decimals)}</p>
         </div>
         <div className={commonClasses.notification}>
           <p className={commonClasses.leftAlign}>Total Supply:</p>
@@ -94,7 +82,6 @@ function Pools({ dexTokens }: { dexTokens: DexTokens }) {
       key={tokenPair.tokenPairId}
       tokenPair={tokenPair}
       onError={(err: any) => setError(err)}
-      dexTokens={dexTokens}
     />
   )
 

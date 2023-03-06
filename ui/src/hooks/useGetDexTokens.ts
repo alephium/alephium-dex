@@ -34,7 +34,7 @@ function useGetDexTokens(): DexTokens {
         return
       }
       setDexTokens((current) => {
-        const tokenPairs = [{ token0Id, token1Id, tokenPairId }]
+        const tokenPairs = [{ token0Info, token1Info, tokenPairId }]
         return current
           .addTokenInfos([token0Info, token1Info])
           .addTokenPairs(tokenPairs)

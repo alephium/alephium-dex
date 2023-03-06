@@ -22,8 +22,8 @@ export const PairTokenDecimals = 18
 export const numberRegex = new RegExp('^[0-9]*[.]?[0-9]*$')
 
 export interface TokenPair {
-  token0Id: string
-  token1Id: string
+  token0Info: TokenInfo
+  token1Info: TokenInfo
   tokenPairId: string
 }
 
