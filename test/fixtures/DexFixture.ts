@@ -10,7 +10,7 @@ import {
 } from '@alephium/web3'
 import { randomBytes } from 'crypto'
 import * as base58 from 'bs58'
-import { TokenPairFactory, TokenPair, Router } from '../../artifacts/ts'
+import { TokenPairFactory, TokenPair, Router, TokenPairFactoryTypes, TokenPairTypes } from '../../artifacts/ts'
 
 export const oneAlph = 10n ** 18n
 export const minimalAlphInContract = oneAlph
@@ -36,7 +36,9 @@ export enum ErrorCodes {
   Expired,
   InsufficientToken0Amount,
   InsufficientToken1Amount,
-  TokenNotExist
+  TokenNotExist,
+  InvalidCaller,
+  SlippageOutOfRange
 }
 
 export class ContractFixture<F extends Fields> {
@@ -105,10 +107,38 @@ export function bigintToHex(num: bigint): string {
   return num.toString(16).padStart(64, '0')
 }
 
-export function createTokenPair(token0Id: string, token1Id: string, contractId?: string) {
+function createTokenPairTemplate() {
+  const address = randomContractAddress()
+  const contractState = TokenPair.stateForTest(
+    {
+      factoryId: '',
+      token0Id: '',
+      token1Id: '',
+      reserve0: 0n,
+      reserve1: 0n,
+      blockTimeStampLast: 0n,
+      price0CumulativeLast: 0n,
+      price1CumulativeLast: 0n,
+      totalSupply: 0n
+    },
+    {
+      alphAmount: oneAlph
+    },
+    address
+  )
+  return new ContractFixture(contractState, [], address)
+}
+
+export function createTokenPair(
+  factory: ContractFixture<TokenPairFactoryTypes.Fields>,
+  token0Id: string,
+  token1Id: string,
+  contractId?: string
+): ContractFixture<TokenPairTypes.Fields> {
   const address = contractId ? addressFromContractId(contractId) : randomContractAddress()
   const contractState = TokenPair.stateForTest(
     {
+      factoryId: factory.contractId,
       token0Id: token0Id,
       token1Id: token1Id,
       reserve0: 0n,
@@ -124,14 +154,15 @@ export function createTokenPair(token0Id: string, token1Id: string, contractId?:
     },
     address
   )
-  return new ContractFixture(contractState, [], address)
+  return new ContractFixture(contractState, factory.states(), address)
 }
 
-export function createTokenPairFactory() {
-  const pairTemplate = createTokenPair(randomTokenId(), randomTokenId())
+export function createTokenPairFactory(admin?: string) {
+  const pairTemplate = createTokenPairTemplate()
   const address = randomContractAddress()
+  const adminAddress = admin ?? randomP2PKHAddress()
   const contractState = TokenPairFactory.stateForTest(
-    { pairTemplateId: pairTemplate.contractId, pairSize: 0n },
+    { pairTemplateId: pairTemplate.contractId, admin: adminAddress, maxSlippage: 25n, pairSize: 0n },
     { alphAmount: oneAlph },
     address
   )

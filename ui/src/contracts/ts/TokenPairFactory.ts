@@ -29,6 +29,8 @@ import { default as TokenPairFactoryContractJson } from "../dex/token_pair_facto
 export namespace TokenPairFactoryTypes {
   export type Fields = {
     pairTemplateId: HexString;
+    admin: HexString;
+    maxSlippage: bigint;
     pairSize: bigint;
   };
 
@@ -72,6 +74,24 @@ class Factory extends ContractFactory<
   ): Promise<TestContractResult<null>> {
     return testMethod(this, "createPair", params);
   }
+
+  async testUpdateMaxSlippageMethod(
+    params: TestContractParams<
+      TokenPairFactoryTypes.Fields,
+      { newMaxSlippage: bigint }
+    >
+  ): Promise<TestContractResult<null>> {
+    return testMethod(this, "updateMaxSlippage", params);
+  }
+
+  async testGetMaxSlippageMethod(
+    params: Omit<
+      TestContractParams<TokenPairFactoryTypes.Fields, never>,
+      "testArgs"
+    >
+  ): Promise<TestContractResult<bigint>> {
+    return testMethod(this, "getMaxSlippage", params);
+  }
 }
 
 // Use this object to test and deploy the contract
@@ -79,7 +99,7 @@ export const TokenPairFactory = new Factory(
   Contract.fromJson(
     TokenPairFactoryContractJson,
     "",
-    "6e20ca1d1474ca5d61542b180e858beac69c23e5feb6cb5c1a53c68e0e6a5d36"
+    "a103d726989c707bc999b59928da45ed6fa42d25f67b6f5f4f073b6e9bfcd5df"
   )
 );
 
@@ -107,6 +127,17 @@ export class TokenPairFactoryInstance extends ContractInstance {
       options,
       "PairCreated",
       fromCount
+    );
+  }
+
+  async callGetMaxSlippageMethod(
+    params?: Omit<CallContractParams<{}>, "args">
+  ): Promise<CallContractResult<bigint>> {
+    return callMethod(
+      TokenPairFactory,
+      this,
+      "getMaxSlippage",
+      params === undefined ? {} : params
     );
   }
 }

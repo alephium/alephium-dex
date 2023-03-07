@@ -28,6 +28,7 @@ import { default as TokenPairContractJson } from "../dex/token_pair.ral.json";
 // Custom types for the contract
 export namespace TokenPairTypes {
   export type Fields = {
+    factoryId: HexString;
     token0Id: HexString;
     token1Id: HexString;
     reserve0: bigint;
@@ -163,7 +164,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "40cd786ad351defdb0153bcd578d47ac4d091f1127671155206792b638a4bc37"
+    "35736c0a55f1c1993027bc82f5fccf3676238e7a7679df8b8d4d16d2727f7737"
   )
 );
 

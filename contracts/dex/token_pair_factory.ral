@@ -1,6 +1,8 @@
 // TODO: do we need to support `feeTo`???
 Contract TokenPairFactory(
   pairTemplateId: ByteVec, // the template contract id of `TokenPair`
+  admin: Address,
+  mut maxSlippage: U256,
   mut pairSize: U256
 ) extends Constants() {
   event PairCreated(token0: ByteVec, token1: ByteVec, pair: ByteVec, currentPairSize: U256)
@@ -28,7 +30,7 @@ Contract TokenPairFactory(
     )
     assert!(tokenAId != tokenBId, ErrorCodes.IdenticalTokenIds)
     let (token0Id, token1Id) = sortTokens(tokenAId, tokenBId)
-    let encodedImmutableFields = encodeToByteVec!(token0Id, token1Id)
+    let encodedImmutableFields = encodeToByteVec!(selfContractId!(), token0Id, token1Id)
     let encodedMutableFields = encodeToByteVec!(
       0, // reserve0
       0, // reserve1
@@ -48,5 +50,15 @@ Contract TokenPairFactory(
     emit PairCreated(token0Id, token1Id, pairId, pairSize)
 
     pairSize = pairSize + 1
+  }
+
+  @using(updateFields = true)
+  pub fn updateMaxSlippage(newMaxSlippage: U256) -> () {
+    checkCaller!(callerAddress!() == admin, ErrorCodes.InvalidCaller)
+    maxSlippage = newMaxSlippage
+  }
+
+  pub fn getMaxSlippage() -> U256 {
+    return maxSlippage
   }
 }

@@ -1,6 +1,7 @@
 import "std/token_interface"
 
 Contract TokenPair(
+  factoryId: ByteVec,
   token0Id: ByteVec,
   token1Id: ByteVec,
   mut reserve0: U256,
@@ -113,9 +114,12 @@ Contract TokenPair(
     // fee: 0.003 * amountIn
     let amountInExcludeFee = amountIn * 997
     let kX1000 = reserve0 * reserve1 * 1000
+    let maxSlippage = TokenPairFactory(factoryId).getMaxSlippage()
+    let amountInX1000 = 1000 * amountIn
 
     if (tokenInId == token0Id) {
       assert!(amountOut < reserve1, ErrorCodes.InsufficientLiquidity)
+      assert!(amountInX1000 <=  maxSlippage * reserve0, ErrorCodes.SlippageOutOfRange)
       let newReserve0X1000 = 1000 * reserve0 + amountInExcludeFee
       let newReserve1 = reserve1 - amountOut
       assert!(newReserve0X1000 * newReserve1 >= kX1000, ErrorCodes.InvalidK)
@@ -123,6 +127,7 @@ Contract TokenPair(
       update(reserve0 + amountIn, newReserve1)
     } else {
       assert!(amountOut < reserve0, ErrorCodes.InsufficientLiquidity)
+      assert!(amountInX1000 <= maxSlippage * reserve1, ErrorCodes.SlippageOutOfRange)
       let newReserve0 = reserve0 - amountOut
       let newReserve1X1000 = 1000 * reserve1 + amountInExcludeFee
       assert!(newReserve0 * newReserve1X1000 >= kX1000, ErrorCodes.InvalidK)

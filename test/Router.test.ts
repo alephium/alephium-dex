@@ -1,10 +1,11 @@
 import { ContractState, web3 } from '@alephium/web3'
 import { expectAssertionError } from '@alephium/web3-test'
-import { Router, TokenPair, TokenPairTypes } from '../artifacts/ts'
+import { Router, TokenPairTypes } from '../artifacts/ts'
 import {
   buildProject,
   createRouter,
   createTokenPair,
+  createTokenPairFactory,
   defaultGasFee,
   dustAmount,
   ErrorCodes,
@@ -106,7 +107,7 @@ describe('test router', () => {
     }
 
     const [token0Id, token1Id] = randomTokenPair()
-    const tokenPairFixture = createTokenPair(token0Id, token1Id)
+    const tokenPairFixture = createTokenPair(createTokenPairFactory(), token0Id, token1Id)
     const { contractState } = await mint(tokenPairFixture, sender, 1000n, 30000n)
     const now = Date.now()
 
@@ -165,7 +166,7 @@ describe('test router', () => {
     }
 
     const [token0Id, token1Id] = randomTokenPair()
-    const tokenPairFixture = createTokenPair(token0Id, token1Id)
+    const tokenPairFixture = createTokenPair(createTokenPairFactory(), token0Id, token1Id)
     const { contractState } = await mint(tokenPairFixture, sender, 1000n, 30000n)
     const now = Date.now()
 
@@ -205,7 +206,7 @@ describe('test router', () => {
     const sender = randomP2PKHAddress()
     const routerFixture = createRouter()
     const [token0Id, token1Id] = randomTokenPair()
-    const tokenPairFixture = createTokenPair(token0Id, token1Id)
+    const tokenPairFixture = createTokenPair(createTokenPairFactory(), token0Id, token1Id)
     const { contractState } = await mint(tokenPairFixture, sender, 1000n, 30000n)
 
     async function testGetReserveInAndReserveOut(tokenPairState: ContractState, tokenInId: string) {
@@ -227,6 +228,7 @@ describe('test router', () => {
 
     const sender = randomP2PKHAddress()
     const routerFixture = createRouter()
+    const factory = createTokenPairFactory()
 
     async function testSwapExactTokenForToken(
       tokenPairState: ContractState,
@@ -245,7 +247,7 @@ describe('test router', () => {
           amountOutMin: amountOutMin,
           deadline: deadline
         },
-        existingContracts: routerFixture.dependencies.concat([tokenPairState]),
+        existingContracts: routerFixture.dependencies.concat([tokenPairState]).concat(factory.states()),
         inputAssets: [
           {
             address: sender,
@@ -259,28 +261,33 @@ describe('test router', () => {
     }
 
     const [token0Id, token1Id] = randomTokenPair()
-    const tokenPairFixture = createTokenPair(token0Id, token1Id)
+    const tokenPairFixture = createTokenPair(factory, token0Id, token1Id)
     const { contractState } = await mint(tokenPairFixture, sender, 1000n, 30000n)
     const now = Date.now()
 
     await expectAssertionError(
-      testSwapExactTokenForToken(contractState, token1Id, 15000n, 332n, BigInt(now - 60000)),
+      testSwapExactTokenForToken(contractState, token1Id, 750n, 24n, BigInt(now - 60000)),
       routerFixture.address,
       ErrorCodes.Expired
     )
-    const result = await testSwapExactTokenForToken(contractState, token1Id, 15000n, 332n, BigInt(now + 60000))
+    await expectAssertionError(
+      testSwapExactTokenForToken(contractState, token1Id, 751n, 24n, BigInt(now + 60000)),
+      contractState.address,
+      ErrorCodes.SlippageOutOfRange
+    )
+    const result = await testSwapExactTokenForToken(contractState, token1Id, 750n, 24n, BigInt(now + 60000))
     const tokenPairState = getContractState<TokenPairTypes.Fields>(result.contracts, tokenPairFixture.contractId)
-    expect(tokenPairState.fields.reserve0).toEqual(668n)
-    expect(tokenPairState.fields.reserve1).toEqual(45000n)
+    expect(tokenPairState.fields.reserve0).toEqual(976n)
+    expect(tokenPairState.fields.reserve1).toEqual(30750n)
     expect(tokenPairState.fields.totalSupply).toEqual(5477n)
     const assetOutputs = result.txOutputs.filter((c) => c.address === sender)
     expectAssetsEqual(assetOutputs, [
-      { alphAmount: dustAmount, tokens: [{ id: token0Id, amount: 332n }] },
+      { alphAmount: dustAmount, tokens: [{ id: token0Id, amount: 24n }] },
       { alphAmount: oneAlph - defaultGasFee - dustAmount, tokens: [] }
     ])
 
     await expectAssertionError(
-      testSwapExactTokenForToken(contractState, token1Id, 15000n, 333n, BigInt(now + 60000)),
+      testSwapExactTokenForToken(contractState, token1Id, 750n, 25n, BigInt(now + 60000)),
       routerFixture.address,
       ErrorCodes.InsufficientOutputAmount
     )
@@ -291,6 +298,7 @@ describe('test router', () => {
 
     const sender = randomP2PKHAddress()
     const routerFixture = createRouter()
+    const factory = createTokenPairFactory()
 
     async function testSwapTokenForExactToken(
       tokenPairState: ContractState,
@@ -309,7 +317,7 @@ describe('test router', () => {
           amountOut: amountOut,
           deadline: deadline
         },
-        existingContracts: routerFixture.dependencies.concat([tokenPairState]),
+        existingContracts: routerFixture.dependencies.concat([tokenPairState]).concat(factory.states()),
         inputAssets: [
           {
             address: sender,
@@ -323,28 +331,33 @@ describe('test router', () => {
     }
 
     const [token0Id, token1Id] = randomTokenPair()
-    const tokenPairFixture = createTokenPair(token0Id, token1Id)
+    const tokenPairFixture = createTokenPair(factory, token0Id, token1Id)
     const { contractState } = await mint(tokenPairFixture, sender, 1000n, 30000n)
     const now = Date.now()
 
     await expectAssertionError(
-      testSwapTokenForExactToken(contractState, token0Id, 1004n, 15000n, BigInt(now - 60000)),
+      testSwapTokenForExactToken(contractState, token0Id, 25n, 729n, BigInt(now - 60000)),
       routerFixture.address,
       ErrorCodes.Expired
     )
-    const result = await testSwapTokenForExactToken(contractState, token0Id, 1004n, 15000n, BigInt(now + 60000))
+    await expectAssertionError(
+      testSwapTokenForExactToken(contractState, token0Id, 26n, 730n, BigInt(now + 60000)),
+      contractState.address,
+      ErrorCodes.SlippageOutOfRange
+    )
+    const result = await testSwapTokenForExactToken(contractState, token0Id, 25n, 729n, BigInt(now + 60000))
     const tokenPairState = getContractState<TokenPairTypes.Fields>(result.contracts, tokenPairFixture.contractId)
-    expect(tokenPairState.fields.reserve0).toEqual(2004n)
-    expect(tokenPairState.fields.reserve1).toEqual(15000n)
+    expect(tokenPairState.fields.reserve0).toEqual(1025n)
+    expect(tokenPairState.fields.reserve1).toEqual(29271n)
     expect(tokenPairState.fields.totalSupply).toEqual(5477n)
     const assetOutputs = result.txOutputs.filter((c) => c.address === sender)
     expectAssetsEqual(assetOutputs, [
-      { alphAmount: dustAmount, tokens: [{ id: token1Id, amount: 15000n }] },
+      { alphAmount: dustAmount, tokens: [{ id: token1Id, amount: 729n }] },
       { alphAmount: oneAlph - defaultGasFee - dustAmount, tokens: [] }
     ])
 
     await expectAssertionError(
-      testSwapTokenForExactToken(contractState, token0Id, 1003n, 15000n, BigInt(now + 60000)),
+      testSwapTokenForExactToken(contractState, token0Id, 25n, 730n, BigInt(now + 60000)),
       routerFixture.address,
       ErrorCodes.InsufficientInputAmount
     )

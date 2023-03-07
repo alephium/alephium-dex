@@ -10,7 +10,7 @@ import {
   randomTokenPair,
   sortTokens
 } from './fixtures/DexFixture'
-import { TokenPairFactory, TokenPairTypes } from '../artifacts/ts'
+import { TokenPairFactory, TokenPairTypes, TokenPairFactoryTypes } from '../artifacts/ts'
 
 describe('test token pair factory', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
@@ -38,6 +38,7 @@ describe('test token pair factory', () => {
       const pairContractId = subContractId(fixture.contractId, token0Id + token1Id, 0)
       const pairContractState = getContractState<TokenPairTypes.Fields>(testResult.contracts, pairContractId)
       expect(pairContractState.fields).toEqual({
+        factoryId: fixture.contractId,
         token0Id: token0Id,
         token1Id: token1Id,
         reserve0: 0n,
@@ -74,4 +75,27 @@ describe('test token pair factory', () => {
       ErrorCodes.TokenNotExist
     )
   }, 10000)
+
+  test('update slippage', async () => {
+    await buildProject()
+
+    const payer = randomP2PKHAddress()
+    const fixture = createTokenPairFactory(payer)
+
+    async function test(payer: string) {
+      const testResult = await TokenPairFactory.testUpdateMaxSlippageMethod({
+        initialFields: fixture.selfState.fields,
+        address: fixture.address,
+        existingContracts: fixture.dependencies,
+        testArgs: { newMaxSlippage: 30n },
+        inputAssets: [{ address: payer, asset: { alphAmount: oneAlph } }]
+      })
+
+      const state = getContractState<TokenPairFactoryTypes.Fields>(testResult.contracts, fixture.contractId)
+      expect(state.fields.maxSlippage).toEqual(30n)
+    }
+
+    await test(payer)
+    expectAssertionError(test(randomP2PKHAddress()), fixture.address, 16)
+  })
 })

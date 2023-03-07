@@ -3,6 +3,7 @@ import {
   buildProject,
   ContractFixture,
   createTokenPair,
+  createTokenPairFactory,
   defaultGasFee,
   dustAmount,
   ErrorCodes,
@@ -180,7 +181,7 @@ describe('test token pair', () => {
     }
 
     async function test(token0Id: string, token1Id: string) {
-      const fixture = createTokenPair(token0Id, token1Id)
+      const fixture = createTokenPair(createTokenPairFactory(), token0Id, token1Id)
       await expectAssertionError(testMint(fixture, 100n, 5000n), fixture.address, 1)
       const contractState0 = await testMint(fixture, 1000n, 30000n)
       const contractState1 = await testMint(fixture, 1000n, 30000n, contractState0.fields, contractState0.asset)
@@ -273,7 +274,7 @@ describe('test token pair', () => {
     }
 
     async function test(token0Id: string, token1Id: string) {
-      const fixture = createTokenPair(token0Id, token1Id)
+      const fixture = createTokenPair(createTokenPairFactory(), token0Id, token1Id)
       const { contractState } = await mint(fixture, sender, 3333n, 8888n)
       await expectAssertionError(
         testBurn(fixture, 1n, contractState.fields, contractState.asset),
@@ -388,7 +389,7 @@ describe('test token pair', () => {
     }
 
     async function test(token0Id: string, token1Id: string) {
-      const fixture = createTokenPair(token0Id, token1Id)
+      const fixture = createTokenPair(createTokenPairFactory(), token0Id, token1Id)
       const { contractState, reserve0, reserve1 } = await mint(fixture, sender, 100n, 80000n)
       await expectAssertionError(
         testSwap(fixture, token0Id, reserve0, reserve1, contractState.fields, contractState.asset),
@@ -411,8 +412,22 @@ describe('test token pair', () => {
         ErrorCodes.InvalidTokenInId
       )
 
-      const amountIn0 = 20n // token0Id
+      const amountIn0 = 2n // token0Id
       const expectedAmountOut0 = getAmountOut(amountIn0, reserve0, reserve1)
+      await expectAssertionError(
+        testSwap(fixture, token0Id, amountIn0 + 1n, expectedAmountOut0, contractState.fields, contractState.asset),
+        fixture.address,
+        ErrorCodes.SlippageOutOfRange
+      )
+
+      const amountIn1 = 2000n // token1Id
+      const expectedAmountOut1 = getAmountOut(amountIn1, reserve1, reserve0)
+      await expectAssertionError(
+        testSwap(fixture, token1Id, amountIn1 + 1n, expectedAmountOut1, contractState.fields, contractState.asset),
+        fixture.address,
+        ErrorCodes.SlippageOutOfRange
+      )
+
       await testSwap(fixture, token0Id, amountIn0, expectedAmountOut0, contractState.fields, contractState.asset)
       await expectAssertionError(
         testSwap(fixture, token0Id, amountIn0, expectedAmountOut0 + 1n, contractState.fields, contractState.asset),
@@ -420,8 +435,6 @@ describe('test token pair', () => {
         ErrorCodes.InvalidK
       )
 
-      const amountIn1 = 60000n // token1Id
-      const expectedAmountOut1 = getAmountOut(amountIn1, reserve1, reserve0)
       await testSwap(fixture, token1Id, amountIn1, expectedAmountOut1, contractState.fields, contractState.asset)
       await expectAssertionError(
         testSwap(fixture, token1Id, amountIn1, expectedAmountOut1 + 1n, contractState.fields, contractState.asset),

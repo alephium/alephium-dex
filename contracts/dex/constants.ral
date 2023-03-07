@@ -16,5 +16,7 @@ Abstract Contract Constants() {
     InsufficientToken0Amount    = 13
     InsufficientToken1Amount    = 14
     TokenNotExist               = 15
+    InvalidCaller               = 16
+    SlippageOutOfRange          = 17
   }
 }
