@@ -22,7 +22,7 @@ export function useAlephiumWallet() {
 
   return useMemo(() => {
     if (context.signerProvider?.nodeProvider === undefined) {
-      return
+      return undefined
     }
     web3.setCurrentNodeProvider(context.signerProvider.nodeProvider)
     if (isConnected && account !== undefined) {
@@ -38,8 +38,10 @@ export function useAvailableBalances() {
 }
 
 function getAvailableBalances(rawBalance: node.Balance | undefined): Map<string, bigint> {
-  if (rawBalance === undefined) return new Map<string, bigint>()
   const balances = new Map<string, bigint>()
+  if (rawBalance === undefined) {
+    return balances
+  }
   const alphAmount = BigInt(rawBalance.balance) - BigInt(rawBalance.lockedBalance)
   balances.set(ALPH_TOKEN_ID, alphAmount)
   const tokens: node.Token[] = rawBalance.tokenBalances ?? []
