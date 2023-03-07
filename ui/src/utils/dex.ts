@@ -19,7 +19,8 @@ import { default as devnetTokenList } from './devnet-token-list.json'
 
 const MINIMUM_LIQUIDITY = 1000n
 export const PairTokenDecimals = 18
-export const numberRegex = new RegExp('^[0-9]*[.]?[0-9]*$')
+export const NumberRegex = new RegExp('^[0-9]*[.]?[0-9]*$')
+export const MaxSlippage = 5 // 5% price slippage
 
 export interface TokenPair {
   token0Info: TokenInfo
@@ -199,13 +200,28 @@ async function swapMaxIn(
   return result
 }
 
+function checkSlippage(state: TokenPairState, tokenInId: string, amountIn: bigint, amountOut: bigint) {
+  const [reserveIn, reserveOut] = state.token0Info.id === tokenInId
+    ? [state.reserve0, state.reserve1]
+    : [state.reserve1, state.reserve0]
+  // priceInitial = reserveIn / reserveOut
+  // priceFinal = (reserveIn + amountIn) / (reserveOut - amountOut)
+  // (priceFinal - priceInitial) / priceInitial <= MaxSlippage / 100
+  // (reserveIn + amountIn) * reserveOut * 100 <= (MaxSlippage + 100) * (reserveOut - amount) * reserveIn
+  const left = (reserveIn + amountIn) * reserveOut * 100n
+  const right = (reserveOut - amountOut) * (BigInt(MaxSlippage) + 100n) * reserveIn
+  if (left > right) {
+    throw new Error('Price slippage out of range')
+  }
+}
+
 export async function swap(
   type: 'ExactIn' | 'ExactOut',
   balances: Map<string, bigint>,
   signer: SignerProvider,
   nodeProvider: NodeProvider,
   sender: string,
-  pairId: string,
+  state: TokenPairState,
   tokenInInfo: TokenInfo,
   amountIn: bigint,
   amountOut: bigint,
@@ -216,14 +232,15 @@ export async function swap(
   if (available < amountIn) {
     throw new Error(`not enough balance, available: ${bigIntToString(available, tokenInInfo.decimals)}`)
   }
+  checkSlippage(state, tokenInInfo.id, amountIn, amountOut)
 
   if (type === 'ExactIn') {
     const amountOutMin = minimalAmount(amountOut, slippage)
-    return swapMinOut(signer, nodeProvider, sender, pairId, tokenInInfo.id, amountIn, amountOutMin, ttl)
+    return swapMinOut(signer, nodeProvider, sender, state.tokenPairId, tokenInInfo.id, amountIn, amountOutMin, ttl)
   }
 
   const amountInMax = maximalAmount(amountIn, slippage)
-  return swapMaxIn(signer, nodeProvider, sender, pairId, tokenInInfo.id, amountInMax, amountOut, ttl)
+  return swapMaxIn(signer, nodeProvider, sender, state.tokenPairId, tokenInInfo.id, amountInMax, amountOut, ttl)
 }
 
 function isConfirmed(txStatus: node.TxStatus): txStatus is node.Confirmed {
@@ -297,16 +314,23 @@ function sqrt(y: bigint): bigint {
   return 1n
 }
 
-function calcSlippageAmount(amount: bigint, slippage: number): bigint {
-  return BigInt(BigNumber(amount.toString()).times(slippage).idiv(100).toFixed())
+function floatToBigint(num: number): [bigint, bigint] {
+  const parts = num.toString().split('.')
+  const factor = 10n ** BigInt(parts.length === 2 ? parts[1].length : 0)
+  const numBigint = BigInt(parts.length === 2 ? (parts[0] + parts[1]) : parts[0])
+  return [numBigint, factor]
 }
 
 export function minimalAmount(amount: bigint, slippage: number): bigint {
-  return amount - calcSlippageAmount(amount, slippage)
+  // amount / (1 + slippage / 100)
+  const [slippageBigint, factor] = floatToBigint(slippage)
+  return amount * 100n * factor / (100n * factor + slippageBigint)
 }
 
 function maximalAmount(amount: bigint, slippage: number): bigint {
-  return amount + calcSlippageAmount(amount, slippage)
+  // amount * (1 + (slippage / 100))
+  const [slippageBigint, factor] = floatToBigint(slippage)
+  return amount * (100n * factor + slippageBigint) / (100n * factor)
 }
 
 export async function addLiquidity(

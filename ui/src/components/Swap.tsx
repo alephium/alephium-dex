@@ -138,7 +138,7 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
           wallet.signer,
           wallet.nodeProvider,
           wallet.address,
-          tokenPairState.tokenPairId,
+          tokenPairState,
           tokenInInfo,
           tokenInAmount,
           tokenOutAmount,
