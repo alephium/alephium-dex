@@ -38,10 +38,15 @@ const useStyles = makeStyles((theme) => ({
     height: 25,
     width: "max-content",
     padding: ".5rem",
-    background: "#1E90FF",
+    background:
+      "linear-gradient(90deg, rgba(69,74,117,.2) 0%, rgba(138,146,178,.2) 33%, rgba(69,74,117,.5) 66%, rgba(98,104,143,.5) 100%), linear-gradient(45deg, rgba(153,69,255,.1) 0%, rgba(121,98,231,.1) 20%, rgba(0,209,140,.1) 100%)",
   },
   medium: {
     padding: "1.5rem 3rem",
+  },
+  style2: {
+    background:
+      "linear-gradient(270deg, rgba(69,74,117,.2) 0%, rgba(138,146,178,.2) 33%, rgba(69,74,117,.5) 66%, rgba(98,104,143,.5) 100%), linear-gradient(45deg, rgba(153,69,255,.1) 0%, rgba(121,98,231,.1) 20%, rgba(0,209,140,.1) 100%)",
   },
   selectedSymbol: {
     fontFamily: "Monospace",
@@ -59,6 +64,7 @@ interface TokenSelectProps {
   tokenId: string | undefined
   counterpart: string | undefined
   onChange: any
+  style2?: boolean
   mediumSize?: boolean
   selectFromTokenList?: boolean
 }
@@ -100,6 +106,7 @@ export default function TokenSelectDialog({
   tokenId,
   counterpart,
   onChange,
+  style2,
   mediumSize,
   selectFromTokenList
 }: TokenSelectProps) {
@@ -128,7 +135,9 @@ export default function TokenSelectDialog({
     />
   );
 
-  const style = classes.selectedCard + (mediumSize ? ' ' + classes.medium : '')
+  const style = classes.selectedCard +
+    (style2 ? ' ' + classes.style2 : '') +
+    (mediumSize ? ' ' + classes.medium : '')
   return (
     <>
       <Card
