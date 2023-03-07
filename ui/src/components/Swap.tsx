@@ -75,7 +75,6 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
           tokenId={tokenInInfo?.id}
           counterpart={tokenOutInfo?.id}
           onChange={handleTokenInChange}
-          style2={true}
         />
         <NumberTextField
           className={classes.numberField}

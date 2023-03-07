@@ -72,7 +72,6 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
           tokenId={tokenAInfo?.id}
           counterpart={tokenBInfo?.id}
           onChange={handleTokenAChange}
-          style2={true}
         />
         <NumberTextField
           className={classes.numberField}
