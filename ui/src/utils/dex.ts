@@ -247,6 +247,13 @@ function isConfirmed(txStatus: node.TxStatus): txStatus is node.Confirmed {
   return txStatus.type === 'Confirmed'
 }
 
+async function checkScriptExecutionResult(provider: NodeProvider, txId: string) {
+  const details = await provider.transactions.getTransactionsDetailsTxid(txId)
+  if (!details.scriptExecutionOk) {
+    throw new Error('Failed to call contract')
+  }
+}
+
 export async function waitTxConfirmed(
   provider: NodeProvider,
   txId: string,
@@ -254,6 +261,7 @@ export async function waitTxConfirmed(
 ): Promise<node.Confirmed> {
   const status = await provider.transactions.getTransactionsStatus({ txId: txId })
   if (isConfirmed(status) && status.chainConfirmations >= confirmations) {
+    await checkScriptExecutionResult(provider, txId)
     return status
   }
   await new Promise((r) => setTimeout(r, checkTxConfirmedFrequency * 1000))
