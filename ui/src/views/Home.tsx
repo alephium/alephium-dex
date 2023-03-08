@@ -5,7 +5,6 @@ import Swap from "../components/Swap";
 import AddLiquidity from "../components/AddLiquidity";
 import RemoveLiquidity from "../components/RemoveLiquidity";
 import AddPool from "../components/AddPool";
-import Pools from "../components/Pools";
 import { AlephiumConnectButton } from "@alephium/web3-react";
 import TransactionSettings from "../components/Settings";
 import { useDispatch } from "react-redux"
@@ -96,14 +95,6 @@ function Home() {
               >
                 Add Pool
               </Link>
-              <Link
-                component={NavLink}
-                to="/pools"
-                color="inherit"
-                className={classes.link}
-              >
-                Pools
-              </Link>
             </div>
           </Hidden>
           <div style={{ position: "absolute", top: "6px", right: "30px" }}>
@@ -126,9 +117,6 @@ function Home() {
         </Route>
         <Route exact path="/add-pool">
           <AddPool />
-        </Route>
-        <Route exact path="/pools">
-          <Pools />
         </Route>
         <Route>
           <Redirect to="/swap" />
