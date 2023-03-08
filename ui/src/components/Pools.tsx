@@ -1,66 +1,63 @@
-import {
-  Box,
-  Container,
-  makeStyles,
-  Paper,
-  Typography,
-  List,
-  ListItem,
-  ListItemText
-} from "@material-ui/core";
-import { ExpandLess, ExpandMore } from "@material-ui/icons";
+import { Container, Paper, Typography, Button } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
-import { useState, useCallback } from "react";
-import { getTokenPairState, TokenPairState, TokenPair, bigIntToString, PairTokenDecimals } from "../utils/dex";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { bigIntToString, PairTokenDecimals } from "../utils/dex";
 import { commonStyles } from "./style";
+import { TokenInfo } from "@alephium/token-list";
+import { useTokenPairState } from "../state/useTokenPairState";
+import TokenSelectDialog from "./TokenSelectDialog";
+import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
+import { CopyToClipboard } from 'react-copy-to-clipboard'
 
-const useStyles = makeStyles(() => ({
-  text: {
-    fontFamily: "monospace",
-    whiteSpace: "pre",
-    fontSize: "15px"
-  },
-  list: {
-    width: '100%'
-  },
-}));
+function shortContractId(id: string): string {
+  return id.slice(0, 6) + '...' + id.slice(-6)
+}
 
-function ListTokenPair({ tokenPair, onError }: { tokenPair: TokenPair, onError: any }) {
+function Pool() {
   const commonClasses = commonStyles()
-  const classes = useStyles()
-  const [open, setOpen] = useState(false)
-  const [tokenPairState, setTokenPairState] = useState<TokenPairState | undefined>(undefined)
+  const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
+  const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
+  const [error, setError] = useState<string | undefined>(undefined)
+  const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
+  const wallet = useAlephiumWallet()
 
-  const handleClick = useCallback(() => {
-    setOpen(!open)
-    getTokenPairState(tokenPair.token0Info, tokenPair.token1Info)
-      .then((state) => {
-        setTokenPairState(state)
-      })
-      .catch((error) => onError(error))
-  }, [onError, open, tokenPair])
+  useEffect(() => {
+    if (wallet === undefined) {
+      setError('Wallet is not connected')
+    } else {
+      setError(undefined)
+    }
+  }, [wallet])
 
-  return (<>
-    <ListItem key={tokenPair.tokenPairId} button onClick={handleClick}>
-      <ListItemText>
-        <Box className={classes.text}>{`${tokenPair.token0Info.name} -> ${tokenPair.token1Info.name}`}</Box>
-      </ListItemText>
-      {open ? <ExpandLess /> : <ExpandMore />}
-    </ListItem>
-    <Collapse in={open}>
+  const handleTokenAChange = useCallback((tokenInfo) => {
+    setTokenAInfo(tokenInfo)
+  }, [])
+
+  const handleTokenBChange = useCallback((tokenInfo) => {
+    setTokenBInfo(tokenInfo)
+  }, [])
+
+  const tokenInfo = useMemo(() => {
+    return <>
       {tokenPairState ? (
         <>
         <div className={commonClasses.notification}>
           <p className={commonClasses.leftAlign}>Token Pair Id:</p>
-          <p className={commonClasses.rightAlign}>{tokenPair.tokenPairId}</p>
+          <p className={commonClasses.rightAlign}>
+            <CopyToClipboard text={tokenPairState.tokenPairId}>
+              <Button style={{ background: 'transparent', height: '15px' }}>
+                <span style={{ fontSize: "15px", fontFamily: "monospace" }}>{shortContractId(tokenPairState.tokenPairId)}</span>
+              </Button>
+            </CopyToClipboard>
+          </p>
         </div>
         <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>{tokenPair.token0Info.name} Reserve:</p>
-          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve0, tokenPair.token0Info.decimals)}</p>
+          <p className={commonClasses.leftAlign}>{tokenPairState.token0Info.name} Reserve:</p>
+          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve0, tokenPairState.token0Info.decimals)}</p>
         </div>
         <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>{tokenPair.token1Info.name} Reserve:</p>
-          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve1, tokenPair.token1Info.decimals)}</p>
+          <p className={commonClasses.leftAlign}>{tokenPairState.token1Info.name} Reserve:</p>
+          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve1, tokenPairState.token1Info.decimals)}</p>
         </div>
         <div className={commonClasses.notification}>
           <p className={commonClasses.leftAlign}>Total Supply:</p>
@@ -68,42 +65,54 @@ function ListTokenPair({ tokenPair, onError }: { tokenPair: TokenPair, onError: 
         </div>
         </>
       ) : null}
-    </Collapse>
-  </>)
-}
+    </>
+  }, [tokenPairState, commonClasses])
 
-function Pools() {
-  const commonClasses = commonStyles()
-  const classes = useStyles()
-  const [error, setError] = useState<string | undefined>(undefined)
-
-  const tokenPairs: TokenPair[] = []
-  const tokenLists = tokenPairs.map((tokenPair) =>
-    <ListTokenPair
-      key={tokenPair.tokenPairId}
-      tokenPair={tokenPair}
-      onError={(err: any) => setError(err)}
-    />
+  const tokenPairContent = (
+    <div className={commonClasses.tokenPairContainer}>
+      <TokenSelectDialog
+        tokenId={tokenAInfo?.id}
+        counterpart={tokenBInfo?.id}
+        onChange={handleTokenAChange}
+        mediumSize={true}
+      />
+      <TokenSelectDialog
+        tokenId={tokenBInfo?.id}
+        counterpart={tokenAInfo?.id}
+        onChange={handleTokenBChange}
+        mediumSize={true}
+      />
+    </div>
   )
 
   return (
-    <Container className={commonClasses.centeredContainer}>
+    <Container className={commonClasses.centeredContainer} maxWidth="sm">
       <div className={commonClasses.titleBar}></div>
       <Typography variant="h4" color="textSecondary">
-        Pools
+        Pool
       </Typography>
       <div className={commonClasses.spacer} />
       <Paper className={commonClasses.mainPaper}>
         <div>
           <Collapse in={true}>
-            {error === undefined ? (
-              <List component="nav" className={classes.list} style={{maxHeight: 500, overflow: 'auto'}}>{tokenLists}</List>
-            ) : null}
-            {error ? (
-              <Typography variant="body2" color="error" className={commonClasses.error}>
-                {error}
-              </Typography>
-            ) : null}
+            {
+              <>
+                {tokenPairContent}
+                <div className={commonClasses.spacer} />
+                {error ? (
+                  <Typography variant="body2" color="error" className={commonClasses.error}>
+                    {error}
+                  </Typography>
+                ) : getTokenPairStateError ? (
+                  (
+                    <Typography variant="body2" color="error" className={commonClasses.error}>
+                      {getTokenPairStateError}
+                    </Typography>
+                  )
+                ) : tokenInfo}
+                <div className={commonClasses.spacer} />
+              </>
+            }
           </Collapse>
         </div>
       </Paper>
@@ -112,4 +121,4 @@ function Pools() {
   );
 }
 
-export default Pools;
+export default Pool;
