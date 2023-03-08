@@ -20,7 +20,7 @@ import { default as devnetTokenList } from './devnet-token-list.json'
 const MINIMUM_LIQUIDITY = 1000n
 export const PairTokenDecimals = 18
 export const NumberRegex = new RegExp('^[0-9]*[.]?[0-9]*$')
-export const MaxSlippage = 5 // 5% price slippage
+export const MaxPriceImpact = 5 // 5%
 
 export interface TokenPair {
   token0Info: TokenInfo
@@ -213,12 +213,12 @@ function checkSlippage(state: TokenPairState, tokenInId: string, amountIn: bigin
     : [state.reserve1, state.reserve0]
   // priceInitial = reserveIn / reserveOut
   // priceFinal = (reserveIn + amountIn) / (reserveOut - amountOut)
-  // (priceFinal - priceInitial) / priceInitial <= MaxSlippage / 100
-  // (reserveIn + amountIn) * reserveOut * 100 <= (MaxSlippage + 100) * (reserveOut - amount) * reserveIn
+  // (priceFinal - priceInitial) / priceInitial <= MaxPriceImpact / 100
+  // (reserveIn + amountIn) * reserveOut * 100 <= (MaxPriceImpact + 100) * (reserveOut - amountOut) * reserveIn
   const left = (reserveIn + amountIn) * reserveOut * 100n
-  const right = (reserveOut - amountOut) * (BigInt(MaxSlippage) + 100n) * reserveIn
+  const right = (reserveOut - amountOut) * (BigInt(MaxPriceImpact) + 100n) * reserveIn
   if (left > right) {
-    throw new Error('Price slippage out of range')
+    throw new Error('Price impact too high')
   }
 }
 
@@ -540,7 +540,11 @@ export function getTokenInfos(): TokenInfo[] {
 
 // This is only used for user inputs
 export function stringToBigInt(amount: string, decimals: number): bigint {
-  return parseUnits(amount, decimals).toBigInt()
+  try {
+    return parseUnits(amount, decimals).toBigInt()
+  } catch (error) {
+    throw new Error(`Invalid amount: ${amount}, decimals: ${decimals}`)
+  }
 }
 
 export function tryStringToBigInt(amount: string | undefined, decimals: number | undefined): bigint | undefined {
