@@ -15,7 +15,7 @@ ReactDOM.render(
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-          <AlephiumConnectProvider>
+          <AlephiumConnectProvider chainGroup={0} network="testnet">
             <SnackbarProvider maxSnack={3}>
               <HashRouter>
                 <App />
