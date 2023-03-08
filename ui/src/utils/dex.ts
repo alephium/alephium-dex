@@ -525,10 +525,10 @@ export function getTokenInfo(tokenId: string): TokenInfo | undefined {
 
 export function getTokenInfos(): TokenInfo[] {
   if (networkName === 'mainnet') {
-    return mainnetTokensMetadata.tokens.concat([ALPHTokenInfo])
+    return [ALPHTokenInfo, ...mainnetTokensMetadata.tokens]
   }
   if (networkName === 'testnet') {
-    return testnetTokensMetadata.tokens.concat([ALPHTokenInfo])
+    return [ALPHTokenInfo, ...testnetTokensMetadata.tokens]
   }
   return (devnetTokenList as TokenInfo[]).map<TokenInfo>((tokenInfo) => {
     return {
