@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
   },
   bg: {
     background:
-      "linear-gradient(160deg, rgba(69,74,117,.1) 0%, rgba(138,146,178,.1) 33%, rgba(69,74,117,.1) 66%, rgba(98,104,143,.1) 100%), linear-gradient(45deg, rgba(153,69,255,.1) 0%, rgba(121,98,231,.1) 20%, rgba(0,209,140,.1) 100%)",
+      "linear-gradient(160deg, rgba(34,37,58,.1) 0%, rgba(69,73,89,.1) 33%, rgba(34,37,58,.1) 66%, rgba(49,52,71,.1) 100%), linear-gradient(45deg, rgba(76,34,128,.1) 0%, rgba(69,49,115,.1) 20%, rgba(0,104,70,.1) 100%)",
     display: "flex",
     flexDirection: "column",
     minHeight: "100vh",
