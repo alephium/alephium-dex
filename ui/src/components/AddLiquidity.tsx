@@ -6,7 +6,7 @@ import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import CircleLoader from "./CircleLoader";
 import NumberTextField from "./NumberTextField";
-import { addLiquidity, DexTokens, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityResult, TokenPairState, tryGetBalance } from "../utils/dex";
+import { addLiquidity, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityResult, TokenPairState, tryGetBalance } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
@@ -17,7 +17,7 @@ import { useDerivedMintInfo } from "../state/mint/hooks";
 import { selectMintState } from "../state/mint/selectors";
 import { commonStyles } from "./style";
 
-function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
+function AddLiquidity() {
   const classes = commonStyles();
   const [completed, setCompleted] = useState<boolean>(false)
   const [addingLiquidity, setAddingLiquidity] = useState<boolean>(false)
@@ -68,7 +68,6 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     <div className={classes.tokenContainerWithBalance}>
       <div className={classes.inputRow}>
         <TokenSelectDialog
-          dexTokens={dexTokens}
           tokenId={tokenAInfo?.id}
           counterpart={tokenBInfo?.id}
           onChange={handleTokenAChange}
@@ -93,7 +92,6 @@ function AddLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     <div className={classes.tokenContainerWithBalance}>
       <div className={classes.inputRow}>
         <TokenSelectDialog
-          dexTokens={dexTokens}
           tokenId={tokenBInfo?.id}
           counterpart={tokenAInfo?.id}
           onChange={handleTokenBChange}

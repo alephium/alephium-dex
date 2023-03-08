@@ -5,8 +5,7 @@ import {
   getInitAddLiquidityResult,
   TokenPairState,
   tryBigIntToString,
-  tryStringToBigInt,
-  tokenPairMatch
+  tryStringToBigInt
 } from '../../utils/dex'
 import { selectMintState } from './selectors'
 import { useMemo } from 'react'
@@ -21,12 +20,11 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
   addLiquidityResult: AddLiquidityResult | undefined,
 } {
   const { lastInput, inputValue, otherInputValue, tokenAInfo, tokenBInfo } = useSelector(selectMintState)
-  const tokenPairState = useTokenPairState(tokenAInfo, tokenBInfo, setError)
+  const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
 
   const parsedAmount = useMemo(() => {
     const tokenInfo = lastInput === 'TokenA' ? tokenAInfo : tokenBInfo
     try {
-      setError(undefined)
       return tryStringToBigInt(inputValue, tokenInfo?.decimals)
     } catch (error) {
       console.log(`Invalid input: ${inputValue}, ${tokenInfo?.decimals}`)
@@ -48,14 +46,14 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
 
   const addLiquidityResult = useMemo(() => {
     try {
-      if (!tokenPairMatch(tokenPairState, tokenAInfo, tokenBInfo)) {
-        return undefined
-      }
+      setError(getTokenPairStateError)
       if (tokenPairState !== undefined && tokenPairState.reserve0 === 0n) {
-        return parsedAmount && otherAmount ? getInitAddLiquidityResult(parsedAmount, otherAmount) : undefined
+        return parsedAmount !== undefined && otherAmount !== undefined
+          ? getInitAddLiquidityResult(parsedAmount, otherAmount)
+          : undefined
       }
       const tokenInfo = lastInput === 'TokenA' ? tokenAInfo : tokenBInfo
-      return tokenInfo && parsedAmount && tokenPairState && lastInput
+      return tokenInfo && parsedAmount !== undefined && tokenPairState && lastInput
         ? getAddLiquidityResult(tokenPairState, tokenInfo.id, parsedAmount, lastInput)
         : undefined
     } catch (error) {
@@ -63,7 +61,7 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
       setError(`${error}`)
       return undefined
     }
-  }, [tokenPairState, lastInput, tokenAInfo, tokenBInfo, parsedAmount, otherAmount, setError])
+  }, [tokenPairState, getTokenPairStateError, lastInput, tokenAInfo, tokenBInfo, parsedAmount, otherAmount, setError])
 
   return useMemo(() => {
     if (tokenPairState === undefined || tokenPairState.reserve0 === 0n) {

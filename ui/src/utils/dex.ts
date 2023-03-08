@@ -97,14 +97,21 @@ export async function getTokenPairState(tokenAInfo: TokenInfo, tokenBInfo: Token
   const pairContractId = subContractId(factoryId, path, groupIndex)
   const contractAddress = addressFromContractId(pairContractId)
   const tokenPair = TokenPairContract.at(contractAddress)
-  const state = await tokenPair.fetchState()
-  return {
-    tokenPairId: pairContractId,
-    reserve0: state.fields.reserve0,
-    reserve1: state.fields.reserve1,
-    token0Info: token0Id === tokenAInfo.id ? tokenAInfo : tokenBInfo,
-    token1Info: token1Id === tokenBInfo.id ? tokenBInfo : tokenAInfo,
-    totalSupply: state.fields.totalSupply
+  try {
+    const state = await tokenPair.fetchState()
+    return {
+      tokenPairId: pairContractId,
+      reserve0: state.fields.reserve0,
+      reserve1: state.fields.reserve1,
+      token0Info: token0Id === tokenAInfo.id ? tokenAInfo : tokenBInfo,
+      token1Info: token1Id === tokenBInfo.id ? tokenBInfo : tokenAInfo,
+      totalSupply: state.fields.totalSupply
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('not found')) {
+      throw new Error('Token pair does not exist')
+    }
+    throw error
   }
 }
 

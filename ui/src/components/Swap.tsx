@@ -7,7 +7,7 @@ import TokenSelectDialog from "../components/TokenSelectDialog";
 import CircleLoader from "../components/CircleLoader";
 import HoverIcon from "../components/HoverIcon";
 import NumberTextField from "../components/NumberTextField";
-import { swap, DexTokens, tryGetBalance } from "../utils/dex";
+import { swap, tryGetBalance } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useDeadline } from "../hooks/useDeadline";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
@@ -18,7 +18,7 @@ import { useDerivedSwapInfo } from "../state/swap/hooks";
 import { selectSwapState } from "../state/swap/selectors";
 import { commonStyles } from "./style";
 
-function Swap({ dexTokens }: { dexTokens: DexTokens }) {
+function Swap() {
   const classes = commonStyles();
   const [completed, setCompleted] = useState<boolean>(false)
   const [swapping, setSwapping] = useState<boolean>(false)
@@ -71,7 +71,6 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
     <div className={classes.tokenContainerWithBalance}>
       <div className={classes.inputRow}>
         <TokenSelectDialog
-          dexTokens={dexTokens}
           tokenId={tokenInInfo?.id}
           counterpart={tokenOutInfo?.id}
           onChange={handleTokenInChange}
@@ -97,7 +96,6 @@ function Swap({ dexTokens }: { dexTokens: DexTokens }) {
     <div className={classes.tokenContainerWithBalance}>
       <div className={classes.inputRow}>
         <TokenSelectDialog
-          dexTokens={dexTokens}
           tokenId={tokenOutInfo?.id}
           counterpart={tokenInInfo?.id}
           onChange={handleTokenOutChange}

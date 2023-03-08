@@ -11,7 +11,7 @@ import {
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 import Collapse from "@material-ui/core/Collapse";
 import { useState, useCallback } from "react";
-import { getTokenPairState, TokenPairState, DexTokens, TokenPair, bigIntToString, PairTokenDecimals } from "../utils/dex";
+import { getTokenPairState, TokenPairState, TokenPair, bigIntToString, PairTokenDecimals } from "../utils/dex";
 import { commonStyles } from "./style";
 
 const useStyles = makeStyles(() => ({
@@ -72,12 +72,13 @@ function ListTokenPair({ tokenPair, onError }: { tokenPair: TokenPair, onError: 
   </>)
 }
 
-function Pools({ dexTokens }: { dexTokens: DexTokens }) {
+function Pools() {
   const commonClasses = commonStyles()
   const classes = useStyles()
   const [error, setError] = useState<string | undefined>(undefined)
 
-  const tokenLists = dexTokens.tokenPairs.map((tokenPair) =>
+  const tokenPairs: TokenPair[] = []
+  const tokenLists = tokenPairs.map((tokenPair) =>
     <ListTokenPair
       key={tokenPair.tokenPairId}
       tokenPair={tokenPair}

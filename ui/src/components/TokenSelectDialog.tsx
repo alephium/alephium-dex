@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import { useCallback, useState } from "react";
 import CloseIcon from "@material-ui/icons/Close";
-import { DexTokens, TokenList } from "../utils/dex";
+import { TokenList } from "../utils/dex";
 import { TokenInfo } from '@alephium/token-list'
 import { MyDialog } from "./MyDialog";
 
@@ -60,13 +60,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface TokenSelectProps {
-  dexTokens: DexTokens
   tokenId: string | undefined
   counterpart: string | undefined
   onChange: any
   style2?: boolean
   mediumSize?: boolean
-  selectFromTokenList?: boolean
 }
 
 const TokenOptions = ({
@@ -102,13 +100,11 @@ const TokenOptions = ({
 };
 
 export default function TokenSelectDialog({
-  dexTokens,
   tokenId,
   counterpart,
   onChange,
   style2,
-  mediumSize,
-  selectFromTokenList
+  mediumSize
 }: TokenSelectProps) {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
@@ -120,20 +116,17 @@ export default function TokenSelectDialog({
     setOpen(true)
   }, [])
 
-  const info = selectFromTokenList
-    ? TokenList.find((tokenInfo) => tokenInfo.id === tokenId)
-    : dexTokens.tokenInfos.find((x) => x.id === tokenId)
-  const availableTokens = selectFromTokenList
-    ? TokenList.filter((tokenInfo) => tokenInfo.id !== tokenId && tokenInfo.id !== counterpart)
-    : dexTokens.getAllowedTokenInfos(counterpart).filter((tokenInfo) => tokenInfo.id !== tokenId)
-  const tokenOptions = availableTokens.map((token) =>
-    <TokenOptions
-      key={token.id}
-      tokenInfo={token}
-      onSelect={onChange}
-      close={handleClose}
-    />
-  );
+  const info = TokenList.find((tokenInfo) => tokenInfo.id === tokenId)
+  const availableTokens = TokenList
+    .filter((tokenInfo) => tokenInfo.id !== tokenId && tokenInfo.id !== counterpart)
+    .map((token) =>
+      <TokenOptions
+        key={token.id}
+        tokenInfo={token}
+        onSelect={onChange}
+        close={handleClose}
+      />
+    );
 
   const style = classes.selectedCard +
     (style2 ? ' ' + classes.style2 : '') +
@@ -172,7 +165,7 @@ export default function TokenSelectDialog({
             </IconButton>
           </div>
         </DialogTitle>
-        <List>{tokenOptions}</List>
+        <List>{availableTokens}</List>
       </MyDialog>
     </>
   );

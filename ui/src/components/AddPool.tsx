@@ -5,7 +5,7 @@ import { TokenInfo } from "@alephium/token-list"
 import { useCallback, useEffect, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import CircleLoader from "./CircleLoader";
-import { tokenPairExist, createTokenPair, DexTokens } from "../utils/dex";
+import { tokenPairExist, createTokenPair } from "../utils/dex";
 import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
 import { commonStyles } from "./style";
 import TokenSelectDialog from "./TokenSelectDialog";
@@ -54,20 +54,16 @@ function AddPool() {
   const tokenPairContent = (
     <div className={commonClasses.tokenPairContainer}>
       <TokenSelectDialog
-        dexTokens={DexTokens.empty}
         tokenId={tokenAInfo?.id}
         counterpart={tokenBInfo?.id}
         onChange={handleTokenAChange}
         mediumSize={true}
-        selectFromTokenList={true}
       />
       <TokenSelectDialog
-        dexTokens={DexTokens.empty}
         tokenId={tokenBInfo?.id}
         counterpart={tokenAInfo?.id}
         onChange={handleTokenBChange}
         mediumSize={true}
-        selectFromTokenList={true}
       />
     </div>
   )

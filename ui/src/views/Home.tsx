@@ -4,7 +4,6 @@ import { COLORS } from "../muiTheme";
 import Swap from "../components/Swap";
 import AddLiquidity from "../components/AddLiquidity";
 import RemoveLiquidity from "../components/RemoveLiquidity";
-import useGetDexTokens from "../hooks/useGetDexTokens";
 import AddPool from "../components/AddPool";
 import Pools from "../components/Pools";
 import { AlephiumConnectButton } from "@alephium/web3-react";
@@ -49,7 +48,6 @@ const useStyles = makeStyles((theme) => ({
 
 function Home() {
   const classes = useStyles();
-  const dexTokens = useGetDexTokens()
   const dispatch = useDispatch()
 
   return (
@@ -118,19 +116,19 @@ function Home() {
       </AppBar>
       <Switch>
         <Route exact path="/swap">
-          <Swap dexTokens={dexTokens} />
+          <Swap />
         </Route>
         <Route exact path="/add-liquidity">
-          <AddLiquidity dexTokens={dexTokens} />
+          <AddLiquidity />
         </Route>
         <Route exact path="/remove-liquidity">
-          <RemoveLiquidity dexTokens={dexTokens} />
+          <RemoveLiquidity />
         </Route>
         <Route exact path="/add-pool">
           <AddPool />
         </Route>
         <Route exact path="/pools">
-          <Pools dexTokens={dexTokens} />
+          <Pools />
         </Route>
         <Route>
           <Redirect to="/swap" />

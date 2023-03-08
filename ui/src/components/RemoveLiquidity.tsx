@@ -11,11 +11,9 @@ import {
   removeLiquidity,
   RemoveLiquidityResult,
   getRemoveLiquidityResult,
-  DexTokens,
   PairTokenDecimals,
   stringToBigInt,
-  bigIntToString,
-  tokenPairMatch
+  bigIntToString
 } from "../utils/dex";
 import { formatUnits } from "ethers/lib/utils";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
@@ -25,7 +23,7 @@ import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
 import { commonStyles } from "./style";
 import { useTokenPairState } from "../state/useTokenPairState";
 
-function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
+function RemoveLiquidity() {
   const classes = commonStyles();
   const [amountInput, setAmountInput] = useState<string | undefined>(undefined)
   const [amount, setAmount] = useState<bigint | undefined>(undefined)
@@ -49,21 +47,18 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     setTokenBInfo(tokenInfo)
   }, []);
 
-  const tokenPairState = useTokenPairState(tokenAInfo, tokenBInfo, setError)
+  const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
 
   useEffect(() => {
     setTotalLiquidityAmount(undefined)
-    if (tokenPairState !== undefined) {
+    if (tokenPairState !== undefined && getTokenPairStateError === undefined) {
       const balance = availableBalance.get(tokenPairState.tokenPairId)
       setTotalLiquidityAmount(balance === undefined ? 0n : balance)
     }
-  }, [tokenPairState, availableBalance])
+  }, [tokenPairState, getTokenPairStateError, availableBalance])
 
   useEffect(() => {
     setRemoveLiquidityResult(undefined)
-    if (!tokenPairMatch(tokenPairState, tokenAInfo, tokenBInfo)) {
-      return
-    }
     try {
       if (
         tokenPairState !== undefined &&
@@ -115,14 +110,12 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
   const tokenPairContent = (
     <div className={classes.tokenPairContainer}>
       <TokenSelectDialog
-        dexTokens={dexTokens}
         tokenId={tokenAInfo?.id}
         counterpart={tokenBInfo?.id}
         onChange={handleTokenAChange}
         mediumSize={true}
       />
       <TokenSelectDialog
-        dexTokens={dexTokens}
         tokenId={tokenBInfo?.id}
         counterpart={tokenAInfo?.id}
         onChange={handleTokenBChange}
@@ -189,7 +182,8 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
     totalLiquidityAmount !== undefined &&
     removeLiquidityResult !== undefined &&
     !removingLiquidity && !completed && 
-    error === undefined
+    error === undefined &&
+    getTokenPairStateError === undefined
   const removeLiquidityButton = (
     <ButtonWithLoader
       disabled={!readyToRemoveLiquidity}
@@ -288,6 +282,10 @@ function RemoveLiquidity({ dexTokens }: { dexTokens: DexTokens }) {
                   {error ? (
                     <Typography variant="body2" color="error" className={classes.error}>
                       {error}
+                    </Typography>
+                  ) : getTokenPairStateError ? (
+                    <Typography variant="body2" color="error" className={classes.error}>
+                      {getTokenPairStateError}
                     </Typography>
                   ) : null}
                 </>) : <></>}
