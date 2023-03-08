@@ -1,25 +1,19 @@
 {
   "version": "v1.7.1",
   "name": "TokenPairFactory",
-  "bytecode": "040440214089409a40a30000020402101600711702160171170316021603314c03160016010216011600020103040900403e16001602a50c3316001603a50c331a130f7b1602160342130b7b16021603000017051704b11604160513036417060c0c0c0c0c0c130664170716001601a21604160544ce00160616070d1340ff3bc2170805160416051608a00161a0010d2aa101010001010007b4ce014513107b1600a100010000000102a00002",
-  "codeHash": "a103d726989c707bc999b59928da45ed6fa42d25f67b6f5f4f073b6e9bfcd5df",
+  "bytecode": "0202402140880000020402101600711702160171170316021603314c03160016010216011600020103040900403d16001602a50c3316001603a50c331a130f7b1602160342130b7b160216030000170517041604160513026417060c0c0c0c0c0c130664170716001601a21604160544ce00160616070d1340ff3bc2170805160416051608a00061a0000d2aa100",
+  "codeHash": "6e20ca1d1474ca5d61542b180e858beac69c23e5feb6cb5c1a53c68e0e6a5d36",
   "fieldsSig": {
     "names": [
       "pairTemplateId",
-      "admin",
-      "maxSlippage",
       "pairSize"
     ],
     "types": [
       "ByteVec",
-      "Address",
-      "U256",
       "U256"
     ],
     "isMutable": [
       false,
-      false,
-      true,
       true
     ]
   },
@@ -87,34 +81,6 @@
         false
       ],
       "returnTypes": []
-    },
-    {
-      "name": "updateMaxSlippage",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
-      "paramNames": [
-        "newMaxSlippage"
-      ],
-      "paramTypes": [
-        "U256"
-      ],
-      "paramIsMutable": [
-        false
-      ],
-      "returnTypes": []
-    },
-    {
-      "name": "getMaxSlippage",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
-      "paramNames": [],
-      "paramTypes": [],
-      "paramIsMutable": [],
-      "returnTypes": [
-        "U256"
-      ]
     }
   ]
 }
