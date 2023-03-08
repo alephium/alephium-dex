@@ -1,7 +1,6 @@
 import {
   Box,
   Card,
-  Dialog,
   DialogTitle,
   IconButton,
   List,
@@ -15,6 +14,7 @@ import { useCallback, useState } from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import { DexTokens, TokenList } from "../utils/dex";
 import { TokenInfo } from '@alephium/token-list'
+import { MyDialog } from "./MyDialog";
 
 const useStyles = makeStyles((theme) => ({
   flexTitle: {
@@ -163,7 +163,7 @@ export default function TokenSelectDialog({
           )
         }
       </Card>
-      <Dialog open={open} onClose={handleClose} maxWidth='md'>
+      <MyDialog open={open} onClose={handleClose} maxWidth='md'>
         <DialogTitle>
           <div className={classes.flexTitle}>
             <div>Select token</div>
@@ -173,7 +173,7 @@ export default function TokenSelectDialog({
           </div>
         </DialogTitle>
         <List>{tokenOptions}</List>
-      </Dialog>
+      </MyDialog>
     </>
   );
 }

@@ -9,7 +9,7 @@ export const COLORS = {
   lightGreen: "rgba(51, 242, 223, 1)",
   lightBlue: "#83b9fc",
   nearBlack: "#000008",
-  nearBlackWithMinorTransparency: "rgba(0,0,0,.25)",
+  nearBlackWithMinorTransparency: "rgba(0,0,0,.70)",
   red: "#aa0818",
   darkRed: "#810612",
 };

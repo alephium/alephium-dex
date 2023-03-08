@@ -5,17 +5,18 @@ import { DEFAULT_DEADLINE_FROM_NOW, DEFAULT_SLIPPAGE } from '../state/settings/r
 import SettingsIcon from '@material-ui/icons/Settings'
 import IconButton from '@material-ui/core/IconButton'
 import {
-  Dialog,
   DialogContent,
   Tooltip,
   Box,
   makeStyles,
   Typography,
-  InputAdornment
+  InputAdornment,
+  createStyles
 } from "@material-ui/core";
 import NumberTextField from './NumberTextField'
+import { MyDialog } from './MyDialog'
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => createStyles({
   container: {
     width: 380,
     height: 60,
@@ -91,7 +92,6 @@ function SettingsDialog() {
   }
 
   const confirmationContent = (
-    <>
       <DialogContent>
         <Box display="flex" className={classes.container}>
           <Tooltip title='Your transaction will revert if the price changes unfavorably by more than this percentage.. The default is 0.5%.'>
@@ -155,7 +155,6 @@ function SettingsDialog() {
           </Typography>
         ) : null}
       </DialogContent>
-    </>
   );
 
   return confirmationContent;
@@ -171,9 +170,9 @@ export default function TransactionSettings() {
       <IconButton aria-label='settings' onClick={() => setOpen(true)}>
         <SettingsIcon/>
       </IconButton>
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <MyDialog open={open} onClose={() => setOpen(false)} >
         <SettingsDialog />
-      </Dialog>
+      </MyDialog>
     </>
   )
 }
