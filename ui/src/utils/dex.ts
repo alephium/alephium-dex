@@ -530,13 +530,12 @@ export function getTokenInfos(): TokenInfo[] {
   if (networkName === 'testnet') {
     return testnetTokensMetadata.tokens.concat([ALPHTokenInfo])
   }
-  const tokenInfos = (devnetTokenList as TokenInfo[]).concat([ALPHTokenInfo])
-  return tokenInfos.map((tokenInfo) => {
+  return (devnetTokenList as TokenInfo[]).map<TokenInfo>((tokenInfo) => {
     return {
       ...tokenInfo,
       logoURI: genLogo(tokenInfo.name)
     }
-  })
+  }).concat([ALPHTokenInfo])
 }
 
 // This is only used for user inputs
