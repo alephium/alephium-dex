@@ -12,7 +12,7 @@ import alephiumIcon from "../icons/alephium.svg";
 import { checkTxConfirmedFrequency, network, networkName } from "./consts"
 import BigNumber from "bignumber.js"
 import { parseUnits } from "ethers/lib/utils";
-import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, RemoveLiquidity, CreatePair } from "../contracts/ts"
+import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, RemoveLiquidity, CreatePair } from "../../artifacts/ts"
 import { genLogo } from "./avatar_images";
 import { mainnetTokensMetadata, testnetTokensMetadata, TokenInfo } from "@alephium/token-list";
 import { default as devnetTokenList } from './devnet-token-list.json'

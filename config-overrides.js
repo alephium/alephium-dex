@@ -3,13 +3,7 @@ const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 const path = require("path");
 
 module.exports = function override(config, env) {
-  config.resolve.plugins.forEach(plugin => {
-    if (plugin instanceof ModuleScopePlugin) {
-      const cwd = process.cwd()
-      plugin.allowedFiles.add(path.join(cwd, '.deployments.devnet.json'))
-      plugin.allowedFiles.add(path.join(cwd, '.deployments.testnet.json'))
-    }
-  })
+  config.resolve.plugins = config.resolve.plugins.filter(plugin => !(plugin instanceof ModuleScopePlugin));
 
   return {
     ...config,
@@ -17,6 +11,7 @@ module.exports = function override(config, env) {
       ...config.module,
       rules: [
         ...config.module.rules,
+        { test: /\.([cm]?ts|tsx)$/, loader: "ts-loader" },
         {
           test: /\.js$/,
           enforce: "pre",
