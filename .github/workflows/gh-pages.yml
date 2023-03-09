@@ -21,11 +21,11 @@ jobs:
           node-version: "16"
           cache: "npm"
 
-      - run: cd ui && npm ci && npm run build
+      - run: npm ci && npm run build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/master' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ui/build
+          publish_dir: build
