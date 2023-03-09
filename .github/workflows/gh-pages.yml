@@ -21,7 +21,7 @@ jobs:
           node-version: "16"
           cache: "npm"
 
-      - run: cd ui && npm ci && npm run build:testnet
+      - run: cd ui && npm ci && npm run build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
