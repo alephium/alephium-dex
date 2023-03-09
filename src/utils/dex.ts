@@ -207,14 +207,10 @@ async function swapMaxIn(
   return result
 }
 
-function checkSlippage(state: TokenPairState, tokenInId: string, amountIn: bigint, amountOut: bigint) {
+function checkPriceImpact(state: TokenPairState, tokenInId: string, amountIn: bigint, amountOut: bigint) {
   const [reserveIn, reserveOut] = state.token0Info.id === tokenInId
     ? [state.reserve0, state.reserve1]
     : [state.reserve1, state.reserve0]
-  // priceInitial = reserveIn / reserveOut
-  // priceFinal = (reserveIn + amountIn) / (reserveOut - amountOut)
-  // (priceFinal - priceInitial) / priceInitial <= MaxPriceImpact / 100
-  // (reserveIn + amountIn) * reserveOut * 100 <= (MaxPriceImpact + 100) * (reserveOut - amountOut) * reserveIn
   const left = (reserveIn + amountIn) * reserveOut * 100n
   const right = (reserveOut - amountOut) * (BigInt(MaxPriceImpact) + 100n) * reserveIn
   if (left > right) {
@@ -239,7 +235,7 @@ export async function swap(
   if (available < amountIn) {
     throw new Error(`not enough balance, available: ${bigIntToString(available, tokenInInfo.decimals)}`)
   }
-  checkSlippage(state, tokenInInfo.id, amountIn, amountOut)
+  checkPriceImpact(state, tokenInInfo.id, amountIn, amountOut)
 
   if (type === 'ExactIn') {
     const amountOutMin = minimalAmount(amountOut, slippage)
