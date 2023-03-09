@@ -54,8 +54,8 @@ Contract TokenPair(
       price1CumulativeLast = price1CumulativeLast |+| uqdiv(reserve0, reserve1) * timeElapsed
     }
     
-    reserve1 = newReserve1
     reserve0 = newReserve0
+    reserve1 = newReserve1
     blockTimeStampLast = blockTimeStampSecond
   }
 

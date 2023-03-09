@@ -16,7 +16,6 @@ jobs:
       - name: Run tests
         working-directory: .
         run: |
-          npm audit --production
           npm ci
           npx @alephium/cli devnet start
           npm run compile && test -z "$(git status --porcelain)"

@@ -1,7 +1,7 @@
 node_modules/
 coverage/
 lerna-debug.log
-artifacts/
 /dist
 /dev
+/build
 .project.json
