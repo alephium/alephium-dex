@@ -5,6 +5,7 @@ import {
   contractIdFromAddress,
   ContractState,
   Fields,
+  number256ToBigint,
   Project,
   Token
 } from '@alephium/web3'
@@ -146,6 +147,11 @@ export function createRouter() {
 
 function sameTokens(expected: Token[], have: Token[]): boolean {
   return expected.every((a) => have.some((b) => a.amount === b.amount && a.id === b.id))
+}
+
+export function contractBalanceOf(state: ContractState, tokenId: string): bigint {
+  const token = state.asset.tokens?.find((t) => t.id === tokenId)
+  return token === undefined ? 0n : number256ToBigint(token.amount)
 }
 
 export function expectTokensEqual(expected: Token[], have: Token[]) {
