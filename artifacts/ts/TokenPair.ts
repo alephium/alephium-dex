@@ -116,6 +116,18 @@ class Factory extends ContractFactory<
     return testMethod(this, "getReserves", params);
   }
 
+  async testGetPrice0CumulativeLastMethod(
+    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+  ): Promise<TestContractResult<bigint>> {
+    return testMethod(this, "getPrice0CumulativeLast", params);
+  }
+
+  async testGetPrice1CumulativeLastMethod(
+    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+  ): Promise<TestContractResult<bigint>> {
+    return testMethod(this, "getPrice1CumulativeLast", params);
+  }
+
   async testUpdateMethod(
     params: TestContractParams<
       TokenPairTypes.Fields,
@@ -163,7 +175,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "3c308fa85c62ec2c0571f9116d4eefbc91a322801600a890111c7c1a85c97352"
+    "c463359672c9fc59dea109dde1c3c94b1cb71049f50035a17093a5dfcb15ada3"
   )
 );
 
@@ -310,6 +322,28 @@ export class TokenPairInstance extends ContractInstance {
       TokenPair,
       this,
       "getReserves",
+      params === undefined ? {} : params
+    );
+  }
+
+  async callGetPrice0CumulativeLastMethod(
+    params?: Omit<CallContractParams<{}>, "args">
+  ): Promise<CallContractResult<bigint>> {
+    return callMethod(
+      TokenPair,
+      this,
+      "getPrice0CumulativeLast",
+      params === undefined ? {} : params
+    );
+  }
+
+  async callGetPrice1CumulativeLastMethod(
+    params?: Omit<CallContractParams<{}>, "args">
+  ): Promise<CallContractResult<bigint>> {
+    return callMethod(
+      TokenPair,
+      this,
+      "getPrice1CumulativeLast",
       params === undefined ? {} : params
     );
   }
