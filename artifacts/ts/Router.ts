@@ -112,6 +112,7 @@ class Factory extends ContractFactory<RouterInstance, {}> {
           tokenInId: HexString;
           amountIn: bigint;
           amountOutMin: bigint;
+          to: HexString;
           deadline: bigint;
         }
       >,
@@ -131,6 +132,7 @@ class Factory extends ContractFactory<RouterInstance, {}> {
           tokenInId: HexString;
           amountInMax: bigint;
           amountOut: bigint;
+          to: HexString;
           deadline: bigint;
         }
       >,
@@ -139,6 +141,25 @@ class Factory extends ContractFactory<RouterInstance, {}> {
   ): Promise<TestContractResult<null>> {
     return testMethod(this, "swapTokenForExactToken", params);
   }
+
+  async testSwapMethod(
+    params: Omit<
+      TestContractParams<
+        never,
+        {
+          tokenPair: HexString;
+          sender: HexString;
+          to: HexString;
+          tokenInId: HexString;
+          amountIn: bigint;
+          amountOut: bigint;
+        }
+      >,
+      "initialFields"
+    >
+  ): Promise<TestContractResult<null>> {
+    return testMethod(this, "swap", params);
+  }
 }
 
 // Use this object to test and deploy the contract
@@ -146,7 +167,7 @@ export const Router = new Factory(
   Contract.fromJson(
     RouterContractJson,
     "",
-    "dc75c12ca63a4824309f3d22036c6f0b690d3f82881f50b81afe382a43238bee"
+    "5e14a9a7e505e35b80c0326b5446c484e1b767d20842533a84f67cc67ca7949a"
   )
 );
 

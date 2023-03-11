@@ -13,7 +13,7 @@ Contract TokenPair(
 
   event Mint(sender: Address, amount0: U256, amount1: U256, liquidity: U256)
   event Burn(sender: Address, amount0: U256, amount1: U256, liquidity: U256)
-  event Swap(sender: Address, tokenInId: ByteVec, amountIn: U256, amountOut: U256)
+  event Swap(sender: Address, amount0In: U256, amount1In: U256, amount0Out: U256, amount1Out: U256, to: Address)
 
   const MINIMUM_LIQUIDITY = 1000
 
@@ -75,13 +75,12 @@ Contract TokenPair(
     }
 
     assert!(liquidity > 0, ErrorCodes.InsufficientLiquidityMinted)
-    totalSupply = totalSupply + liquidity
     transferTokenFromSelf!(sender, selfTokenId!(), liquidity)
-
-    update(reserve0 + amount0, reserve1 + amount1)
-
     transferTokenToSelf!(sender, token0Id, amount0)
     transferTokenToSelf!(sender, token1Id, amount1)
+
+    totalSupply = totalSupply + liquidity
+    update(reserve0 + amount0, reserve1 + amount1)
 
     emit Mint(sender, amount0, amount1, liquidity)
     return liquidity
@@ -93,44 +92,37 @@ Contract TokenPair(
     let amount1 = liquidity * reserve1 / totalSupply
     assert!(amount0 > 0 && amount1 > 0, ErrorCodes.InsufficientLiquidityBurned)
 
-    totalSupply = totalSupply - liquidity
-    update(reserve0 - amount0, reserve1 - amount1)
-
     transferTokenToSelf!(sender, selfTokenId!(), liquidity)
     transferTokenFromSelf!(sender, token0Id, amount0)
     transferTokenFromSelf!(sender, token1Id, amount1)
+
+    totalSupply = totalSupply - liquidity
+    update(reserve0 - amount0, reserve1 - amount1)
 
     emit Burn(sender, amount0, amount1, liquidity)
     return amount0, amount1
   }
 
   @using(preapprovedAssets = true, assetsInContract = true, checkExternalCaller = false)
-  pub fn swap(sender: Address, tokenInId: ByteVec, amountIn: U256, amountOut: U256) -> () {
+  pub fn swap(sender: Address, to: Address, amount0In: U256, amount1In: U256, amount0Out: U256, amount1Out: U256) -> () {
     assert!(isAssetAddress!(sender), ErrorCodes.InvalidToAddress)
-    assert!(amountOut > 0, ErrorCodes.InsufficientOutputAmount)
-    assert!(tokenInId == token0Id || tokenInId == token1Id, ErrorCodes.InvalidTokenInId)
+    assert!(amount0Out > 0 || amount1Out > 0, ErrorCodes.InsufficientOutputAmount)
+    assert!(amount0Out < reserve0 && amount1Out < reserve1, ErrorCodes.InsufficientLiquidity)
 
     // fee: 0.003 * amountIn
-    let amountInExcludeFee = amountIn * 997
-    let kX1000 = reserve0 * reserve1 * 1000
+    let newReserve0 = reserve0 + amount0In - amount0Out
+    let newReserve1 = reserve1 + amount1In - amount1Out
+    let newReserve0Adjusted = newReserve0 * 1000 - amount0In * 3
+    let newReserve1Adjusted = newReserve1 * 1000 - amount1In * 3
+    let kAdjusted = reserve0 * reserve1 * 1000_000
+    assert!(newReserve0Adjusted * newReserve1Adjusted >= kAdjusted, ErrorCodes.InvalidK)
 
-    if (tokenInId == token0Id) {
-      assert!(amountOut < reserve1, ErrorCodes.InsufficientLiquidity)
-      let newReserve0X1000 = 1000 * reserve0 + amountInExcludeFee
-      let newReserve1 = reserve1 - amountOut
-      assert!(newReserve0X1000 * newReserve1 >= kX1000, ErrorCodes.InvalidK)
-      transferTokenFromSelf!(sender, token1Id, amountOut)
-      update(reserve0 + amountIn, newReserve1)
-    } else {
-      assert!(amountOut < reserve0, ErrorCodes.InsufficientLiquidity)
-      let newReserve0 = reserve0 - amountOut
-      let newReserve1X1000 = 1000 * reserve1 + amountInExcludeFee
-      assert!(newReserve0 * newReserve1X1000 >= kX1000, ErrorCodes.InvalidK)
-      transferTokenFromSelf!(sender, token0Id, amountOut)
-      update(newReserve0, reserve1 + amountIn)
-    }
+    if (amount0In > 0) { transferTokenToSelf!(sender, token0Id, amount0In) }
+    if (amount1In > 0) { transferTokenToSelf!(sender, token1Id, amount1In) }
+    if (amount0Out > 0) { transferTokenFromSelf!(to, token0Id, amount0Out) }
+    if (amount1Out > 0) { transferTokenFromSelf!(to, token1Id, amount1Out) }
 
-    transferTokenToSelf!(sender, tokenInId, amountIn)
-    emit Swap(sender, tokenInId, amountIn, amountOut)
+    update(newReserve0, newReserve1)
+    emit Swap(sender, amount0In, amount1In, amount0Out, amount1Out, to)
   }
 }

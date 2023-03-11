@@ -7,5 +7,5 @@ TxScript SwapMinOut(
   amountOutMin: U256,
   deadline: U256
 ) {
-  router.swapExactTokenForToken{sender -> tokenInId: amountIn}(pair, sender, tokenInId, amountIn, amountOutMin, deadline)
+  router.swapExactTokenForToken{sender -> tokenInId: amountIn}(pair, sender, tokenInId, amountIn, amountOutMin, sender, deadline)
 }

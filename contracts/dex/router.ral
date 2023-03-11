@@ -71,6 +71,7 @@ Contract Router() extends Constants() {
     tokenInId: ByteVec,
     amountIn: U256,
     amountOutMin: U256,
+    to: Address,
     deadline: U256
   ) -> () {
     assert!(deadline >= blockTimeStamp!(), ErrorCodes.Expired)
@@ -78,7 +79,7 @@ Contract Router() extends Constants() {
     let amountInExcludeFee = 997 * amountIn
     let amountOut = (amountInExcludeFee * reserveOut) / (amountInExcludeFee + 1000 * reserveIn)
     assert!(amountOut >= amountOutMin, ErrorCodes.InsufficientOutputAmount)
-    tokenPair.swap{sender -> tokenInId: amountIn}(sender, tokenInId, amountIn, amountOut)
+    swap{sender -> tokenInId: amountIn}(tokenPair, sender, to, tokenInId, amountIn, amountOut)
   }
 
   @using(preapprovedAssets = true)
@@ -88,12 +89,23 @@ Contract Router() extends Constants() {
     tokenInId: ByteVec,
     amountInMax: U256,
     amountOut: U256,
+    to: Address,
     deadline: U256
   ) -> () {
     assert!(deadline >= blockTimeStamp!(), ErrorCodes.Expired)
     let (reserveIn, reserveOut) = getReserveInAndReserveOut(tokenPair, tokenInId)
     let amountIn = ((reserveIn * amountOut * 1000) / ((reserveOut - amountOut) * 997)) + 1
     assert!(amountIn <= amountInMax, ErrorCodes.InsufficientInputAmount)
-    tokenPair.swap{sender -> tokenInId: amountIn}(sender, tokenInId, amountIn, amountOut)
+    swap{sender -> tokenInId: amountIn}(tokenPair, sender, to, tokenInId, amountIn, amountOut)
+  }
+
+  @using(preapprovedAssets = true)
+  fn swap(tokenPair: TokenPair, sender: Address, to: Address, tokenInId: ByteVec, amountIn: U256, amountOut: U256) -> () {
+    let (token0Id, _) = tokenPair.getTokenPair()
+    if (tokenInId == token0Id) {
+      tokenPair.swap{sender -> tokenInId: amountIn}(sender, to, amountIn, 0, 0, amountOut)
+    } else {
+      tokenPair.swap{sender -> tokenInId: amountIn}(sender, to, 0, amountIn, amountOut, 0)
+    }
   }
 }

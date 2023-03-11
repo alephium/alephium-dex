@@ -1,6 +1,6 @@
 import { ContractState, web3 } from '@alephium/web3'
 import { expectAssertionError } from '@alephium/web3-test'
-import { Router, TokenPair, TokenPairTypes } from '../artifacts/ts'
+import { Router, TokenPairTypes } from '../artifacts/ts'
 import {
   buildProject,
   createRouter,
@@ -243,6 +243,7 @@ describe('test router', () => {
           tokenInId: tokenInId,
           amountIn: amountIn,
           amountOutMin: amountOutMin,
+          to: sender,
           deadline: deadline
         },
         existingContracts: routerFixture.dependencies.concat([tokenPairState]),
@@ -307,6 +308,7 @@ describe('test router', () => {
           tokenInId: tokenInId,
           amountInMax: amountInMax,
           amountOut: amountOut,
+          to: sender,
           deadline: deadline
         },
         existingContracts: routerFixture.dependencies.concat([tokenPairState]),

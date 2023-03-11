@@ -177,9 +177,11 @@ describe('test token pair', () => {
           existingContracts: fixture.dependencies,
           testArgs: {
             sender: sender,
-            tokenInId: token0Id,
-            amountIn: swapAmount,
-            amountOut: outputAmount
+            amount0In: swapAmount,
+            amount1In: 0n,
+            amount0Out: 0n,
+            amount1Out: outputAmount,
+            to: sender
           },
           inputAssets: [{
             address: sender,
@@ -210,9 +212,11 @@ describe('test token pair', () => {
       existingContracts: fixture.dependencies,
       testArgs: {
         sender: sender,
-        tokenInId: token0Id,
-        amountIn: swapAmount,
-        amountOut: expectedOutputAmount
+        amount0In: swapAmount,
+        amount1In: 0n,
+        amount0Out: 0n,
+        amount1Out: expectedOutputAmount,
+        to: sender
       },
       inputAssets: [{
         address: sender,
@@ -227,9 +231,11 @@ describe('test token pair', () => {
     const event = swapResult.events[0] as TokenPairTypes.SwapEvent
     expect(event.fields).toEqual({
       sender: sender,
-      tokenInId: token0Id,
-      amountIn: swapAmount,
-      amountOut: expectedOutputAmount
+      amount0In: swapAmount,
+      amount1In: 0n,
+      amount0Out: 0n,
+      amount1Out: expectedOutputAmount,
+      to: sender
     })
 
     const tokenPairState = getContractState<TokenPairTypes.Fields>(swapResult.contracts, fixture.contractId)
@@ -257,9 +263,11 @@ describe('test token pair', () => {
       existingContracts: fixture.dependencies,
       testArgs: {
         sender: sender,
-        tokenInId: token1Id,
-        amountIn: swapAmount,
-        amountOut: expectedOutputAmount
+        amount0In: 0n,
+        amount1In: swapAmount,
+        amount0Out: expectedOutputAmount,
+        amount1Out: 0n,
+        to: sender
       },
       inputAssets: [{
         address: sender,
@@ -274,9 +282,11 @@ describe('test token pair', () => {
     const event = swapResult.events[0] as TokenPairTypes.SwapEvent
     expect(event.fields).toEqual({
       sender: sender,
-      tokenInId: token1Id,
-      amountIn: swapAmount,
-      amountOut: expectedOutputAmount
+      amount0In: 0n,
+      amount1In: swapAmount,
+      amount0Out: expectedOutputAmount,
+      amount1Out: 0n,
+      to: sender
     })
 
     const tokenPairState = getContractState<TokenPairTypes.Fields>(swapResult.contracts, fixture.contractId)
@@ -372,9 +382,11 @@ describe('test token pair', () => {
       existingContracts: fixture.dependencies,
       testArgs: {
         sender: sender,
-        tokenInId: token0Id,
-        amountIn: swapAmount,
-        amountOut: expandTo18Decimals(1)
+        amount0In: swapAmount,
+        amount1In: 0n,
+        amount0Out: 0n,
+        amount1Out: expandTo18Decimals(1),
+        to: sender
       },
       inputAssets: [{
         address: sender,
