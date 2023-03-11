@@ -5,3 +5,4 @@ lerna-debug.log
 /dev
 /build
 .project.json
+.deployments.devnet.json
