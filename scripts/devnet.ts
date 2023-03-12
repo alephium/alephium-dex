@@ -207,7 +207,7 @@ program
       console.log(`ALPH token id: ${ALPH_TOKEN_ID}, address: ${addressFromContractId(ALPH_TOKEN_ID)}`)
       const tokenInfos = await createTokens(signer, tokenNumber)
       const content = JSON.stringify(tokenInfos, null, 2)
-      const filepath = path.join(process.cwd(), 'ui', 'src', 'utils', 'devnet-token-list.json')
+      const filepath = path.join(process.cwd(), 'src', 'utils', 'devnet-token-list.json')
       fs.writeFileSync(filepath, content)
       const tokenIds = tokenInfos.map((tokenInfo) => tokenInfo.id)
       if (opts.createPair && opts.init) {

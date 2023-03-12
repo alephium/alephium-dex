@@ -20,7 +20,7 @@
     "noImplicitOverride": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
+    "module": "CommonJS",
     "isolatedModules": true,
     "downlevelIteration": true,
     "noEmit": true,
