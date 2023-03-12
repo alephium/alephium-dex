@@ -204,7 +204,9 @@ async function swapMaxIn(
       amountOut: amountOut,
       deadline: deadline(ttl)
     },
-    tokens: [{ id: tokenInId, amount: amountInMax }]
+    tokens: tokenInId !== ALPH_TOKEN_ID
+      ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountInMax }]
+      : [{ id: ALPH_TOKEN_ID, amount: amountInMax + DUST_AMOUNT }]
   })
   await waitTxConfirmed(nodeProvider, result.txId, 1)
   return result
