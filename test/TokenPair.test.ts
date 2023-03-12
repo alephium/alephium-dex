@@ -1,4 +1,4 @@
-import { ALPH_TOKEN_ID, Asset, ONE_ALPH, sleep, Token, web3 } from '@alephium/web3'
+import { ALPH_TOKEN_ID, Asset, DUST_AMOUNT, ONE_ALPH, sleep, Token, web3 } from '@alephium/web3'
 import {
   buildProject,
   contractBalanceOf,
@@ -11,8 +11,7 @@ import {
   randomP2PKHAddress,
   randomTokenId,
   randomTokenPair,
-  defaultGasFee,
-  dustAmount
+  defaultGasFee
 } from './fixtures/DexFixture'
 import { expectAssertionError } from '@alephium/web3-test'
 import { TokenPair, TokenPairTypes } from '../artifacts/ts'
@@ -321,9 +320,11 @@ describe('test token pair', () => {
       existingContracts: fixture.dependencies,
       testArgs: {
         sender: sender,
-        tokenInId: ALPH_TOKEN_ID,
-        amountIn: swapAmount,
-        amountOut: expectedOutputAmount
+        amount0In: swapAmount,
+        amount1In: 0n,
+        amount0Out: 0n,
+        amount1Out: expectedOutputAmount,
+        to: sender
       },
       inputAssets: [{
         address: sender,
@@ -335,9 +336,11 @@ describe('test token pair', () => {
     const event = swapResult.events[0] as TokenPairTypes.SwapEvent
     expect(event.fields).toEqual({
       sender: sender,
-      tokenInId: ALPH_TOKEN_ID,
-      amountIn: swapAmount,
-      amountOut: expectedOutputAmount
+      amount0In: swapAmount,
+      amount1In: 0n,
+      amount0Out: 0n,
+      amount1Out: expectedOutputAmount,
+      to: sender
     })
 
     const tokenPairState = getContractState<TokenPairTypes.Fields>(swapResult.contracts, fixture.contractId)
@@ -348,9 +351,9 @@ describe('test token pair', () => {
 
     const senderTokenOutput = swapResult.txOutputs.find((o) => o.address === sender && o.tokens !== undefined && o.tokens.length > 0)!
     expect(senderTokenOutput.tokens!).toEqual([{ id: token1Id, amount: expectedOutputAmount }])
-    expect(senderTokenOutput.alphAmount).toEqual(dustAmount)
+    expect(senderTokenOutput.alphAmount).toEqual(DUST_AMOUNT)
     const senderALPHOutput = swapResult.txOutputs.find((o) => o.address === sender && (o.tokens === undefined || o.tokens.length === 0))!
-    expect(senderALPHOutput.alphAmount).toEqual(ONE_ALPH * 2n - swapAmount - defaultGasFee - dustAmount)
+    expect(senderALPHOutput.alphAmount).toEqual(ONE_ALPH * 2n - swapAmount - defaultGasFee - DUST_AMOUNT)
   })
 
   test('swap ALPH by token', async () => {
@@ -372,9 +375,11 @@ describe('test token pair', () => {
       existingContracts: fixture.dependencies,
       testArgs: {
         sender: sender,
-        tokenInId: token1Id,
-        amountIn: swapAmount,
-        amountOut: expectedOutputAmount
+        amount0In: 0n,
+        amount1In: swapAmount,
+        amount0Out: expectedOutputAmount,
+        amount1Out: 0n,
+        to: sender
       },
       inputAssets: [{
         address: sender,
@@ -389,9 +394,11 @@ describe('test token pair', () => {
     const event = swapResult.events[0] as TokenPairTypes.SwapEvent
     expect(event.fields).toEqual({
       sender: sender,
-      tokenInId: token1Id,
-      amountIn: swapAmount,
-      amountOut: expectedOutputAmount
+      amount0In: 0n,
+      amount1In: swapAmount,
+      amount0Out: expectedOutputAmount,
+      amount1Out: 0n,
+      to: sender
     })
 
     const tokenPairState = getContractState<TokenPairTypes.Fields>(swapResult.contracts, fixture.contractId)
@@ -402,6 +409,65 @@ describe('test token pair', () => {
 
     const senderALPHOutput = swapResult.txOutputs.find((o) => o.address === sender)!
     expect(senderALPHOutput.alphAmount).toEqual(ONE_ALPH + expectedOutputAmount - defaultGasFee)
+  })
+
+  test('swap to another address', async () => {
+    const toAddress =  randomP2PKHAddress()
+    const token0Amount = expandTo18Decimals(5)
+    const token1Amount = expandTo18Decimals(10)
+    const { contractState } = await mint(fixture, sender, token0Amount, token1Amount)
+
+    const swapAmount = expandTo18Decimals(1)
+    const expectedOutputAmount = 453305446940074565n
+
+    const swapResult = await TokenPair.testSwapMethod({
+      initialFields: contractState.fields,
+      initialAsset: contractState.asset,
+      address: fixture.address,
+      existingContracts: fixture.dependencies,
+      testArgs: {
+        sender: sender,
+        amount0In: 0n,
+        amount1In: swapAmount,
+        amount0Out: expectedOutputAmount,
+        amount1Out: 0n,
+        to: toAddress
+      },
+      inputAssets: [
+        {
+          address: sender,
+          asset: {
+            alphAmount: ONE_ALPH,
+            tokens: [{ id: token1Id, amount: swapAmount }]
+          }
+        },
+        { address: toAddress, asset: { alphAmount: DUST_AMOUNT } }
+      ]
+    })
+
+    expect(swapResult.events.length).toEqual(1)
+    const event = swapResult.events[0] as TokenPairTypes.SwapEvent
+    expect(event.fields).toEqual({
+      sender: sender,
+      amount0In: 0n,
+      amount1In: swapAmount,
+      amount0Out: expectedOutputAmount,
+      amount1Out: 0n,
+      to: toAddress
+    })
+
+    const tokenPairState = getContractState<TokenPairTypes.Fields>(swapResult.contracts, fixture.contractId)
+    expect(tokenPairState.fields.reserve0).toEqual(token0Amount - expectedOutputAmount)
+    expect(tokenPairState.fields.reserve1).toEqual(token1Amount + swapAmount)
+    expect(contractBalanceOf(tokenPairState, token0Id)).toEqual(token0Amount - expectedOutputAmount)
+    expect(contractBalanceOf(tokenPairState, token1Id)).toEqual(token1Amount + swapAmount)
+
+    const senderTokenOutput = swapResult.txOutputs.find((o) => o.address === sender && o.tokens !== undefined && o.tokens.length > 0)
+    expect(senderTokenOutput).toEqual(undefined)
+
+    const toAddressOutput = swapResult.txOutputs.find((o) => o.address === toAddress && o.tokens !== undefined && o.tokens.length > 0)!
+    expect(toAddressOutput.alphAmount).toEqual(DUST_AMOUNT)
+    expect(toAddressOutput.tokens).toEqual([{ id: token0Id, amount: expectedOutputAmount }])
   })
 
   test('swap:gas', async () => {
@@ -422,9 +488,11 @@ describe('test token pair', () => {
       existingContracts: fixture.dependencies,
       testArgs: {
         sender: sender,
-        tokenInId: token1Id,
-        amountIn: swapAmount,
-        amountOut: expectedOutputAmount
+        amount0In: 0n,
+        amount1In: swapAmount,
+        amount0Out: expectedOutputAmount,
+        amount1Out: 0n,
+        to: sender
       },
       inputAssets: [{
         address: sender,
@@ -435,7 +503,7 @@ describe('test token pair', () => {
       }]
     })
 
-    expect(swapResult.gasUsed).toEqual(23223)
+    expect(swapResult.gasUsed).toEqual(23343)
   })
 
   test('burn', async () => {
