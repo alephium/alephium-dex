@@ -41,6 +41,14 @@ Contract TokenPair(
     return totalSupply
   }
 
+  pub fn getPrice0CumulativeLast() -> U256 {
+    return price0CumulativeLast
+  }
+
+  pub fn getPrice1CumulativeLast() -> U256 {
+    return price1CumulativeLast
+  }
+
   @using(updateFields = true)
   fn update(newReserve0: U256, newReserve1: U256) -> () {
     let max = 1 << 112 - 1

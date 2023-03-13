@@ -5,12 +5,13 @@ import {
   contractIdFromAddress,
   ContractState,
   Fields,
+  number256ToBigint,
   Project,
   Token
 } from '@alephium/web3'
 import { randomBytes } from 'crypto'
 import * as base58 from 'bs58'
-import { TokenPairFactory, TokenPair, Router } from '../../artifacts/ts'
+import { TokenPairFactory, TokenPair, Router, TestToken, GetToken } from '../../artifacts/ts'
 
 export const oneAlph = 10n ** 18n
 export const minimalAlphInContract = oneAlph
@@ -146,6 +147,11 @@ export function createRouter() {
 
 function sameTokens(expected: Token[], have: Token[]): boolean {
   return expected.every((a) => have.some((b) => a.amount === b.amount && a.id === b.id))
+}
+
+export function contractBalanceOf(state: ContractState, tokenId: string): bigint {
+  const token = state.asset.tokens?.find((t) => t.id === tokenId)
+  return token === undefined ? 0n : number256ToBigint(token.amount)
 }
 
 export function expectTokensEqual(expected: Token[], have: Token[]) {
