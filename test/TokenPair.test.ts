@@ -1,4 +1,4 @@
-import { ALPH_TOKEN_ID, Asset, DUST_AMOUNT, ONE_ALPH, sleep, Token, web3 } from '@alephium/web3'
+import { ALPH_TOKEN_ID, DUST_AMOUNT, ONE_ALPH, sleep, web3 } from '@alephium/web3'
 import {
   buildProject,
   contractBalanceOf,
@@ -7,60 +7,21 @@ import {
   ErrorCodes,
   expectTokensEqual,
   getContractState,
-  oneAlph,
   randomP2PKHAddress,
   randomTokenId,
   randomTokenPair,
-  defaultGasFee
+  defaultGasFee,
+  expandTo18Decimals,
+  mint,
+  encodePrice
 } from './fixtures/DexFixture'
 import { expectAssertionError } from '@alephium/web3-test'
 import { TokenPair, TokenPairTypes } from '../artifacts/ts'
 
 const MinimumLiquidity = 1000n
 
-export async function mint(
-  tokenPairFixture: ContractFixture<TokenPairTypes.Fields>,
-  sender: string,
-  amount0: bigint,
-  amount1: bigint,
-  initialFields?: TokenPairTypes.Fields,
-  initialAsset?: Asset
-) {
-  const token0Id = tokenPairFixture.selfState.fields.token0Id
-  const token1Id = tokenPairFixture.selfState.fields.token1Id
-  const initFields = initialFields ?? tokenPairFixture.selfState.fields
-  const initAsset = initialAsset ?? tokenPairFixture.selfState.asset
-
-  const tokens: Token[] = [{ id: token1Id, amount: amount1 }]
-  let alphAmount: bigint = oneAlph
-  if (token0Id === ALPH_TOKEN_ID) {
-    alphAmount += amount0
-  } else {
-    tokens.push({ id: token0Id, amount: amount0 })
-  }
-
-  const inputAssets = [{ address: sender, asset: { alphAmount: alphAmount, tokens: tokens } }]
-  const testResult = await TokenPair.testMintMethod({
-    initialFields: initFields,
-    initialAsset: initAsset,
-    address: tokenPairFixture.address,
-    existingContracts: tokenPairFixture.dependencies,
-    testArgs: { sender: sender, amount0: amount0, amount1: amount1 },
-    inputAssets: inputAssets
-  })
-  const contractState = getContractState<TokenPairTypes.Fields>(testResult.contracts, tokenPairFixture.contractId)
-  const reserve0 = contractState.fields.reserve0
-  const reserve1 = contractState.fields.reserve1
-  const totalSupply = contractState.fields.totalSupply
-  return { testResult: testResult, contractState, reserve0, reserve1, totalSupply }
-}
-
 describe('test token pair', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
-
-  function expandTo18Decimals(num: bigint | number): bigint {
-    return BigInt(num) * (10n ** 18n)
-  }
 
   let sender: string
   let token0Id: string
@@ -503,7 +464,7 @@ describe('test token pair', () => {
       }]
     })
 
-    expect(swapResult.gasUsed).toEqual(23343)
+    expect(swapResult.gasUsed).toEqual(23344)
   })
 
   test('burn', async () => {
@@ -554,10 +515,6 @@ describe('test token pair', () => {
   })
 
   it('price{0,1}CumulativeLast', async () => {
-    function encodePrice(reserve0: bigint, reserve1: bigint) {
-      return [(reserve1 * (2n ** 112n)) / reserve0, (reserve0 * (2n ** 112n)) / reserve1]
-    }
-
     const token0Amount = expandTo18Decimals(3)
     const token1Amount = expandTo18Decimals(3)
     const { contractState } = await mint(fixture, sender, token0Amount, token1Amount)

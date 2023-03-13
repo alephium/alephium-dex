@@ -95,6 +95,10 @@ export namespace TokenPairTypes {
       params: Omit<CallContractParams<{}>, "args">;
       result: CallContractResult<[bigint, bigint]>;
     };
+    getBlockTimeStampLast: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<bigint>;
+    };
     getPrice0CumulativeLast: {
       params: Omit<CallContractParams<{}>, "args">;
       result: CallContractResult<bigint>;
@@ -186,6 +190,12 @@ class Factory extends ContractFactory<
     return testMethod(this, "getReserves", params);
   }
 
+  async testGetBlockTimeStampLastMethod(
+    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+  ): Promise<TestContractResult<bigint>> {
+    return testMethod(this, "getBlockTimeStampLast", params);
+  }
+
   async testGetPrice0CumulativeLastMethod(
     params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
   ): Promise<TestContractResult<bigint>> {
@@ -247,7 +257,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "7ba33f7e825ace3546bd2972e1392e3576748316abdaa281801e5e00b55540ab"
+    "2926998b7402d11482083f629e51820a858d402e31052e2c08717641a4afaee3"
   )
 );
 
@@ -394,6 +404,17 @@ export class TokenPairInstance extends ContractInstance {
       TokenPair,
       this,
       "getReserves",
+      params === undefined ? {} : params
+    );
+  }
+
+  async callGetBlockTimeStampLastMethod(
+    params?: TokenPairTypes.CallMethodParams<"getBlockTimeStampLast">
+  ): Promise<TokenPairTypes.CallMethodResult<"getBlockTimeStampLast">> {
+    return callMethod(
+      TokenPair,
+      this,
+      "getBlockTimeStampLast",
       params === undefined ? {} : params
     );
   }

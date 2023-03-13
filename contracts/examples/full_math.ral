@@ -1,0 +1,73 @@
+Abstract Contract FullMath() extends OracleErrors() {
+  const Resolution = 112
+
+  fn sub(a: U256, b: U256) -> U256 {
+    if (a >= b) {
+      return a - b
+    } else {
+      return u256Max!() - (b - a) + 1
+    }
+  }
+
+  pub fn fullMul(x: U256, y: U256) -> (U256, U256) {
+    let mm = mulModN!(x, y, u256Max!())
+    let l = x |*| y
+    let mut h = sub(mm, l)
+    if (mm < l) {
+      h = sub(h, 1)
+    }
+    return l, h
+  }
+
+  // from: https://github.com/Uniswap/v3-core/blob/main/contracts/libraries/FullMath.sol
+  pub fn mulDiv(a: U256, b: U256, mut denominator: U256) -> U256 {
+    assert!(denominator != 0, ErrorCodes.DivByZero)
+    let u256Max = u256Max!()
+    let (mut prod0, mut prod1) = fullMul(a, b)
+    if (prod1 == 0) {
+      return prod0 / denominator
+    }
+
+    assert!(denominator > prod1, ErrorCodes.FullDivOverflow)
+
+    let remainder = mulModN!(a, b, denominator)
+    if (remainder > prod0) {
+      prod1 = sub(prod1, 1)
+    }
+    prod0 = sub(prod0, remainder)
+
+    let mut twos = (u256Max - denominator + 1) & denominator
+    denominator = denominator / twos
+    prod0 = prod0 / twos
+    twos = (sub(0, twos) / twos) |+| 1
+    prod0 = prod0 | (prod1 |*| twos)
+
+    let mut inv = (3 |*| denominator) ^ 2
+    inv = inv |*| sub(2, denominator |*| inv)
+    inv = inv |*| sub(2, denominator |*| inv)
+    inv = inv |*| sub(2, denominator |*| inv)
+    inv = inv |*| sub(2, denominator |*| inv)
+    inv = inv |*| sub(2, denominator |*| inv)
+    inv = inv |*| sub(2, denominator |*| inv)
+    return prod0 |*| inv
+  }
+
+  pub fn mul(x: U256, y: U256) -> U256 {
+    if (y == 0) {
+      return 0
+    }
+    let z = x |*| y
+    assert!(x == (z / y), ErrorCodes.MulOverflow)
+    return z
+  }
+
+  pub fn fraction(numerator: U256, denominator: U256) -> U256 {
+    assert!(denominator != 0, ErrorCodes.DivByZero)
+    if (numerator == 0) {
+      return 0
+    }
+    let result = if (numerator <= 1 << 144 - 1) (numerator << Resolution) / denominator else mulDiv(numerator, 1 << 112, denominator)
+    assert!(result <= 1 << 224 - 1, ErrorCodes.FractionOverflow)
+    return result
+  }
+}

@@ -1,5 +1,6 @@
 import {
   addressFromContractId,
+  ALPH_TOKEN_ID,
   Asset,
   binToHex,
   contractIdFromAddress,
@@ -12,7 +13,7 @@ import {
 } from '@alephium/web3'
 import { randomBytes } from 'crypto'
 import * as base58 from 'bs58'
-import { TokenPairFactory, TokenPair, Router, TestToken, GetToken } from '../../artifacts/ts'
+import { TokenPairFactory, TokenPair, Router, TokenPairTypes } from '../../artifacts/ts'
 
 export const oneAlph = 10n ** 18n
 export const minimalAlphInContract = oneAlph
@@ -168,4 +169,49 @@ export function expectAssetsEqual(expected: Asset[], have: Asset[]) {
 
 export function getContractState<T extends Fields>(contracts: ContractState[], contractId: string): ContractState<T> {
   return contracts.find((c) => c.contractId === contractId)! as ContractState<T>
+}
+
+export function expandTo18Decimals(num: bigint | number): bigint {
+  return BigInt(num) * (10n ** 18n)
+}
+
+export async function mint(
+  tokenPairFixture: ContractFixture<TokenPairTypes.Fields>,
+  sender: string,
+  amount0: bigint,
+  amount1: bigint,
+  initialFields?: TokenPairTypes.Fields,
+  initialAsset?: Asset
+) {
+  const token0Id = tokenPairFixture.selfState.fields.token0Id
+  const token1Id = tokenPairFixture.selfState.fields.token1Id
+  const initFields = initialFields ?? tokenPairFixture.selfState.fields
+  const initAsset = initialAsset ?? tokenPairFixture.selfState.asset
+
+  const tokens: Token[] = [{ id: token1Id, amount: amount1 }]
+  let alphAmount: bigint = oneAlph
+  if (token0Id === ALPH_TOKEN_ID) {
+    alphAmount += amount0
+  } else {
+    tokens.push({ id: token0Id, amount: amount0 })
+  }
+
+  const inputAssets = [{ address: sender, asset: { alphAmount: alphAmount, tokens: tokens } }]
+  const testResult = await TokenPair.testMintMethod({
+    initialFields: initFields,
+    initialAsset: initAsset,
+    address: tokenPairFixture.address,
+    existingContracts: tokenPairFixture.dependencies,
+    testArgs: { sender: sender, amount0: amount0, amount1: amount1 },
+    inputAssets: inputAssets
+  })
+  const contractState = getContractState<TokenPairTypes.Fields>(testResult.contracts, tokenPairFixture.contractId)
+  const reserve0 = contractState.fields.reserve0
+  const reserve1 = contractState.fields.reserve1
+  const totalSupply = contractState.fields.totalSupply
+  return { testResult: testResult, contractState, reserve0, reserve1, totalSupply }
+}
+
+export function encodePrice(reserve0: bigint, reserve1: bigint) {
+  return [(reserve1 * (2n ** 112n)) / reserve0, (reserve0 * (2n ** 112n)) / reserve1]
 }
