@@ -1,12 +1,11 @@
-import { ContractState, web3 } from '@alephium/web3'
+import { ContractState, DUST_AMOUNT, web3 } from '@alephium/web3'
 import { expectAssertionError } from '@alephium/web3-test'
-import { Router, TokenPair, TokenPairTypes } from '../artifacts/ts'
+import { Router, TokenPairTypes } from '../artifacts/ts'
 import {
   buildProject,
   createRouter,
   createTokenPair,
   defaultGasFee,
-  dustAmount,
   ErrorCodes,
   expectAssetsEqual,
   getContractState,
@@ -123,8 +122,8 @@ describe('test router', () => {
     expect(result.returns).toEqual([500n, 15000n, 2738n])
     const assetOutputs = result.txOutputs.filter((c) => c.address === sender)
     expectAssetsEqual(assetOutputs, [
-      { alphAmount: dustAmount, tokens: [{ id: tokenPairFixture.contractId, amount: 2738n }] },
-      { alphAmount: oneAlph - defaultGasFee - dustAmount, tokens: [] }
+      { alphAmount: DUST_AMOUNT, tokens: [{ id: tokenPairFixture.contractId, amount: 2738n }] },
+      { alphAmount: oneAlph - defaultGasFee - DUST_AMOUNT, tokens: [] }
     ])
   })
 
@@ -182,9 +181,9 @@ describe('test router', () => {
     expect(result.returns).toEqual([499n, 14997n])
     const assetOutputs = result.txOutputs.filter((c) => c.address === sender)
     expectAssetsEqual(assetOutputs, [
-      { alphAmount: dustAmount, tokens: [{ id: token0Id, amount: 499n }] },
-      { alphAmount: dustAmount, tokens: [{ id: token1Id, amount: 14997n }] },
-      { alphAmount: oneAlph - defaultGasFee - dustAmount * 2n, tokens: [] }
+      { alphAmount: DUST_AMOUNT, tokens: [{ id: token0Id, amount: 499n }] },
+      { alphAmount: DUST_AMOUNT, tokens: [{ id: token1Id, amount: 14997n }] },
+      { alphAmount: oneAlph - defaultGasFee - DUST_AMOUNT * 2n, tokens: [] }
     ])
 
     await expectAssertionError(
@@ -243,6 +242,7 @@ describe('test router', () => {
           tokenInId: tokenInId,
           amountIn: amountIn,
           amountOutMin: amountOutMin,
+          to: sender,
           deadline: deadline
         },
         existingContracts: routerFixture.dependencies.concat([tokenPairState]),
@@ -275,8 +275,8 @@ describe('test router', () => {
     expect(tokenPairState.fields.totalSupply).toEqual(5477n)
     const assetOutputs = result.txOutputs.filter((c) => c.address === sender)
     expectAssetsEqual(assetOutputs, [
-      { alphAmount: dustAmount, tokens: [{ id: token0Id, amount: 332n }] },
-      { alphAmount: oneAlph - defaultGasFee - dustAmount, tokens: [] }
+      { alphAmount: DUST_AMOUNT, tokens: [{ id: token0Id, amount: 332n }] },
+      { alphAmount: oneAlph - defaultGasFee - DUST_AMOUNT, tokens: [] }
     ])
 
     await expectAssertionError(
@@ -307,6 +307,7 @@ describe('test router', () => {
           tokenInId: tokenInId,
           amountInMax: amountInMax,
           amountOut: amountOut,
+          to: sender,
           deadline: deadline
         },
         existingContracts: routerFixture.dependencies.concat([tokenPairState]),
@@ -339,8 +340,8 @@ describe('test router', () => {
     expect(tokenPairState.fields.totalSupply).toEqual(5477n)
     const assetOutputs = result.txOutputs.filter((c) => c.address === sender)
     expectAssetsEqual(assetOutputs, [
-      { alphAmount: dustAmount, tokens: [{ id: token1Id, amount: 15000n }] },
-      { alphAmount: oneAlph - defaultGasFee - dustAmount, tokens: [] }
+      { alphAmount: DUST_AMOUNT, tokens: [{ id: token1Id, amount: 15000n }] },
+      { alphAmount: oneAlph - defaultGasFee - DUST_AMOUNT, tokens: [] }
     ])
 
     await expectAssertionError(

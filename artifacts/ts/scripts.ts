@@ -12,7 +12,6 @@ import {
 import { default as AddLiquidityScriptJson } from "../scripts/add_liquidity.ral.json";
 import { default as CreatePairScriptJson } from "../scripts/create_pair.ral.json";
 import { default as RemoveLiquidityScriptJson } from "../scripts/remove_liquidity.ral.json";
-import { default as SwapScriptJson } from "../scripts/swap.ral.json";
 import { default as SwapMaxInScriptJson } from "../scripts/swap_max_in.ral.json";
 import { default as SwapMinOutScriptJson } from "../scripts/swap_min_out.ral.json";
 import { default as GetTokenScriptJson } from "../test/get_token.ral.json";
@@ -74,24 +73,6 @@ export namespace RemoveLiquidity {
   }
 
   export const script = Script.fromJson(RemoveLiquidityScriptJson);
-}
-
-export namespace Swap {
-  export async function execute(
-    signer: SignerProvider,
-    params: ExecuteScriptParams<{
-      sender: HexString;
-      pair: HexString;
-      tokenInId: HexString;
-      amountIn: bigint;
-      amountOut: bigint;
-    }>
-  ): Promise<ExecuteScriptResult> {
-    const signerParams = await script.txParamsForExecution(signer, params);
-    return await signer.signAndSubmitExecuteScriptTx(signerParams);
-  }
-
-  export const script = Script.fromJson(SwapScriptJson);
 }
 
 export namespace SwapMaxIn {

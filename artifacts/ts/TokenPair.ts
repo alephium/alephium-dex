@@ -54,9 +54,11 @@ export namespace TokenPairTypes {
   }>;
   export type SwapEvent = ContractEvent<{
     sender: HexString;
-    tokenInId: HexString;
-    amountIn: bigint;
-    amountOut: bigint;
+    amount0In: bigint;
+    amount1In: bigint;
+    amount0Out: bigint;
+    amount1Out: bigint;
+    to: HexString;
   }>;
 }
 
@@ -160,9 +162,11 @@ class Factory extends ContractFactory<
       TokenPairTypes.Fields,
       {
         sender: HexString;
-        tokenInId: HexString;
-        amountIn: bigint;
-        amountOut: bigint;
+        to: HexString;
+        amount0In: bigint;
+        amount1In: bigint;
+        amount0Out: bigint;
+        amount1Out: bigint;
       }
     >
   ): Promise<TestContractResult<null>> {
@@ -175,7 +179,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "c463359672c9fc59dea109dde1c3c94b1cb71049f50035a17093a5dfcb15ada3"
+    "7ba33f7e825ace3546bd2972e1392e3576748316abdaa281801e5e00b55540ab"
   )
 );
 
