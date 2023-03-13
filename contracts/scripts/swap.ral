@@ -1,9 +1,0 @@
-TxScript Swap(
-  sender: Address,
-  pair: TokenPair,
-  tokenInId: ByteVec,
-  amountIn: U256,
-  amountOut: U256
-) {
-  pair.swap{sender -> tokenInId: amountIn}(sender, tokenInId, amountIn, amountOut)
-}

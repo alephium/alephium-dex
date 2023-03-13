@@ -5,6 +5,7 @@ import {
   contractIdFromAddress,
   ContractState,
   Fields,
+  groupOfAddress,
   number256ToBigint,
   Project,
   Token
@@ -19,7 +20,6 @@ export const maxAlphAmount = 10n ** 18n * 1000000000n
 export const gasPrice = 100000000000n
 export const maxGasPerTx = 625000n
 export const defaultGasFee = gasPrice * maxGasPerTx
-export const dustAmount = 10n ** 15n
 
 export enum ErrorCodes {
   ReserveOverflow,

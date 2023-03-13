@@ -6,7 +6,8 @@ import {
   NodeProvider,
   node,
   ALPH_TOKEN_ID,
-  prettifyTokenAmount
+  prettifyTokenAmount,
+  DUST_AMOUNT
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
 import { checkTxConfirmedFrequency, network, networkName } from "./consts"
@@ -175,7 +176,9 @@ async function swapMinOut(
       amountOutMin: amountOutMin,
       deadline: deadline(ttl)
     },
-    tokens: [{ id: tokenInId, amount: amountIn }]
+    tokens: tokenInId !== ALPH_TOKEN_ID
+      ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountIn }]
+      : [{ id: ALPH_TOKEN_ID, amount: amountIn + DUST_AMOUNT }]
   })
   await waitTxConfirmed(nodeProvider, result.txId, 1)
   return result
@@ -201,7 +204,9 @@ async function swapMaxIn(
       amountOut: amountOut,
       deadline: deadline(ttl)
     },
-    tokens: [{ id: tokenInId, amount: amountInMax }]
+    tokens: tokenInId !== ALPH_TOKEN_ID
+      ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountInMax }]
+      : [{ id: ALPH_TOKEN_ID, amount: amountInMax + DUST_AMOUNT }]
   })
   await waitTxConfirmed(nodeProvider, result.txId, 1)
   return result

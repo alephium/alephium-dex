@@ -24,6 +24,9 @@ function getNetworkConfig(network: NetworkName): NetworkConfig {
   }
 
   const deployment = (network === 'testnet' ? testnetDeployment : devnetDeployment) as any
+  if (deployment.contracts === undefined) {
+    throw new Error(`Please deploy the DEX contract to ${networkName} first`)
+  }
   return {
     networkId: network === 'testnet' ? 1 : 4,
     groupIndex: groupOfAddress(deployment.deployerAddress),
