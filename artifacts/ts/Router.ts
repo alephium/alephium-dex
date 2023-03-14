@@ -19,6 +19,7 @@ import {
   subscribeContractEvents,
   testMethod,
   callMethod,
+  multicallMethods,
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
@@ -28,6 +29,44 @@ import { default as RouterContractJson } from "../dex/router.ral.json";
 // Custom types for the contract
 export namespace RouterTypes {
   export type State = Omit<ContractState<any>, "fields">;
+
+  export interface CallMethodTable {
+    addLiquidity: {
+      params: CallContractParams<{
+        tokenPair: HexString;
+        sender: HexString;
+        amount0Desired: bigint;
+        amount1Desired: bigint;
+        amount0Min: bigint;
+        amount1Min: bigint;
+        deadline: bigint;
+      }>;
+      result: CallContractResult<[bigint, bigint, bigint]>;
+    };
+    removeLiquidity: {
+      params: CallContractParams<{
+        tokenPairId: HexString;
+        sender: HexString;
+        liquidity: bigint;
+        amount0Min: bigint;
+        amount1Min: bigint;
+        deadline: bigint;
+      }>;
+      result: CallContractResult<[bigint, bigint]>;
+    };
+  }
+  export type CallMethodParams<T extends keyof CallMethodTable> =
+    CallMethodTable[T]["params"];
+  export type CallMethodResult<T extends keyof CallMethodTable> =
+    CallMethodTable[T]["result"];
+  export type MultiCallParams = Partial<{
+    [Name in keyof CallMethodTable]: CallMethodTable[Name]["params"];
+  }>;
+  export type MultiCallResults<T extends MultiCallParams> = {
+    [MaybeName in keyof T]: MaybeName extends keyof CallMethodTable
+      ? CallMethodTable[MaybeName]["result"]
+      : undefined;
+  };
 }
 
 class Factory extends ContractFactory<RouterInstance, {}> {
@@ -167,7 +206,7 @@ export const Router = new Factory(
   Contract.fromJson(
     RouterContractJson,
     "",
-    "e6430ee982958ff469f5a965ab9efc52f5a2552dad2c98834913579c20a5afc3"
+    "8b04be2dd9da1696690fee435abf99af0232d10388336155a147d9006c60ffdb"
   )
 );
 
@@ -182,29 +221,24 @@ export class RouterInstance extends ContractInstance {
   }
 
   async callAddLiquidityMethod(
-    params: CallContractParams<{
-      tokenPair: HexString;
-      sender: HexString;
-      amount0Desired: bigint;
-      amount1Desired: bigint;
-      amount0Min: bigint;
-      amount1Min: bigint;
-      deadline: bigint;
-    }>
-  ): Promise<CallContractResult<[bigint, bigint, bigint]>> {
+    params: RouterTypes.CallMethodParams<"addLiquidity">
+  ): Promise<RouterTypes.CallMethodResult<"addLiquidity">> {
     return callMethod(Router, this, "addLiquidity", params);
   }
 
   async callRemoveLiquidityMethod(
-    params: CallContractParams<{
-      tokenPairId: HexString;
-      sender: HexString;
-      liquidity: bigint;
-      amount0Min: bigint;
-      amount1Min: bigint;
-      deadline: bigint;
-    }>
-  ): Promise<CallContractResult<[bigint, bigint]>> {
+    params: RouterTypes.CallMethodParams<"removeLiquidity">
+  ): Promise<RouterTypes.CallMethodResult<"removeLiquidity">> {
     return callMethod(Router, this, "removeLiquidity", params);
+  }
+
+  async multicall<Calls extends RouterTypes.MultiCallParams>(
+    calls: Calls
+  ): Promise<RouterTypes.MultiCallResults<Calls>> {
+    return (await multicallMethods(
+      Router,
+      this,
+      calls
+    )) as RouterTypes.MultiCallResults<Calls>;
   }
 }

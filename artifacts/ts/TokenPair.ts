@@ -19,6 +19,7 @@ import {
   subscribeContractEvents,
   testMethod,
   callMethod,
+  multicallMethods,
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
@@ -60,6 +61,77 @@ export namespace TokenPairTypes {
     amount1Out: bigint;
     to: HexString;
   }>;
+
+  export interface CallMethodTable {
+    getSymbol: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<HexString>;
+    };
+    getName: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<HexString>;
+    };
+    getDecimals: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<bigint>;
+    };
+    getTotalSupply: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<bigint>;
+    };
+    uqdiv: {
+      params: CallContractParams<{ a: bigint; b: bigint }>;
+      result: CallContractResult<bigint>;
+    };
+    sqrt: {
+      params: CallContractParams<{ y: bigint }>;
+      result: CallContractResult<bigint>;
+    };
+    getTokenPair: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<[HexString, HexString]>;
+    };
+    getReserves: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<[bigint, bigint]>;
+    };
+    getBlockTimeStampLast: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<bigint>;
+    };
+    getPrice0CumulativeLast: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<bigint>;
+    };
+    getPrice1CumulativeLast: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<bigint>;
+    };
+    mint: {
+      params: CallContractParams<{
+        sender: HexString;
+        amount0: bigint;
+        amount1: bigint;
+      }>;
+      result: CallContractResult<bigint>;
+    };
+    burn: {
+      params: CallContractParams<{ sender: HexString; liquidity: bigint }>;
+      result: CallContractResult<[bigint, bigint]>;
+    };
+  }
+  export type CallMethodParams<T extends keyof CallMethodTable> =
+    CallMethodTable[T]["params"];
+  export type CallMethodResult<T extends keyof CallMethodTable> =
+    CallMethodTable[T]["result"];
+  export type MultiCallParams = Partial<{
+    [Name in keyof CallMethodTable]: CallMethodTable[Name]["params"];
+  }>;
+  export type MultiCallResults<T extends MultiCallParams> = {
+    [MaybeName in keyof T]: MaybeName extends keyof CallMethodTable
+      ? CallMethodTable[MaybeName]["result"]
+      : undefined;
+  };
 }
 
 class Factory extends ContractFactory<
@@ -116,6 +188,12 @@ class Factory extends ContractFactory<
     params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
   ): Promise<TestContractResult<[bigint, bigint]>> {
     return testMethod(this, "getReserves", params);
+  }
+
+  async testGetBlockTimeStampLastMethod(
+    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+  ): Promise<TestContractResult<bigint>> {
+    return testMethod(this, "getBlockTimeStampLast", params);
   }
 
   async testGetPrice0CumulativeLastMethod(
@@ -179,7 +257,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "7ba33f7e825ace3546bd2972e1392e3576748316abdaa281801e5e00b55540ab"
+    "2569e7cf13f9cc0870412cf91babccd289e2d909b0a23efbb2ac9549ea4f1659"
   )
 );
 
@@ -253,8 +331,8 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   async callGetSymbolMethod(
-    params?: Omit<CallContractParams<{}>, "args">
-  ): Promise<CallContractResult<HexString>> {
+    params?: TokenPairTypes.CallMethodParams<"getSymbol">
+  ): Promise<TokenPairTypes.CallMethodResult<"getSymbol">> {
     return callMethod(
       TokenPair,
       this,
@@ -264,8 +342,8 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   async callGetNameMethod(
-    params?: Omit<CallContractParams<{}>, "args">
-  ): Promise<CallContractResult<HexString>> {
+    params?: TokenPairTypes.CallMethodParams<"getName">
+  ): Promise<TokenPairTypes.CallMethodResult<"getName">> {
     return callMethod(
       TokenPair,
       this,
@@ -275,8 +353,8 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   async callGetDecimalsMethod(
-    params?: Omit<CallContractParams<{}>, "args">
-  ): Promise<CallContractResult<bigint>> {
+    params?: TokenPairTypes.CallMethodParams<"getDecimals">
+  ): Promise<TokenPairTypes.CallMethodResult<"getDecimals">> {
     return callMethod(
       TokenPair,
       this,
@@ -286,8 +364,8 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   async callGetTotalSupplyMethod(
-    params?: Omit<CallContractParams<{}>, "args">
-  ): Promise<CallContractResult<bigint>> {
+    params?: TokenPairTypes.CallMethodParams<"getTotalSupply">
+  ): Promise<TokenPairTypes.CallMethodResult<"getTotalSupply">> {
     return callMethod(
       TokenPair,
       this,
@@ -297,20 +375,20 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   async callUqdivMethod(
-    params: CallContractParams<{ a: bigint; b: bigint }>
-  ): Promise<CallContractResult<bigint>> {
+    params: TokenPairTypes.CallMethodParams<"uqdiv">
+  ): Promise<TokenPairTypes.CallMethodResult<"uqdiv">> {
     return callMethod(TokenPair, this, "uqdiv", params);
   }
 
   async callSqrtMethod(
-    params: CallContractParams<{ y: bigint }>
-  ): Promise<CallContractResult<bigint>> {
+    params: TokenPairTypes.CallMethodParams<"sqrt">
+  ): Promise<TokenPairTypes.CallMethodResult<"sqrt">> {
     return callMethod(TokenPair, this, "sqrt", params);
   }
 
   async callGetTokenPairMethod(
-    params?: Omit<CallContractParams<{}>, "args">
-  ): Promise<CallContractResult<[HexString, HexString]>> {
+    params?: TokenPairTypes.CallMethodParams<"getTokenPair">
+  ): Promise<TokenPairTypes.CallMethodResult<"getTokenPair">> {
     return callMethod(
       TokenPair,
       this,
@@ -320,8 +398,8 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   async callGetReservesMethod(
-    params?: Omit<CallContractParams<{}>, "args">
-  ): Promise<CallContractResult<[bigint, bigint]>> {
+    params?: TokenPairTypes.CallMethodParams<"getReserves">
+  ): Promise<TokenPairTypes.CallMethodResult<"getReserves">> {
     return callMethod(
       TokenPair,
       this,
@@ -330,9 +408,20 @@ export class TokenPairInstance extends ContractInstance {
     );
   }
 
+  async callGetBlockTimeStampLastMethod(
+    params?: TokenPairTypes.CallMethodParams<"getBlockTimeStampLast">
+  ): Promise<TokenPairTypes.CallMethodResult<"getBlockTimeStampLast">> {
+    return callMethod(
+      TokenPair,
+      this,
+      "getBlockTimeStampLast",
+      params === undefined ? {} : params
+    );
+  }
+
   async callGetPrice0CumulativeLastMethod(
-    params?: Omit<CallContractParams<{}>, "args">
-  ): Promise<CallContractResult<bigint>> {
+    params?: TokenPairTypes.CallMethodParams<"getPrice0CumulativeLast">
+  ): Promise<TokenPairTypes.CallMethodResult<"getPrice0CumulativeLast">> {
     return callMethod(
       TokenPair,
       this,
@@ -342,8 +431,8 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   async callGetPrice1CumulativeLastMethod(
-    params?: Omit<CallContractParams<{}>, "args">
-  ): Promise<CallContractResult<bigint>> {
+    params?: TokenPairTypes.CallMethodParams<"getPrice1CumulativeLast">
+  ): Promise<TokenPairTypes.CallMethodResult<"getPrice1CumulativeLast">> {
     return callMethod(
       TokenPair,
       this,
@@ -353,18 +442,24 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   async callMintMethod(
-    params: CallContractParams<{
-      sender: HexString;
-      amount0: bigint;
-      amount1: bigint;
-    }>
-  ): Promise<CallContractResult<bigint>> {
+    params: TokenPairTypes.CallMethodParams<"mint">
+  ): Promise<TokenPairTypes.CallMethodResult<"mint">> {
     return callMethod(TokenPair, this, "mint", params);
   }
 
   async callBurnMethod(
-    params: CallContractParams<{ sender: HexString; liquidity: bigint }>
-  ): Promise<CallContractResult<[bigint, bigint]>> {
+    params: TokenPairTypes.CallMethodParams<"burn">
+  ): Promise<TokenPairTypes.CallMethodResult<"burn">> {
     return callMethod(TokenPair, this, "burn", params);
+  }
+
+  async multicall<Calls extends TokenPairTypes.MultiCallParams>(
+    calls: Calls
+  ): Promise<TokenPairTypes.MultiCallResults<Calls>> {
+    return (await multicallMethods(
+      TokenPair,
+      this,
+      calls
+    )) as TokenPairTypes.MultiCallResults<Calls>;
   }
 }

@@ -1,4 +1,4 @@
-import { ALPH_TOKEN_ID, Asset, DUST_AMOUNT, ONE_ALPH, sleep, Token, web3 } from '@alephium/web3'
+import { ALPH_TOKEN_ID, DUST_AMOUNT, ONE_ALPH, sleep, web3 } from '@alephium/web3'
 import {
   buildProject,
   contractBalanceOf,
@@ -7,60 +7,21 @@ import {
   ErrorCodes,
   expectTokensEqual,
   getContractState,
-  oneAlph,
   randomP2PKHAddress,
   randomTokenId,
   randomTokenPair,
-  defaultGasFee
+  defaultGasFee,
+  expandTo18Decimals,
+  mint,
+  encodePrice
 } from './fixtures/DexFixture'
 import { expectAssertionError } from '@alephium/web3-test'
 import { TokenPair, TokenPairTypes } from '../artifacts/ts'
 
 const MinimumLiquidity = 1000n
 
-export async function mint(
-  tokenPairFixture: ContractFixture<TokenPairTypes.Fields>,
-  sender: string,
-  amount0: bigint,
-  amount1: bigint,
-  initialFields?: TokenPairTypes.Fields,
-  initialAsset?: Asset
-) {
-  const token0Id = tokenPairFixture.selfState.fields.token0Id
-  const token1Id = tokenPairFixture.selfState.fields.token1Id
-  const initFields = initialFields ?? tokenPairFixture.selfState.fields
-  const initAsset = initialAsset ?? tokenPairFixture.selfState.asset
-
-  const tokens: Token[] = [{ id: token1Id, amount: amount1 }]
-  let alphAmount: bigint = oneAlph
-  if (token0Id === ALPH_TOKEN_ID) {
-    alphAmount += amount0
-  } else {
-    tokens.push({ id: token0Id, amount: amount0 })
-  }
-
-  const inputAssets = [{ address: sender, asset: { alphAmount: alphAmount, tokens: tokens } }]
-  const testResult = await TokenPair.testMintMethod({
-    initialFields: initFields,
-    initialAsset: initAsset,
-    address: tokenPairFixture.address,
-    existingContracts: tokenPairFixture.dependencies,
-    testArgs: { sender: sender, amount0: amount0, amount1: amount1 },
-    inputAssets: inputAssets
-  })
-  const contractState = getContractState<TokenPairTypes.Fields>(testResult.contracts, tokenPairFixture.contractId)
-  const reserve0 = contractState.fields.reserve0
-  const reserve1 = contractState.fields.reserve1
-  const totalSupply = contractState.fields.totalSupply
-  return { testResult: testResult, contractState, reserve0, reserve1, totalSupply }
-}
-
 describe('test token pair', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
-
-  function expandTo18Decimals(num: bigint | number): bigint {
-    return BigInt(num) * (10n ** 18n)
-  }
 
   let sender: string
   let token0Id: string
@@ -154,6 +115,18 @@ describe('test token pair', () => {
     const senderOutput = mintResult.txOutputs.find((o) => o.address === sender && o.tokens !== undefined && o.tokens.length > 0)!
     expect(senderOutput.tokens!).toEqual([{ id: fixture.contractId, amount: expectedLiquidity }])
   })
+
+  test('mint:maxReserve', async () => {
+    async function test(token0Amount: bigint, token1Amount: bigint) {
+      return mint(fixture, sender, token0Amount, token1Amount)
+    }
+
+    const maxReserve = (1n << 112n) - 1n
+    await expectAssertionError(test(maxReserve + 1n, maxReserve), fixture.address, ErrorCodes.ReserveOverflow)
+    await expectAssertionError(test(maxReserve, maxReserve + 1n), fixture.address, ErrorCodes.ReserveOverflow)
+    await expectAssertionError(test(maxReserve + 1n, maxReserve + 1n), fixture.address, ErrorCodes.ReserveOverflow)
+    await test(maxReserve, maxReserve)
+  }, 10000)
 
   const swapTestCases: bigint[][] = [
     [1, 5, 10, '1662497915624478906'],
@@ -503,7 +476,7 @@ describe('test token pair', () => {
       }]
     })
 
-    expect(swapResult.gasUsed).toEqual(23343)
+    expect(swapResult.gasUsed).toEqual(23338)
   })
 
   test('burn', async () => {
@@ -554,18 +527,14 @@ describe('test token pair', () => {
   })
 
   it('price{0,1}CumulativeLast', async () => {
-    function encodePrice(reserve0: bigint, reserve1: bigint) {
-      return [(reserve1 * (2n ** 112n)) / reserve0, (reserve0 * (2n ** 112n)) / reserve1]
-    }
-
     const token0Amount = expandTo18Decimals(3)
     const token1Amount = expandTo18Decimals(3)
     const { contractState } = await mint(fixture, sender, token0Amount, token1Amount)
 
-    const blockTimestamp = contractState.fields.blockTimeStampLast
-    await sleep(2000)
+    const blockTimeStamp = contractState.fields.blockTimeStampLast
 
     const result0 = await TokenPair.testUpdateMethod({
+      blockTimeStamp: (Number(blockTimeStamp) + 1) * 1000,
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
       address: fixture.address,
@@ -575,14 +544,13 @@ describe('test token pair', () => {
 
     const tokenPairState0 = getContractState<TokenPairTypes.Fields>(result0.contracts, fixture.contractId)
     const initialPrice = encodePrice(token0Amount, token1Amount)
-    expect(tokenPairState0.fields.price0CumulativeLast >= initialPrice[0] * 2n).toEqual(true)
-    expect(tokenPairState0.fields.price1CumulativeLast >= initialPrice[1] * 2n).toEqual(true)
-    expect(tokenPairState0.fields.blockTimeStampLast >= blockTimestamp + 2n).toEqual(true)
+    expect(tokenPairState0.fields.price0CumulativeLast).toEqual(initialPrice[0])
+    expect(tokenPairState0.fields.price1CumulativeLast).toEqual(initialPrice[1])
+    expect(tokenPairState0.fields.blockTimeStampLast).toEqual(blockTimeStamp + 1n)
 
     const swapAmount = expandTo18Decimals(3)
-    await sleep(2000)
-    const diff = BigInt(Math.floor(Date.now() / 1000)) - tokenPairState0.fields.blockTimeStampLast + 2n
     const result1 = await TokenPair.testSwapMethod({
+      blockTimeStamp: (Number(blockTimeStamp) + 10) * 1000,
       initialFields: tokenPairState0.fields,
       initialAsset: tokenPairState0.asset,
       address: fixture.address,
@@ -605,15 +573,15 @@ describe('test token pair', () => {
     })
 
     const tokenPairState1 = getContractState<TokenPairTypes.Fields>(result1.contracts, fixture.contractId)
-    expect(tokenPairState1.fields.price0CumulativeLast >= initialPrice[0] * diff).toEqual(true)
-    expect(tokenPairState1.fields.price1CumulativeLast >= initialPrice[1] * diff).toEqual(true)
-    expect(tokenPairState1.fields.blockTimeStampLast >= blockTimestamp + diff).toEqual(true)
+    expect(tokenPairState1.fields.price0CumulativeLast).toEqual(initialPrice[0] * 10n)
+    expect(tokenPairState1.fields.price1CumulativeLast).toEqual(initialPrice[1] * 10n)
+    expect(tokenPairState1.fields.blockTimeStampLast).toEqual(blockTimeStamp + 10n)
     expect(tokenPairState1.fields.reserve0).toEqual(expandTo18Decimals(6))
     expect(tokenPairState1.fields.reserve1).toEqual(expandTo18Decimals(2))
 
-    await sleep(2000)
     const newPrice = encodePrice(expandTo18Decimals(6), expandTo18Decimals(2))
     const result2 = await TokenPair.testUpdateMethod({
+      blockTimeStamp: (Number(blockTimeStamp) + 20) * 1000,
       initialFields: tokenPairState1.fields,
       initialAsset: tokenPairState1.asset,
       address: fixture.address,
@@ -622,8 +590,8 @@ describe('test token pair', () => {
     })
 
     const tokenPairState2 = getContractState<TokenPairTypes.Fields>(result2.contracts, fixture.contractId)
-    expect(tokenPairState2.fields.price0CumulativeLast >= tokenPairState1.fields.price0CumulativeLast + newPrice[0] * 2n).toEqual(true)
-    expect(tokenPairState2.fields.price1CumulativeLast >= tokenPairState1.fields.price1CumulativeLast + newPrice[1] * 2n).toEqual(true)
-    expect(tokenPairState2.fields.blockTimeStampLast >= tokenPairState1.fields.blockTimeStampLast + 2n).toEqual(true)
-  }, 20000)
+    expect(tokenPairState2.fields.price0CumulativeLast).toEqual(initialPrice[0] * 10n + newPrice[0] * 10n)
+    expect(tokenPairState2.fields.price1CumulativeLast).toEqual(initialPrice[1] * 10n + newPrice[1] * 10n)
+    expect(tokenPairState2.fields.blockTimeStampLast).toEqual(blockTimeStamp + 20n)
+  }, 10000)
 })

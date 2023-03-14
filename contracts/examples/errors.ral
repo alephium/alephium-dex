@@ -1,0 +1,10 @@
+Abstract Contract OracleErrors() {
+  enum ErrorCodes {
+    FullDivOverflow  = 0
+    DivByZero        = 1
+    MulOverflow      = 2
+    FractionOverflow = 3
+    PeriodNotElapsed = 4
+    InvalidToken     = 5
+  }
+}

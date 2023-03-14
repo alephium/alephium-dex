@@ -9,11 +9,11 @@ import {
   ErrorCodes,
   expectAssetsEqual,
   getContractState,
+  mint,
   oneAlph,
   randomP2PKHAddress,
   randomTokenPair
 } from './fixtures/DexFixture'
-import { mint } from './TokenPair.test'
 
 describe('test router', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
