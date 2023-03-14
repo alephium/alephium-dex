@@ -62,8 +62,8 @@ Contract TokenPair(
     let timeElapsed = blockTimeStampSecond - blockTimeStampLast
     if (timeElapsed > 0 && reserve0 > 0 && reserve1 > 0) {
       // allow overflow for TWAP(time-weighted-average-price)
-      price0CumulativeLast = price0CumulativeLast |+| uqdiv(reserve1, reserve0) * timeElapsed
-      price1CumulativeLast = price1CumulativeLast |+| uqdiv(reserve0, reserve1) * timeElapsed
+      price0CumulativeLast = price0CumulativeLast |+| (uqdiv(reserve1, reserve0) * timeElapsed)
+      price1CumulativeLast = price1CumulativeLast |+| (uqdiv(reserve0, reserve1) * timeElapsed)
     }
     
     reserve0 = newReserve0
@@ -81,8 +81,8 @@ Contract TokenPair(
       totalSupply = totalSupply + MINIMUM_LIQUIDITY
       burnToken!(selfAddress!(), selfTokenId!(), MINIMUM_LIQUIDITY)
     } else {
-      let liquidity0 = amount0 * totalSupply / reserve0
-      let liquidity1 = amount1 * totalSupply / reserve1
+      let liquidity0 = (amount0 * totalSupply) / reserve0
+      let liquidity1 = (amount1 * totalSupply) / reserve1
       liquidity = if (liquidity0 > liquidity1) liquidity1 else liquidity0
     }
 
@@ -100,8 +100,8 @@ Contract TokenPair(
 
   @using(preapprovedAssets = true, assetsInContract = true, updateFields = true, checkExternalCaller = false)
   pub fn burn(sender: Address, liquidity: U256) -> (U256, U256) {
-    let amount0 = liquidity * reserve0 / totalSupply
-    let amount1 = liquidity * reserve1 / totalSupply
+    let amount0 = (liquidity * reserve0) / totalSupply
+    let amount1 = (liquidity * reserve1) / totalSupply
     assert!(amount0 > 0 && amount1 > 0, ErrorCodes.InsufficientLiquidityBurned)
 
     transferTokenToSelf!(sender, selfTokenId!(), liquidity)
@@ -124,8 +124,8 @@ Contract TokenPair(
     // fee: 0.003 * amountIn
     let newReserve0 = reserve0 + amount0In - amount0Out
     let newReserve1 = reserve1 + amount1In - amount1Out
-    let newReserve0Adjusted = newReserve0 * 1000 - amount0In * 3
-    let newReserve1Adjusted = newReserve1 * 1000 - amount1In * 3
+    let newReserve0Adjusted = (newReserve0 * 1000) - (amount0In * 3)
+    let newReserve1Adjusted = (newReserve1 * 1000) - (amount1In * 3)
     let kAdjusted = reserve0 * reserve1 * 1000_000
     assert!(newReserve0Adjusted * newReserve1Adjusted >= kAdjusted, ErrorCodes.InvalidK)
 

@@ -66,8 +66,8 @@ Abstract Contract FullMath() extends OracleErrors() {
     if (numerator == 0) {
       return 0
     }
-    let result = if (numerator <= 1 << 144 - 1) (numerator << Resolution) / denominator else mulDiv(numerator, 1 << 112, denominator)
-    assert!(result <= 1 << 224 - 1, ErrorCodes.FractionOverflow)
+    let result = if (numerator <= (1 << 144) - 1) (numerator << Resolution) / denominator else mulDiv(numerator, 1 << 112, denominator)
+    assert!(result <= (1 << 224) - 1, ErrorCodes.FractionOverflow)
     return result
   }
 }

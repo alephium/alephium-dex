@@ -118,7 +118,7 @@ export const FullMathTest = new Factory(
   Contract.fromJson(
     FullMathTestContractJson,
     "",
-    "2a3fce94dfe5d0d5cde01623512a16cb7939ea3b2faf0931cab0b74ed887df4f"
+    "83ac4787e8677b932c1f99c9bada8eb5040cb2b506d8c3aee6dac5750e344c51"
   )
 );
 
