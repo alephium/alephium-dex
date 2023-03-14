@@ -562,10 +562,10 @@ describe('test token pair', () => {
     const token1Amount = expandTo18Decimals(3)
     const { contractState } = await mint(fixture, sender, token0Amount, token1Amount)
 
-    const blockTimestamp = contractState.fields.blockTimeStampLast
-    await sleep(2000)
+    const blockTimeStamp = contractState.fields.blockTimeStampLast
 
     const result0 = await TokenPair.testUpdateMethod({
+      blockTimeStamp: (Number(blockTimeStamp) + 1) * 1000,
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
       address: fixture.address,
@@ -575,14 +575,13 @@ describe('test token pair', () => {
 
     const tokenPairState0 = getContractState<TokenPairTypes.Fields>(result0.contracts, fixture.contractId)
     const initialPrice = encodePrice(token0Amount, token1Amount)
-    expect(tokenPairState0.fields.price0CumulativeLast >= initialPrice[0] * 2n).toEqual(true)
-    expect(tokenPairState0.fields.price1CumulativeLast >= initialPrice[1] * 2n).toEqual(true)
-    expect(tokenPairState0.fields.blockTimeStampLast >= blockTimestamp + 2n).toEqual(true)
+    expect(tokenPairState0.fields.price0CumulativeLast).toEqual(initialPrice[0])
+    expect(tokenPairState0.fields.price1CumulativeLast).toEqual(initialPrice[1])
+    expect(tokenPairState0.fields.blockTimeStampLast).toEqual(blockTimeStamp + 1n)
 
     const swapAmount = expandTo18Decimals(3)
-    await sleep(2000)
-    const diff = BigInt(Math.floor(Date.now() / 1000)) - tokenPairState0.fields.blockTimeStampLast + 2n
     const result1 = await TokenPair.testSwapMethod({
+      blockTimeStamp: (Number(blockTimeStamp) + 10) * 1000,
       initialFields: tokenPairState0.fields,
       initialAsset: tokenPairState0.asset,
       address: fixture.address,
@@ -605,15 +604,15 @@ describe('test token pair', () => {
     })
 
     const tokenPairState1 = getContractState<TokenPairTypes.Fields>(result1.contracts, fixture.contractId)
-    expect(tokenPairState1.fields.price0CumulativeLast >= initialPrice[0] * diff).toEqual(true)
-    expect(tokenPairState1.fields.price1CumulativeLast >= initialPrice[1] * diff).toEqual(true)
-    expect(tokenPairState1.fields.blockTimeStampLast >= blockTimestamp + diff).toEqual(true)
+    expect(tokenPairState1.fields.price0CumulativeLast).toEqual(initialPrice[0] * 10n)
+    expect(tokenPairState1.fields.price1CumulativeLast).toEqual(initialPrice[1] * 10n)
+    expect(tokenPairState1.fields.blockTimeStampLast).toEqual(blockTimeStamp + 10n)
     expect(tokenPairState1.fields.reserve0).toEqual(expandTo18Decimals(6))
     expect(tokenPairState1.fields.reserve1).toEqual(expandTo18Decimals(2))
 
-    await sleep(2000)
     const newPrice = encodePrice(expandTo18Decimals(6), expandTo18Decimals(2))
     const result2 = await TokenPair.testUpdateMethod({
+      blockTimeStamp: (Number(blockTimeStamp) + 20) * 1000,
       initialFields: tokenPairState1.fields,
       initialAsset: tokenPairState1.asset,
       address: fixture.address,
@@ -622,8 +621,8 @@ describe('test token pair', () => {
     })
 
     const tokenPairState2 = getContractState<TokenPairTypes.Fields>(result2.contracts, fixture.contractId)
-    expect(tokenPairState2.fields.price0CumulativeLast >= tokenPairState1.fields.price0CumulativeLast + newPrice[0] * 2n).toEqual(true)
-    expect(tokenPairState2.fields.price1CumulativeLast >= tokenPairState1.fields.price1CumulativeLast + newPrice[1] * 2n).toEqual(true)
-    expect(tokenPairState2.fields.blockTimeStampLast >= tokenPairState1.fields.blockTimeStampLast + 2n).toEqual(true)
-  }, 20000)
+    expect(tokenPairState2.fields.price0CumulativeLast).toEqual(initialPrice[0] * 10n + newPrice[0] * 10n)
+    expect(tokenPairState2.fields.price1CumulativeLast).toEqual(initialPrice[1] * 10n + newPrice[1] * 10n)
+    expect(tokenPairState2.fields.blockTimeStampLast).toEqual(blockTimeStamp + 20n)
+  }, 10000)
 })
