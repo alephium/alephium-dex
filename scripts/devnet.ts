@@ -12,7 +12,7 @@ import {
 import { PrivateKeyWallet } from '@alephium/web3-wallet'
 import { program } from 'commander'
 import { randomInt } from 'crypto'
-import { default as devnetDeployment } from '../.deployments.devnet.json'
+import { default as devnetDeployment } from '../artifacts/.deployments.devnet.json'
 import { AddLiquidity, CreatePair, GetToken, TestToken } from '../artifacts/ts'
 import { TokenInfo } from '@alephium/token-list'
 import * as fs from 'fs'
