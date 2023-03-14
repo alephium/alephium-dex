@@ -55,7 +55,7 @@ Contract TokenPair(
 
   @using(updateFields = true)
   fn update(newReserve0: U256, newReserve1: U256) -> () {
-    let max = 1 << 112 - 1
+    let max = (1 << 112) - 1
     assert!(newReserve0 < max && newReserve1 < max, ErrorCodes.ReserveOverflow)
 
     let blockTimeStampSecond = (blockTimeStamp!() / 1000) % (1 << 32)
