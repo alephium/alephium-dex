@@ -116,6 +116,18 @@ describe('test token pair', () => {
     expect(senderOutput.tokens!).toEqual([{ id: fixture.contractId, amount: expectedLiquidity }])
   })
 
+  test('mint:maxReserve', async () => {
+    async function test(token0Amount: bigint, token1Amount: bigint) {
+      return mint(fixture, sender, token0Amount, token1Amount)
+    }
+
+    const maxReserve = (1n << 112n) - 1n
+    await expectAssertionError(test(maxReserve + 1n, maxReserve), fixture.address, ErrorCodes.ReserveOverflow)
+    await expectAssertionError(test(maxReserve, maxReserve + 1n), fixture.address, ErrorCodes.ReserveOverflow)
+    await expectAssertionError(test(maxReserve + 1n, maxReserve + 1n), fixture.address, ErrorCodes.ReserveOverflow)
+    await test(maxReserve, maxReserve)
+  }, 10000)
+
   const swapTestCases: bigint[][] = [
     [1, 5, 10, '1662497915624478906'],
     [1, 10, 5, '453305446940074565'],
@@ -464,7 +476,7 @@ describe('test token pair', () => {
       }]
     })
 
-    expect(swapResult.gasUsed).toEqual(23344)
+    expect(swapResult.gasUsed).toEqual(23338)
   })
 
   test('burn', async () => {
