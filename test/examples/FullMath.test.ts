@@ -86,9 +86,9 @@ describe('test math', () => {
     // the tests are different with eth, eth only test the gas cost of the function
     const gasCostCases: [bigint, bigint, number][] = [
       [0n, 569n, 1082],
-      [239n, 569n, 1165],
-      [Q112 * 2359n, Q112 * 2360n, 1165],
-      [Q112 * 2359n * (2n ** 32n), Q112 * 2360n, 2160]
+      [239n, 569n, 1155],
+      [Q112 * 2359n, Q112 * 2360n, 1155],
+      [Q112 * 2359n * (2n ** 32n), Q112 * 2360n, 2150]
     ]
     for (const c of gasCostCases) {
       const testResult = await test(c[0], c[1])
