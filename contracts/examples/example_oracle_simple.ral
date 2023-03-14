@@ -27,8 +27,8 @@ Contract ExampleOracleSimple(
     assert!(timeElapsed >= Period, ErrorCodes.PeriodNotElapsed)
 
     let (price0Cumulative, price1Cumulative) = currentCumulativePrices(blockTimeStamp)
-    price0Average = sub(price0Cumulative, price0CumulativeLast) / timeElapsed
-    price1Average = sub(price1Cumulative, price1CumulativeLast) / timeElapsed
+    price0Average = (price0Cumulative |-| price0CumulativeLast) / timeElapsed
+    price1Average = (price1Cumulative |-| price1CumulativeLast) / timeElapsed
     price0CumulativeLast = price0Cumulative
     price1CumulativeLast = price1Cumulative
     blockTimeStampLast = blockTimeStamp
@@ -37,9 +37,9 @@ Contract ExampleOracleSimple(
   pub fn consult(tokenId: ByteVec, amountIn: U256) -> U256 {
     let (token0Id, token1Id) = pair.getTokenPair()
     if (tokenId == token0Id) {
-      return mul(price0Average, amountIn) >> Resolution
+      return (price0Average * amountIn) >> Resolution
     }
     assert!(tokenId == token1Id, ErrorCodes.InvalidToken)
-    return mul(price1Average, amountIn) >> Resolution
+    return (price1Average * amountIn) >> Resolution
   }
 }

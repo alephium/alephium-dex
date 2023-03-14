@@ -48,10 +48,6 @@ export namespace ExampleOracleSimpleTypes {
       params: CallContractParams<{ a: bigint; b: bigint; denominator: bigint }>;
       result: CallContractResult<bigint>;
     };
-    mul: {
-      params: CallContractParams<{ x: bigint; y: bigint }>;
-      result: CallContractResult<bigint>;
-    };
     fraction: {
       params: CallContractParams<{ numerator: bigint; denominator: bigint }>;
       result: CallContractResult<bigint>;
@@ -83,15 +79,6 @@ class Factory extends ContractFactory<
     return new ExampleOracleSimpleInstance(address);
   }
 
-  async testSubMethod(
-    params: TestContractParams<
-      ExampleOracleSimpleTypes.Fields,
-      { a: bigint; b: bigint }
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "sub", params);
-  }
-
   async testFullMulMethod(
     params: TestContractParams<
       ExampleOracleSimpleTypes.Fields,
@@ -108,15 +95,6 @@ class Factory extends ContractFactory<
     >
   ): Promise<TestContractResult<bigint>> {
     return testMethod(this, "mulDiv", params);
-  }
-
-  async testMulMethod(
-    params: TestContractParams<
-      ExampleOracleSimpleTypes.Fields,
-      { x: bigint; y: bigint }
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "mul", params);
   }
 
   async testFractionMethod(
@@ -161,7 +139,7 @@ export const ExampleOracleSimple = new Factory(
   Contract.fromJson(
     ExampleOracleSimpleContractJson,
     "",
-    "781693683d51091292c9d405c8c40ec0a3881d5bb460fe5bc4c2ac2c92fc1b11"
+    "902f1564daac72276ba3b6be1c18266ee300ae12c97b5169583781912d08032d"
   )
 );
 
@@ -185,12 +163,6 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
     params: ExampleOracleSimpleTypes.CallMethodParams<"mulDiv">
   ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"mulDiv">> {
     return callMethod(ExampleOracleSimple, this, "mulDiv", params);
-  }
-
-  async callMulMethod(
-    params: ExampleOracleSimpleTypes.CallMethodParams<"mul">
-  ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"mul">> {
-    return callMethod(ExampleOracleSimple, this, "mul", params);
   }
 
   async callFractionMethod(

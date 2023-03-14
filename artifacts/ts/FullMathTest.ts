@@ -39,10 +39,6 @@ export namespace FullMathTestTypes {
       params: CallContractParams<{ a: bigint; b: bigint; denominator: bigint }>;
       result: CallContractResult<bigint>;
     };
-    mul: {
-      params: CallContractParams<{ x: bigint; y: bigint }>;
-      result: CallContractResult<bigint>;
-    };
     fraction: {
       params: CallContractParams<{ numerator: bigint; denominator: bigint }>;
       result: CallContractResult<bigint>;
@@ -67,15 +63,6 @@ class Factory extends ContractFactory<FullMathTestInstance, {}> {
     return new FullMathTestInstance(address);
   }
 
-  async testSubMethod(
-    params: Omit<
-      TestContractParams<never, { a: bigint; b: bigint }>,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "sub", params);
-  }
-
   async testFullMulMethod(
     params: Omit<
       TestContractParams<never, { x: bigint; y: bigint }>,
@@ -94,15 +81,6 @@ class Factory extends ContractFactory<FullMathTestInstance, {}> {
     return testMethod(this, "mulDiv", params);
   }
 
-  async testMulMethod(
-    params: Omit<
-      TestContractParams<never, { x: bigint; y: bigint }>,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "mul", params);
-  }
-
   async testFractionMethod(
     params: Omit<
       TestContractParams<never, { numerator: bigint; denominator: bigint }>,
@@ -118,7 +96,7 @@ export const FullMathTest = new Factory(
   Contract.fromJson(
     FullMathTestContractJson,
     "",
-    "83ac4787e8677b932c1f99c9bada8eb5040cb2b506d8c3aee6dac5750e344c51"
+    "95341220f9fabffb32795244c08b6a73bffa30c1a883f9eae2bb93d9c7b62075"
   )
 );
 
@@ -142,12 +120,6 @@ export class FullMathTestInstance extends ContractInstance {
     params: FullMathTestTypes.CallMethodParams<"mulDiv">
   ): Promise<FullMathTestTypes.CallMethodResult<"mulDiv">> {
     return callMethod(FullMathTest, this, "mulDiv", params);
-  }
-
-  async callMulMethod(
-    params: FullMathTestTypes.CallMethodParams<"mul">
-  ): Promise<FullMathTestTypes.CallMethodResult<"mul">> {
-    return callMethod(FullMathTest, this, "mul", params);
   }
 
   async callFractionMethod(

@@ -5,10 +5,9 @@ import { ContractFixture, randomContractAddress } from './DexFixture'
 export enum OracleErrorCodes {
   FullDivOverflow  = 0,
   DivByZero        = 1,
-  MulOverflow      = 2,
-  FractionOverflow = 3,
-  PeriodNotElapsed = 4,
-  InvalidToken     = 5
+  FractionOverflow = 2,
+  PeriodNotElapsed = 3,
+  InvalidToken     = 4
 }
 
 export function createExampleOracle(pairState: ContractState<TokenPairTypes.Fields>) {

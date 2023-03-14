@@ -26,29 +26,6 @@ describe('test math', () => {
     }
   }, 10000)
 
-  test('sub', async () => {
-    const cases: [bigint, bigint, bigint][] = [
-      [ 1n, 0n, 1n ],
-      [ 1n, 1n, 0n ],
-      [ 0n, 1n, U256Max ],
-      [ U256Max, 0n, U256Max ],
-      [ 0n, 2n, U256Max - 1n ],
-    ]
-
-    for (const c of cases) {
-      const testResult = await FullMathTest.testSubMethod({ testArgs: { a: c[0], b: c[1] } })
-      expect(testResult.returns).toEqual(c[2])
-    }
-
-    for (let i = 0; i < 10; i++) {
-      const a = randomBigInt(0n, U256Max)
-      const b = randomBigInt(0n, U256Max)
-      const result = a >= b ? a - b : (U256Max - (b - a) + 1n)
-      const testResult = await FullMathTest.testSubMethod({ testArgs: { a, b } })
-      expect(testResult.returns).toEqual(result)
-    }
-  }, 10000)
-
   test('mulDiv', async () => {
     const Q128 = 1n << 128n
     const address = randomContractAddress()
@@ -76,35 +53,6 @@ describe('test math', () => {
       const testResult = await test(c[0], c[1], c[2])
       expect(testResult.returns).toEqual(c[3])
     }
-  }, 10000)
-
-  test('mul', async () => {
-    const address = randomContractAddress()
-    const Q112 = 1n << 112n
-
-    async function test(x: bigint, y: bigint) {
-      return FullMathTest.testMulMethod({
-        address: address,
-        testArgs: { x, y }
-      })
-    }
-
-    const cases: [bigint, bigint, bigint][] = [
-      [ 0n, 1n, 0n ],
-      [ 1n, 0n, 0n ],
-      [ 3n * Q112, 2n, 6n * Q112 ],
-      [ Q112, Q112, 2n ** 224n ],
-      [ 2n ** 32n, (2n ** 224n) - 1n, 115792089237316195423570985008687907853269984665640564039457584007908834672640n ],
-      [ 1n, (2n ** 256n) - 1n, U256Max ]
-    ]
-    for (const c of cases) {
-      const testResult = await test(c[0], c[1])
-      expect(testResult.returns).toEqual(c[2])
-    }
-
-    expectAssertionError(test(Q112, 2n ** 224n), address, OracleErrorCodes.MulOverflow)
-    expectAssertionError(test((2n ** 32n) + 1n, (2n ** 224n) - 1n), address, OracleErrorCodes.MulOverflow)
-    expectAssertionError(test(2n, U256Max), address, OracleErrorCodes.MulOverflow)
   }, 10000)
 
   test('fraction', async () => {
@@ -137,10 +85,10 @@ describe('test math', () => {
 
     // the tests are different with eth, eth only test the gas cost of the function
     const gasCostCases: [bigint, bigint, number][] = [
-      [0n, 569n, 1095],
-      [239n, 569n, 1178],
-      [Q112 * 2359n, Q112 * 2360n, 1178],
-      [Q112 * 2359n * (2n ** 32n), Q112 * 2360n, 4610]
+      [0n, 569n, 1082],
+      [239n, 569n, 1165],
+      [Q112 * 2359n, Q112 * 2360n, 1165],
+      [Q112 * 2359n * (2n ** 32n), Q112 * 2360n, 2160]
     ]
     for (const c of gasCostCases) {
       const testResult = await test(c[0], c[1])
