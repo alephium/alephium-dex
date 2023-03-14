@@ -19,6 +19,7 @@ import {
   subscribeContractEvents,
   testMethod,
   callMethod,
+  multicallMethods,
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
@@ -28,6 +29,29 @@ import { default as MathTestContractJson } from "../test/math_test.ral.json";
 // Custom types for the contract
 export namespace MathTestTypes {
   export type State = Omit<ContractState<any>, "fields">;
+
+  export interface CallMethodTable {
+    uqdiv: {
+      params: CallContractParams<{ a: bigint; b: bigint }>;
+      result: CallContractResult<bigint>;
+    };
+    sqrt: {
+      params: CallContractParams<{ y: bigint }>;
+      result: CallContractResult<bigint>;
+    };
+  }
+  export type CallMethodParams<T extends keyof CallMethodTable> =
+    CallMethodTable[T]["params"];
+  export type CallMethodResult<T extends keyof CallMethodTable> =
+    CallMethodTable[T]["result"];
+  export type MultiCallParams = Partial<{
+    [Name in keyof CallMethodTable]: CallMethodTable[Name]["params"];
+  }>;
+  export type MultiCallResults<T extends MultiCallParams> = {
+    [MaybeName in keyof T]: MaybeName extends keyof CallMethodTable
+      ? CallMethodTable[MaybeName]["result"]
+      : undefined;
+  };
 }
 
 class Factory extends ContractFactory<MathTestInstance, {}> {
@@ -71,14 +95,24 @@ export class MathTestInstance extends ContractInstance {
   }
 
   async callUqdivMethod(
-    params: CallContractParams<{ a: bigint; b: bigint }>
-  ): Promise<CallContractResult<bigint>> {
+    params: MathTestTypes.CallMethodParams<"uqdiv">
+  ): Promise<MathTestTypes.CallMethodResult<"uqdiv">> {
     return callMethod(MathTest, this, "uqdiv", params);
   }
 
   async callSqrtMethod(
-    params: CallContractParams<{ y: bigint }>
-  ): Promise<CallContractResult<bigint>> {
+    params: MathTestTypes.CallMethodParams<"sqrt">
+  ): Promise<MathTestTypes.CallMethodResult<"sqrt">> {
     return callMethod(MathTest, this, "sqrt", params);
+  }
+
+  async multicall<Calls extends MathTestTypes.MultiCallParams>(
+    calls: Calls
+  ): Promise<MathTestTypes.MultiCallResults<Calls>> {
+    return (await multicallMethods(
+      MathTest,
+      this,
+      calls
+    )) as MathTestTypes.MultiCallResults<Calls>;
   }
 }
