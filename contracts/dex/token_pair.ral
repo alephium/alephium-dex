@@ -25,10 +25,6 @@ Contract TokenPair(
     return reserve0, reserve1
   }
 
-  pub fn getBlockTimeStampLast() -> U256 {
-    return blockTimeStampLast
-  }
-
   pub fn getSymbol() -> ByteVec {
     return #414c50482d444558 // ALPH-DEX
   }
@@ -43,6 +39,10 @@ Contract TokenPair(
 
   pub fn getTotalSupply() -> U256 {
     return totalSupply
+  }
+
+  pub fn getBlockTimeStampLast() -> U256 {
+    return blockTimeStampLast
   }
 
   pub fn getPrice0CumulativeLast() -> U256 {
