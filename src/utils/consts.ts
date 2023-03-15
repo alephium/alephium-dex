@@ -1,6 +1,6 @@
 import { groupOfAddress } from '@alephium/web3'
-import { default as devnetDeployment } from '../../.deployments.devnet.json'
-import { default as testnetDeployment } from '../../.deployments.testnet.json'
+import { default as devnetDeployment } from '../../artifacts/.deployments.devnet.json'
+import { default as testnetDeployment } from '../../artifacts/.deployments.testnet.json'
 
 export interface NetworkConfig {
   networkId: number

@@ -1,0 +1,45 @@
+Contract ExampleOracleSimple(
+  pair: TokenPair,
+  mut price0CumulativeLast: U256,
+  mut price1CumulativeLast: U256,
+  mut blockTimeStampLast: U256,
+  mut price0Average: U256,
+  mut price1Average: U256
+) extends FullMath() {
+  const Period = 86400 // 24 hours in seconds
+
+  fn currentCumulativePrices(currentBlockTimeStamp: U256) -> (U256, U256) {
+    let mut price0Cumulative = pair.getPrice0CumulativeLast()
+    let mut price1Cumulative = pair.getPrice1CumulativeLast()
+    let (reserve0, reserve1) = pair.getReserves()
+    let timeElapsed = currentBlockTimeStamp - pair.getBlockTimeStampLast()
+    if (timeElapsed != 0) {
+      price0Cumulative = price0Cumulative |+| (fraction(reserve1, reserve0) * timeElapsed)
+      price1Cumulative = price1Cumulative |+| (fraction(reserve0, reserve1) * timeElapsed)
+    }
+    return price0Cumulative, price1Cumulative
+  }
+
+  @using(checkExternalCaller = false, updateFields = true)
+  pub fn update() -> () {
+    let blockTimeStamp = (blockTimeStamp!() / 1000) % (1 << 32)
+    let timeElapsed = blockTimeStamp - blockTimeStampLast
+    assert!(timeElapsed >= Period, ErrorCodes.PeriodNotElapsed)
+
+    let (price0Cumulative, price1Cumulative) = currentCumulativePrices(blockTimeStamp)
+    price0Average = (price0Cumulative |-| price0CumulativeLast) / timeElapsed
+    price1Average = (price1Cumulative |-| price1CumulativeLast) / timeElapsed
+    price0CumulativeLast = price0Cumulative
+    price1CumulativeLast = price1Cumulative
+    blockTimeStampLast = blockTimeStamp
+  }
+
+  pub fn consult(tokenId: ByteVec, amountIn: U256) -> U256 {
+    let (token0Id, token1Id) = pair.getTokenPair()
+    if (tokenId == token0Id) {
+      return (price0Average * amountIn) >> Resolution
+    }
+    assert!(tokenId == token1Id, ErrorCodes.InvalidToken)
+    return (price1Average * amountIn) >> Resolution
+  }
+}
