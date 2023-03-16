@@ -17,17 +17,8 @@ function Pool() {
   const commonClasses = commonStyles()
   const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
-  const [error, setError] = useState<string | undefined>(undefined)
   const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
   const wallet = useAlephiumWallet()
-
-  useEffect(() => {
-    if (wallet === undefined) {
-      setError('Wallet is not connected')
-    } else {
-      setError(undefined)
-    }
-  }, [wallet])
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     setTokenAInfo(tokenInfo)
@@ -94,16 +85,19 @@ function Pool() {
       <div className={commonClasses.spacer} />
       <Paper className={commonClasses.mainPaper}>
         <div>
-          <Collapse in={true}>
+          {wallet === undefined ?
+            <div>
+              <Typography variant="h6" color="error" className={commonClasses.error}>
+                Your wallet is not connected
+              </Typography>
+            </div> : null
+          }
+          <Collapse in={wallet !== undefined}>
             {
               <>
                 {tokenPairContent}
                 <div className={commonClasses.spacer} />
-                {error ? (
-                  <Typography variant="body2" color="error" className={commonClasses.error}>
-                    {error}
-                  </Typography>
-                ) : getTokenPairStateError ? (
+                {getTokenPairStateError ? (
                   (
                     <Typography variant="body2" color="error" className={commonClasses.error}>
                       {getTokenPairStateError}

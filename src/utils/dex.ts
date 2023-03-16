@@ -165,7 +165,7 @@ async function swapMinOut(
   amountOutMin: bigint,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  return SwapMinOut.execute(signer, {
+  return await SwapMinOut.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -190,7 +190,7 @@ async function swapMaxIn(
   amountOut: bigint,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  return SwapMaxIn.execute(signer, {
+  return await SwapMaxIn.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -237,11 +237,11 @@ export async function swap(
 
   if (type === 'ExactIn') {
     const amountOutMin = minimalAmount(amountOut, slippage)
-    return swapMinOut(signer, sender, state.tokenPairId, tokenInInfo.id, amountIn, amountOutMin, ttl)
+    return await swapMinOut(signer, sender, state.tokenPairId, tokenInInfo.id, amountIn, amountOutMin, ttl)
   }
 
   const amountInMax = maximalAmount(amountIn, slippage)
-  return swapMaxIn(signer, sender, state.tokenPairId, tokenInInfo.id, amountInMax, amountOut, ttl)
+  return await swapMaxIn(signer, sender, state.tokenPairId, tokenInInfo.id, amountInMax, amountOut, ttl)
 }
 
 function isConfirmed(txStatus: node.TxStatus): txStatus is node.Confirmed {
@@ -373,7 +373,7 @@ export async function addLiquidity(
   const [amount0Desired, amount1Desired, amount0Min, amount1Min] = tokenAInfo.id === tokenPairState.token0Info.id
     ? [amountADesired, amountBDesired, amountAMin, amountBMin]
     : [amountBDesired, amountADesired, amountBMin, amountAMin]
-  return AddLiquidity.execute(signer, {
+  return await AddLiquidity.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -435,7 +435,7 @@ export async function removeLiquidity(
 ): Promise<SignExecuteScriptTxResult> {
   const amount0Min = minimalAmount(amount0Desired, slippage)
   const amount1Min = minimalAmount(amount1Desired, slippage)
-  return RemoveLiquidity.execute(signer, {
+  return await RemoveLiquidity.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,

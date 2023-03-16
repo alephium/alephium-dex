@@ -189,8 +189,15 @@ function Swap() {
             </Button>
           </>
         </Collapse>
+        {wallet === undefined ?
+          <div>
+            <Typography variant="h6" color="error" className={classes.error}>
+              Your wallet is not connected
+            </Typography>
+          </div> : null
+        }
         <div>
-          <Collapse in={!completed}>
+          <Collapse in={!completed && wallet !== undefined}>
             {
               <>
                 {sourceContent}
