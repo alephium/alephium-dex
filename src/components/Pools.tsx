@@ -52,15 +52,15 @@ function Pool() {
           </p>
         </div>
         <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>{tokenPairState.token0Info.name} Reserve:</p>
+          <p className={commonClasses.leftAlign}>{tokenPairState.token0Info.name}({tokenPairState.token0Info.symbol}) Reserve:</p>
           <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve0, tokenPairState.token0Info.decimals)}</p>
         </div>
         <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>{tokenPairState.token1Info.name} Reserve:</p>
+          <p className={commonClasses.leftAlign}>{tokenPairState.token1Info.name}({tokenPairState.token1Info.symbol}) Reserve:</p>
           <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve1, tokenPairState.token1Info.decimals)}</p>
         </div>
         <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>Total Supply:</p>
+          <p className={commonClasses.leftAlign}>Liquidity token total supply:</p>
           <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.totalSupply, PairTokenDecimals)}</p>
         </div>
         </>
@@ -110,13 +110,11 @@ function Pool() {
                     </Typography>
                   )
                 ) : tokenInfo}
-                <div className={commonClasses.spacer} />
               </>
             }
           </Collapse>
         </div>
       </Paper>
-      <div className={commonClasses.spacer} />
     </Container>
   );
 }
