@@ -165,6 +165,9 @@ function AddLiquidity() {
 
   const formatAddLiquidityResult = (state: TokenPairState, result: AddLiquidityResult, slippage: number | 'auto') => {
     const slippageTolerance = slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage
+    const [tokenA, tokenB] = result.tokenAId === state.token0Info.id
+      ? [{ info: state.token0Info, amount: result.amountA }, { info: state.token1Info, amount: result.amountB }]
+      : [{ info: state.token1Info, amount: result.amountA }, { info: state.token0Info, amount: result.amountB }]
     return <>
       <div className={classes.notification}>
         <p className={classes.leftAlign}>Share amount:</p>
@@ -177,12 +180,12 @@ function AddLiquidity() {
       {state.reserve0 > 0n ? (
         <>
           <div className={classes.notification}>
-            <p className={classes.leftAlign}>Minimal amount of token {state.token0Info.symbol}:</p>
-            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(result.amountA, slippageTolerance), state.token0Info.decimals)}</p>
+            <p className={classes.leftAlign}>Minimal amount of {tokenA.info.symbol}:</p>
+            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(tokenA.amount, slippageTolerance), tokenA.info.decimals)}</p>
           </div>
           <div className={classes.notification}>
-            <p className={classes.leftAlign}>Minimal amount of token {state.token1Info.symbol}:</p>
-            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(result.amountB, slippageTolerance), state.token1Info.decimals)}</p>
+            <p className={classes.leftAlign}>Minimal amount of {tokenB.info.symbol}:</p>
+            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(tokenB.amount, slippageTolerance), tokenB.info.decimals)}</p>
           </div>
         </>
       ) : null}

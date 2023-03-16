@@ -270,18 +270,22 @@ export async function waitTxConfirmed(
 }
 
 export interface AddLiquidityResult {
+  tokenAId: string
+  tokenBId: string
   amountA: bigint
   amountB: bigint
   shareAmount: bigint
   sharePercentage: number
 }
 
-export function getInitAddLiquidityResult(amountA: bigint, amountB: bigint): AddLiquidityResult {
+export function getInitAddLiquidityResult(tokenAId: string, tokenBId: string, amountA: bigint, amountB: bigint): AddLiquidityResult {
   const liquidity = sqrt(amountA * amountB)
   if (liquidity <= MINIMUM_LIQUIDITY) {
     throw new Error('insufficient initial liquidity')
   }
   return {
+    tokenAId: tokenAId,
+    tokenBId: tokenBId,
     amountA: amountA,
     amountB: amountB,
     shareAmount: liquidity - MINIMUM_LIQUIDITY,
@@ -289,21 +293,26 @@ export function getInitAddLiquidityResult(amountA: bigint, amountB: bigint): Add
   }
 }
 
-export function getAddLiquidityResult(state: TokenPairState, tokenId: string, amountA: bigint, type: 'TokenA' | 'TokenB'): AddLiquidityResult {
-  const [reserveA, reserveB] = tokenId === state.token0Info.id
+export function getAddLiquidityResult(state: TokenPairState, inputTokenId: string, inputAmount: bigint, inputType: 'TokenA' | 'TokenB'): AddLiquidityResult {
+  const [reserveA, reserveB] = inputTokenId === state.token0Info.id
     ? [state.reserve0, state.reserve1]
     : [state.reserve1, state.reserve0]
-  const amountB = amountA * reserveB / reserveA
-  const liquidityA = amountA * state.totalSupply / reserveA
+  const amountB = inputAmount * reserveB / reserveA
+  const liquidityA = inputAmount * state.totalSupply / reserveA
   const liquidityB = amountB * state.totalSupply / reserveB
   const liquidity = liquidityA < liquidityB ? liquidityA : liquidityB
   const totalSupply = state.totalSupply + liquidity
   const percentage = BigNumber((100n * liquidity).toString())
     .div(BigNumber(totalSupply.toString()))
     .toFixed(5)
+  const [tokenAId, tokenBId] = inputTokenId === state.token0Info.id
+    ? [state.token0Info.id, state.token1Info.id]
+    : [state.token1Info.id, state.token0Info.id]
   const result = {
-    amountA: type === 'TokenA' ? amountA : amountB,
-    amountB: type === 'TokenA' ? amountB : amountA,
+    tokenAId: inputType === 'TokenA' ? tokenAId : tokenBId,
+    tokenBId: inputType === 'TokenA' ? tokenBId : tokenAId,
+    amountA: inputType === 'TokenA' ? inputAmount : amountB,
+    amountB: inputType === 'TokenA' ? amountB : inputAmount,
     shareAmount: liquidity,
     sharePercentage: parseFloat(percentage)
   }
