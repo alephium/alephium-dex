@@ -4,7 +4,6 @@ import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutline
 import { useCallback, useState, useMemo } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
-import CircleLoader from "./CircleLoader";
 import HoverIcon from "./HoverIcon";
 import NumberTextField from "./NumberTextField";
 import { swap, tryGetBalance } from "../utils/dex";
@@ -21,7 +20,6 @@ import { commonStyles } from "./style";
 function Swap() {
   const classes = commonStyles();
   const [completed, setCompleted] = useState<boolean>(false)
-  const [swapping, setSwapping] = useState<boolean>(false)
   const dispatch = useDispatch()
   const [error, setError] = useState<string | undefined>(undefined)
   const [slippage,] = useSlippageTolerance()
@@ -55,7 +53,6 @@ function Swap() {
   const handleReset = useCallback(() => {
     dispatch(reset())
     setCompleted(false)
-    setSwapping(false)
     setError(undefined)
   }, [dispatch])
 
@@ -74,6 +71,7 @@ function Swap() {
           tokenId={tokenInInfo?.id}
           counterpart={tokenOutInfo?.id}
           onChange={handleTokenInChange}
+          tokenBalances={balance}
           style2={true}
         />
         <NumberTextField
@@ -82,7 +80,7 @@ function Swap() {
           onChange={handleTokenInAmountChange}
           autoFocus={true}
           InputProps={{ disableUnderline: true }}
-          disabled={!!swapping || !!completed}
+          disabled={!!completed}
         />
       </div>
       {tokenInBalance ?
@@ -99,13 +97,14 @@ function Swap() {
           tokenId={tokenOutInfo?.id}
           counterpart={tokenInInfo?.id}
           onChange={handleTokenOutChange}
+          tokenBalances={balance}
         />
         <NumberTextField
           className={classes.numberField}
           value={tokenOutInput !== undefined ? tokenOutInput : ''}
           onChange={handleTokenOutAmountChange}
           InputProps={{ disableUnderline: true }}
-          disabled={!!swapping || !!completed}
+          disabled={!!completed}
         />
       </div>
       {tokenOutBalance ?
@@ -117,7 +116,6 @@ function Swap() {
 
   const handleSwap = useCallback(async () => {
     try {
-      setSwapping(true)
       if (
         swapType !== undefined &&
         wallet !== undefined &&
@@ -134,7 +132,6 @@ function Swap() {
           swapType,
           balance,
           wallet.signer,
-          wallet.nodeProvider,
           wallet.address,
           tokenPairState,
           tokenInInfo,
@@ -145,11 +142,9 @@ function Swap() {
         )
         console.log(`swap succeed, tx id: ${result.txId}`)
         setCompleted(true)
-        setSwapping(false)
       }
     } catch (error) {
       setError(`${error}`)
-      setSwapping(false)
       console.error(`failed to swap, error: ${error}`)
     }
   }, [wallet, tokenPairState, tokenInInfo, tokenInAmount, tokenOutAmount, slippage, deadline, swapType, balance])
@@ -161,8 +156,7 @@ function Swap() {
     tokenInAmount !== undefined &&
     tokenOutAmount !== undefined &&
     swapType !== undefined &&
-    !swapping && !completed &&
-    error === undefined
+    !completed && error === undefined
   const swapButton = (
     <ButtonWithLoader
       disabled={!readyToSwap}
@@ -189,7 +183,7 @@ function Swap() {
               fontSize={"inherit"}
               className={classes.successIcon}
             />
-            <Typography>Swap succeed!</Typography>
+            <Typography>The swap transaction has been submitted, please wait for confirmation.</Typography>
             <div className={classes.spacer} />
             <div className={classes.spacer} />
             <Button onClick={handleReset} variant="contained" color="primary">
@@ -197,21 +191,15 @@ function Swap() {
             </Button>
           </>
         </Collapse>
-        <div className={classes.loaderHolder}>
-          <Collapse in={!!swapping && !completed}>
-            <div className={classes.loaderHolder}>
-              <CircleLoader />
-              <div className={classes.spacer} />
-              <div className={classes.spacer} />
-              <Typography variant="h5">
-                Swapping...
-              </Typography>
-              <div className={classes.spacer} />
-            </div>
-          </Collapse>
-        </div>
+        {wallet === undefined ?
+          <div>
+            <Typography variant="h6" color="error" className={classes.error}>
+              Your wallet is not connected
+            </Typography>
+          </div> : null
+        }
         <div>
-          <Collapse in={!swapping && !completed}>
+          <Collapse in={!completed && wallet !== undefined}>
             {
               <>
                 {sourceContent}

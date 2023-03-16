@@ -4,20 +4,21 @@ import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutline
 import { TokenInfo } from "@alephium/token-list"
 import { useCallback, useEffect, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
-import CircleLoader from "./CircleLoader";
 import { tokenPairExist, createTokenPair } from "../utils/dex";
-import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
+import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { commonStyles } from "./style";
 import TokenSelectDialog from "./TokenSelectDialog";
+import { useHistory } from "react-router-dom";
 
 function AddPool() {
   const commonClasses = commonStyles();
   const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
   const [completed, setCompleted] = useState<boolean>(false)
-  const [addingPool, setAddingPool] = useState<boolean>(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
+  const balance = useAvailableBalances()
+  const history = useHistory()
 
   useEffect(() => {
     async function checkContractExist() {
@@ -43,13 +44,13 @@ function AddPool() {
     setTokenBInfo(tokenInfo)
   }, [])
 
-  const handleReset = useCallback(() => {
+  const redirectToAddLiquidity = useCallback(() => {
     setTokenAInfo(undefined)
     setTokenBInfo(undefined)
     setCompleted(false)
-    setAddingPool(false)
     setError(undefined)
-  }, [])
+    history.push('/add-liquidity')
+  }, [history])
 
   const tokenPairContent = (
     <div className={commonClasses.tokenPairContainer}>
@@ -57,12 +58,14 @@ function AddPool() {
         tokenId={tokenAInfo?.id}
         counterpart={tokenBInfo?.id}
         onChange={handleTokenAChange}
+        tokenBalances={balance}
         mediumSize={true}
       />
       <TokenSelectDialog
         tokenId={tokenBInfo?.id}
         counterpart={tokenAInfo?.id}
         onChange={handleTokenBChange}
+        tokenBalances={balance}
         mediumSize={true}
       />
     </div>
@@ -70,22 +73,18 @@ function AddPool() {
 
   const handleAddPool = useCallback(async () => {
     try {
-      setAddingPool(true)
       if (wallet !== undefined && tokenAInfo !== undefined && tokenBInfo !== undefined) {
         const result = await createTokenPair(
           wallet.signer,
-          wallet.nodeProvider,
           wallet.address,
           tokenAInfo.id,
           tokenBInfo.id
         )
         console.log(`add pool succeed, tx id: ${result.txId}, token pair id: ${result.tokenPairId}`)
         setCompleted(true)
-        setAddingPool(false)
       }
     } catch (error) {
       setError(`${error}`)
-      setAddingPool(false)
       console.error(`failed to add pool, error: ${error}`)
     }
   }, [wallet, tokenAInfo, tokenBInfo])
@@ -94,8 +93,7 @@ function AddPool() {
     wallet !== undefined &&
     tokenAInfo !== undefined &&
     tokenBInfo !== undefined &&
-    !addingPool && !completed && 
-    error === undefined
+    !completed && error === undefined
   const addPoolButton = (
     <ButtonWithLoader
       disabled={!readyToAddPool}
@@ -122,29 +120,23 @@ function AddPool() {
               fontSize={"inherit"}
               className={commonClasses.successIcon}
             />
-            <Typography>Add pool succeed!</Typography>
+            <Typography>The pool creation transaction has been submitted, please wait for confirmation.</Typography>
             <div className={commonClasses.spacer} />
             <div className={commonClasses.spacer} />
-            <Button onClick={handleReset} variant="contained" color="primary">
-              Add More Pools!
+            <Button onClick={redirectToAddLiquidity} variant="contained" color="primary">
+              Add Liquidity
             </Button>
           </>
         </Collapse>
-        <div className={commonClasses.loaderHolder}>
-          <Collapse in={!!addingPool && !completed}>
-            <div className={commonClasses.loaderHolder}>
-              <CircleLoader />
-              <div className={commonClasses.spacer} />
-              <div className={commonClasses.spacer} />
-              <Typography variant="h5">
-                Adding pool...
-              </Typography>
-              <div className={commonClasses.spacer} />
-            </div>
-          </Collapse>
-        </div>
+        {wallet === undefined ?
+          <div>
+            <Typography variant="h6" color="error" className={commonClasses.error}>
+              Your wallet is not connected
+            </Typography>
+          </div> : null
+        }
         <div>
-          <Collapse in={!addingPool && !completed}>
+          <Collapse in={!completed && wallet !== undefined}>
             {
               <>
                 {tokenPairContent}

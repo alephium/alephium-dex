@@ -4,7 +4,6 @@ import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutline
 import { useCallback, useMemo, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
-import CircleLoader from "./CircleLoader";
 import NumberTextField from "./NumberTextField";
 import { addLiquidity, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityResult, TokenPairState, tryGetBalance } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
@@ -16,17 +15,18 @@ import { reset, selectTokenA, selectTokenB, typeInput } from "../state/mint/acti
 import { useDerivedMintInfo } from "../state/mint/hooks";
 import { selectMintState } from "../state/mint/selectors";
 import { commonStyles } from "./style";
+import { useHistory } from "react-router-dom";
 
 function AddLiquidity() {
   const classes = commonStyles();
   const [completed, setCompleted] = useState<boolean>(false)
-  const [addingLiquidity, setAddingLiquidity] = useState<boolean>(false)
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
   const dispatch = useDispatch()
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
   const balance = useAvailableBalances()
+  const history = useHistory()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     dispatch(selectTokenA(tokenInfo))
@@ -49,12 +49,12 @@ function AddLiquidity() {
     dispatch(typeInput({ type: 'TokenB', value: event.target.value, hasLiquidity }))
   }, [dispatch, tokenPairState])
 
-  const handleReset = useCallback(() => {
+  const redirectToSwap = useCallback(() => {
     dispatch(reset())
     setCompleted(false)
-    setAddingLiquidity(false)
     setError(undefined)
-  }, [dispatch])
+    history.push('/swap')
+  }, [history])
 
   const tokenABalance = useMemo(() => {
     return tryGetBalance(balance, tokenAInfo)
@@ -71,6 +71,7 @@ function AddLiquidity() {
           tokenId={tokenAInfo?.id}
           counterpart={tokenBInfo?.id}
           onChange={handleTokenAChange}
+          tokenBalances={balance}
           style2={true}
         />
         <NumberTextField
@@ -79,7 +80,7 @@ function AddLiquidity() {
           onChange={handleTokenAAmountChange}
           autoFocus={true}
           InputProps={{ disableUnderline: true }}
-          disabled={!!addingLiquidity || !!completed}
+          disabled={!!completed}
         />
       </div>
       {tokenABalance ?
@@ -95,13 +96,14 @@ function AddLiquidity() {
           tokenId={tokenBInfo?.id}
           counterpart={tokenAInfo?.id}
           onChange={handleTokenBChange}
+          tokenBalances={balance}
         />
         <NumberTextField
           className={classes.numberField}
           value={tokenBInput !== undefined ? tokenBInput : ''}
           onChange={handleTokenBAmountChange}
           InputProps={{ disableUnderline: true }}
-          disabled={!!addingLiquidity || !!completed}
+          disabled={!!completed}
         />
       </div>
       {tokenBBalance ?
@@ -113,7 +115,6 @@ function AddLiquidity() {
 
   const handleAddLiquidity = useCallback(async () => {
     try {
-      setAddingLiquidity(true)
       if (
         wallet !== undefined &&
         tokenPairState !== undefined &&
@@ -129,7 +130,6 @@ function AddLiquidity() {
         const result = await addLiquidity(
           balance,
           wallet.signer,
-          wallet.nodeProvider,
           wallet.address,
           tokenPairState,
           tokenAInfo,
@@ -141,11 +141,9 @@ function AddLiquidity() {
         )
         console.log(`add liquidity succeed, tx id: ${result.txId}`)
         setCompleted(true)
-        setAddingLiquidity(false)
       }
     } catch (error) {
       setError(`${error}`)
-      setAddingLiquidity(false)
       console.error(`failed to add liquidity, error: ${error}`)
     }
   }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline, balance])
@@ -156,8 +154,7 @@ function AddLiquidity() {
     tokenBInfo !== undefined &&
     tokenAAmount !== undefined &&
     tokenBAmount !== undefined &&
-    !addingLiquidity && !completed && 
-    error === undefined
+    !completed && error === undefined
   const addLiquidityButton = (
     <ButtonWithLoader
       disabled={!readyToAddLiquidity}
@@ -172,6 +169,9 @@ function AddLiquidity() {
 
   const formatAddLiquidityResult = (state: TokenPairState, result: AddLiquidityResult, slippage: number | 'auto') => {
     const slippageTolerance = slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage
+    const [tokenA, tokenB] = result.tokenAId === state.token0Info.id
+      ? [{ info: state.token0Info, amount: result.amountA }, { info: state.token1Info, amount: result.amountB }]
+      : [{ info: state.token1Info, amount: result.amountA }, { info: state.token0Info, amount: result.amountB }]
     return <>
       <div className={classes.notification}>
         <p className={classes.leftAlign}>Share amount:</p>
@@ -184,12 +184,12 @@ function AddLiquidity() {
       {state.reserve0 > 0n ? (
         <>
           <div className={classes.notification}>
-            <p className={classes.leftAlign}>Minimal amount of token {state.token0Info.symbol}:</p>
-            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(result.amountA, slippageTolerance), state.token0Info.decimals)}</p>
+            <p className={classes.leftAlign}>Minimal amount of {tokenA.info.symbol}:</p>
+            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(tokenA.amount, slippageTolerance), tokenA.info.decimals)}</p>
           </div>
           <div className={classes.notification}>
-            <p className={classes.leftAlign}>Minimal amount of token {state.token1Info.symbol}:</p>
-            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(result.amountB, slippageTolerance), state.token1Info.decimals)}</p>
+            <p className={classes.leftAlign}>Minimal amount of {tokenB.info.symbol}:</p>
+            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(tokenB.amount, slippageTolerance), tokenB.info.decimals)}</p>
           </div>
         </>
       ) : null}
@@ -210,29 +210,23 @@ function AddLiquidity() {
               fontSize={"inherit"}
               className={classes.successIcon}
             />
-            <Typography>Add liquidity succeed!</Typography>
+            <Typography>The add liquidity transaction has been submitted, please wait for confirmation.</Typography>
             <div className={classes.spacer} />
             <div className={classes.spacer} />
-            <Button onClick={handleReset} variant="contained" color="primary">
-              Add More Liquidity!
+            <Button onClick={redirectToSwap} variant="contained" color="primary">
+              Swap coins
             </Button>
           </>
         </Collapse>
-        <div className={classes.loaderHolder}>
-          <Collapse in={!!addingLiquidity && !completed}>
-            <div className={classes.loaderHolder}>
-              <CircleLoader />
-              <div className={classes.spacer} />
-              <div className={classes.spacer} />
-              <Typography variant="h5">
-                Adding liquidity...
-              </Typography>
-              <div className={classes.spacer} />
-            </div>
-          </Collapse>
-        </div>
+        {wallet === undefined ?
+          <div>
+            <Typography variant="h6" color="error" className={classes.error}>
+              Your wallet is not connected
+            </Typography>
+          </div> : null
+        }
         <div>
-          <Collapse in={!addingLiquidity && !completed}>
+          <Collapse in={!completed && wallet !== undefined}>
             {
               <>
                 {sourceContent}

@@ -47,14 +47,17 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
   const addLiquidityResult = useMemo(() => {
     try {
       setError(getTokenPairStateError)
+      if (tokenAInfo === undefined || tokenBInfo === undefined) {
+        return undefined
+      }
+      const [tokenAId, tokenBId] = lastInput === 'TokenA' ? [tokenAInfo.id, tokenBInfo.id] : [tokenBInfo.id, tokenAInfo.id]
       if (tokenPairState !== undefined && tokenPairState.reserve0 === 0n) {
         return parsedAmount !== undefined && otherAmount !== undefined
-          ? getInitAddLiquidityResult(parsedAmount, otherAmount)
+          ? getInitAddLiquidityResult(tokenAId, tokenBId, parsedAmount, otherAmount)
           : undefined
       }
-      const tokenInfo = lastInput === 'TokenA' ? tokenAInfo : tokenBInfo
-      return tokenInfo && parsedAmount !== undefined && tokenPairState && lastInput
-        ? getAddLiquidityResult(tokenPairState, tokenInfo.id, parsedAmount, lastInput)
+      return parsedAmount !== undefined && tokenPairState && lastInput
+        ? getAddLiquidityResult(tokenPairState, tokenAId, parsedAmount, lastInput)
         : undefined
     } catch (error) {
       console.log(`${error}`)
