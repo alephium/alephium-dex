@@ -111,12 +111,14 @@ function RemoveLiquidity() {
         tokenId={tokenAInfo?.id}
         counterpart={tokenBInfo?.id}
         onChange={handleTokenAChange}
+        tokenBalances={availableBalance}
         mediumSize={true}
       />
       <TokenSelectDialog
         tokenId={tokenBInfo?.id}
         counterpart={tokenAInfo?.id}
         onChange={handleTokenBChange}
+        tokenBalances={availableBalance}
         mediumSize={true}
       />
     </div>

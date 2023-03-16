@@ -5,7 +5,7 @@ import { TokenInfo } from "@alephium/token-list"
 import { useCallback, useEffect, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import { tokenPairExist, createTokenPair } from "../utils/dex";
-import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
+import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { commonStyles } from "./style";
 import TokenSelectDialog from "./TokenSelectDialog";
 
@@ -16,6 +16,7 @@ function AddPool() {
   const [completed, setCompleted] = useState<boolean>(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
+  const balance = useAvailableBalances()
 
   useEffect(() => {
     async function checkContractExist() {
@@ -54,12 +55,14 @@ function AddPool() {
         tokenId={tokenAInfo?.id}
         counterpart={tokenBInfo?.id}
         onChange={handleTokenAChange}
+        tokenBalances={balance}
         mediumSize={true}
       />
       <TokenSelectDialog
         tokenId={tokenBInfo?.id}
         counterpart={tokenAInfo?.id}
         onChange={handleTokenBChange}
+        tokenBalances={balance}
         mediumSize={true}
       />
     </div>

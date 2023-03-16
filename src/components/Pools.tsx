@@ -6,7 +6,7 @@ import { commonStyles } from "./style";
 import { TokenInfo } from "@alephium/token-list";
 import { useTokenPairState } from "../state/useTokenPairState";
 import TokenSelectDialog from "./TokenSelectDialog";
-import { useAlephiumWallet } from "../hooks/useAlephiumWallet";
+import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 
 function shortContractId(id: string): string {
@@ -19,6 +19,7 @@ function Pool() {
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
   const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
   const wallet = useAlephiumWallet()
+  const balance = useAvailableBalances()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     setTokenAInfo(tokenInfo)
@@ -65,12 +66,14 @@ function Pool() {
         tokenId={tokenAInfo?.id}
         counterpart={tokenBInfo?.id}
         onChange={handleTokenAChange}
+        tokenBalances={balance}
         mediumSize={true}
       />
       <TokenSelectDialog
         tokenId={tokenBInfo?.id}
         counterpart={tokenAInfo?.id}
         onChange={handleTokenBChange}
+        tokenBalances={balance}
         mediumSize={true}
       />
     </div>

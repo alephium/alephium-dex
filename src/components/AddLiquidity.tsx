@@ -69,6 +69,7 @@ function AddLiquidity() {
           tokenId={tokenAInfo?.id}
           counterpart={tokenBInfo?.id}
           onChange={handleTokenAChange}
+          tokenBalances={balance}
           style2={true}
         />
         <NumberTextField
@@ -93,6 +94,7 @@ function AddLiquidity() {
           tokenId={tokenBInfo?.id}
           counterpart={tokenAInfo?.id}
           onChange={handleTokenBChange}
+          tokenBalances={balance}
         />
         <NumberTextField
           className={classes.numberField}

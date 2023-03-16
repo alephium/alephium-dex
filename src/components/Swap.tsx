@@ -71,6 +71,7 @@ function Swap() {
           tokenId={tokenInInfo?.id}
           counterpart={tokenOutInfo?.id}
           onChange={handleTokenInChange}
+          tokenBalances={balance}
           style2={true}
         />
         <NumberTextField
@@ -96,6 +97,7 @@ function Swap() {
           tokenId={tokenOutInfo?.id}
           counterpart={tokenInInfo?.id}
           onChange={handleTokenOutChange}
+          tokenBalances={balance}
         />
         <NumberTextField
           className={classes.numberField}

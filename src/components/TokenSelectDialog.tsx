@@ -6,13 +6,14 @@ import {
   List,
   ListItem,
   ListItemIcon,
+  ListItemSecondaryAction,
   ListItemText,
   makeStyles,
   Typography,
 } from "@material-ui/core";
 import { useCallback, useState } from "react";
 import CloseIcon from "@material-ui/icons/Close";
-import { TokenList } from "../utils/dex";
+import { bigIntToString, TokenList } from "../utils/dex";
 import { TokenInfo } from '@alephium/token-list'
 import { MyDialog } from "./MyDialog";
 
@@ -63,16 +64,19 @@ interface TokenSelectProps {
   tokenId: string | undefined
   counterpart: string | undefined
   onChange: any
+  tokenBalances: Map<string, bigint>
   style2?: boolean
   mediumSize?: boolean
 }
 
 const TokenOptions = ({
   tokenInfo,
+  balance,
   onSelect,
   close,
 }: {
   tokenInfo: TokenInfo;
+  balance: bigint | undefined;
   onSelect: (tokenInfo: TokenInfo) => void;
   close: () => void;
 }) => {
@@ -92,9 +96,10 @@ const TokenOptions = ({
           className={classes.icon}
         />
       </ListItemIcon>
-      <ListItemText>
-        <Box fontFamily="Monospace" fontWeight="fontWeightMedium">{tokenInfo.name}</Box>
-      </ListItemText>
+      <ListItemText primary={tokenInfo.name} secondary={tokenInfo.symbol}/>
+      <ListItemSecondaryAction>
+        {balance === undefined ? '0' : bigIntToString(balance, tokenInfo.decimals)}
+      </ListItemSecondaryAction>
     </ListItem>
   );
 };
@@ -103,6 +108,7 @@ export default function TokenSelectDialog({
   tokenId,
   counterpart,
   onChange,
+  tokenBalances,
   style2,
   mediumSize
 }: TokenSelectProps) {
@@ -123,6 +129,7 @@ export default function TokenSelectDialog({
       <TokenOptions
         key={token.id}
         tokenInfo={token}
+        balance={tokenBalances.get(token.id)}
         onSelect={onChange}
         close={handleClose}
       />
@@ -156,10 +163,10 @@ export default function TokenSelectDialog({
           )
         }
       </Card>
-      <MyDialog open={open} onClose={handleClose} maxWidth='md'>
+      <MyDialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
         <DialogTitle>
           <div className={classes.flexTitle}>
-            <div>Select token</div>
+            <div>Select a token</div>
             <IconButton onClick={handleClose}>
               <CloseIcon />
             </IconButton>
