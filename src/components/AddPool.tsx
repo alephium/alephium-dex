@@ -8,6 +8,7 @@ import { tokenPairExist, createTokenPair } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { commonStyles } from "./style";
 import TokenSelectDialog from "./TokenSelectDialog";
+import { useHistory } from "react-router-dom";
 
 function AddPool() {
   const commonClasses = commonStyles();
@@ -17,6 +18,7 @@ function AddPool() {
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
   const balance = useAvailableBalances()
+  const history = useHistory()
 
   useEffect(() => {
     async function checkContractExist() {
@@ -42,12 +44,13 @@ function AddPool() {
     setTokenBInfo(tokenInfo)
   }, [])
 
-  const handleReset = useCallback(() => {
+  const redirectToAddLiquidity = useCallback(() => {
     setTokenAInfo(undefined)
     setTokenBInfo(undefined)
     setCompleted(false)
     setError(undefined)
-  }, [])
+    history.push('/add-liquidity')
+  }, [history])
 
   const tokenPairContent = (
     <div className={commonClasses.tokenPairContainer}>
@@ -120,8 +123,8 @@ function AddPool() {
             <Typography>The pool creation transaction has been submitted, please wait for confirmation.</Typography>
             <div className={commonClasses.spacer} />
             <div className={commonClasses.spacer} />
-            <Button onClick={handleReset} variant="contained" color="primary">
-              Add More Pools!
+            <Button onClick={redirectToAddLiquidity} variant="contained" color="primary">
+              Add Liquidity
             </Button>
           </>
         </Collapse>

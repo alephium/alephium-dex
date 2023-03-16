@@ -15,6 +15,7 @@ import { reset, selectTokenA, selectTokenB, typeInput } from "../state/mint/acti
 import { useDerivedMintInfo } from "../state/mint/hooks";
 import { selectMintState } from "../state/mint/selectors";
 import { commonStyles } from "./style";
+import { useHistory } from "react-router-dom";
 
 function AddLiquidity() {
   const classes = commonStyles();
@@ -25,6 +26,7 @@ function AddLiquidity() {
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
   const balance = useAvailableBalances()
+  const history = useHistory()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     dispatch(selectTokenA(tokenInfo))
@@ -47,11 +49,12 @@ function AddLiquidity() {
     dispatch(typeInput({ type: 'TokenB', value: event.target.value, hasLiquidity }))
   }, [dispatch, tokenPairState])
 
-  const handleReset = useCallback(() => {
+  const redirectToSwap = useCallback(() => {
     dispatch(reset())
     setCompleted(false)
     setError(undefined)
-  }, [dispatch])
+    history.push('/swap')
+  }, [history])
 
   const tokenABalance = useMemo(() => {
     return tryGetBalance(balance, tokenAInfo)
@@ -210,8 +213,8 @@ function AddLiquidity() {
             <Typography>The add liquidity transaction has been submitted, please wait for confirmation.</Typography>
             <div className={classes.spacer} />
             <div className={classes.spacer} />
-            <Button onClick={handleReset} variant="contained" color="primary">
-              Add More Liquidity!
+            <Button onClick={redirectToSwap} variant="contained" color="primary">
+              Swap coins
             </Button>
           </>
         </Collapse>
