@@ -4,7 +4,6 @@ import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutline
 import { useCallback, useEffect, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
-import CircleLoader from "./CircleLoader";
 import NumberTextField from "./NumberTextField";
 import { TokenInfo } from '@alephium/token-list'
 import {

@@ -1,6 +1,6 @@
 import { Container, Paper, Typography, Button } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { bigIntToString, PairTokenDecimals } from "../utils/dex";
 import { commonStyles } from "./style";
 import { TokenInfo } from "@alephium/token-list";
