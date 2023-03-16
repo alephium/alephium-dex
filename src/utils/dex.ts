@@ -15,7 +15,7 @@ import BigNumber from "bignumber.js"
 import { parseUnits } from "ethers/lib/utils";
 import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, RemoveLiquidity, CreatePair } from "../../artifacts/ts"
 import { genLogo } from "./avatar_images";
-import { mainnetTokensMetadata, testnetTokensMetadata, TokenInfo } from "@alephium/token-list";
+import { mainnetTokensMetadata, testnetTokensMetadata, TokenInfo, ALPH as ALPHInfo } from "@alephium/token-list";
 import { default as devnetTokenList } from './devnet-token-list.json'
 
 const MINIMUM_LIQUIDITY = 1000n
@@ -231,7 +231,7 @@ export async function swap(
 ): Promise<SignExecuteScriptTxResult> {
   const available = balances.get(tokenInInfo.id) ?? 0n
   if (available < amountIn) {
-    throw new Error(`not enough balance, available: ${bigIntToString(available, tokenInInfo.decimals)}`)
+    throw new Error(`not enough ${tokenInInfo.symbol} balance, available: ${bigIntToString(available, tokenInInfo.decimals)}`)
   }
   checkPriceImpact(state, tokenInInfo.id, amountIn, amountOut)
 
@@ -496,10 +496,7 @@ export async function createTokenPair(
 }
 
 export const ALPHTokenInfo: TokenInfo = {
-  id: ALPH_TOKEN_ID,
-  name: 'ALPH',
-  symbol: 'ALPH',
-  decimals: 18,
+  ...ALPHInfo,
   logoURI: alephiumIcon
 }
 
