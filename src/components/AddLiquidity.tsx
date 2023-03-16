@@ -20,7 +20,6 @@ import { commonStyles } from "./style";
 function AddLiquidity() {
   const classes = commonStyles();
   const [completed, setCompleted] = useState<boolean>(false)
-  const [addingLiquidity, setAddingLiquidity] = useState<boolean>(false)
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
   const dispatch = useDispatch()
@@ -52,7 +51,6 @@ function AddLiquidity() {
   const handleReset = useCallback(() => {
     dispatch(reset())
     setCompleted(false)
-    setAddingLiquidity(false)
     setError(undefined)
   }, [dispatch])
 
@@ -79,7 +77,7 @@ function AddLiquidity() {
           onChange={handleTokenAAmountChange}
           autoFocus={true}
           InputProps={{ disableUnderline: true }}
-          disabled={!!addingLiquidity || !!completed}
+          disabled={!!completed}
         />
       </div>
       {tokenABalance ?
@@ -101,7 +99,7 @@ function AddLiquidity() {
           value={tokenBInput !== undefined ? tokenBInput : ''}
           onChange={handleTokenBAmountChange}
           InputProps={{ disableUnderline: true }}
-          disabled={!!addingLiquidity || !!completed}
+          disabled={!!completed}
         />
       </div>
       {tokenBBalance ?
@@ -113,7 +111,6 @@ function AddLiquidity() {
 
   const handleAddLiquidity = useCallback(async () => {
     try {
-      setAddingLiquidity(true)
       if (
         wallet !== undefined &&
         tokenPairState !== undefined &&
@@ -129,7 +126,6 @@ function AddLiquidity() {
         const result = await addLiquidity(
           balance,
           wallet.signer,
-          wallet.nodeProvider,
           wallet.address,
           tokenPairState,
           tokenAInfo,
@@ -141,11 +137,9 @@ function AddLiquidity() {
         )
         console.log(`add liquidity succeed, tx id: ${result.txId}`)
         setCompleted(true)
-        setAddingLiquidity(false)
       }
     } catch (error) {
       setError(`${error}`)
-      setAddingLiquidity(false)
       console.error(`failed to add liquidity, error: ${error}`)
     }
   }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline, balance])
@@ -156,8 +150,7 @@ function AddLiquidity() {
     tokenBInfo !== undefined &&
     tokenAAmount !== undefined &&
     tokenBAmount !== undefined &&
-    !addingLiquidity && !completed && 
-    error === undefined
+    !completed && error === undefined
   const addLiquidityButton = (
     <ButtonWithLoader
       disabled={!readyToAddLiquidity}
@@ -210,7 +203,7 @@ function AddLiquidity() {
               fontSize={"inherit"}
               className={classes.successIcon}
             />
-            <Typography>Add liquidity succeed!</Typography>
+            <Typography>The add liquidity transaction has been submitted, please wait for confirmation.</Typography>
             <div className={classes.spacer} />
             <div className={classes.spacer} />
             <Button onClick={handleReset} variant="contained" color="primary">
@@ -218,21 +211,8 @@ function AddLiquidity() {
             </Button>
           </>
         </Collapse>
-        <div className={classes.loaderHolder}>
-          <Collapse in={!!addingLiquidity && !completed}>
-            <div className={classes.loaderHolder}>
-              <CircleLoader />
-              <div className={classes.spacer} />
-              <div className={classes.spacer} />
-              <Typography variant="h5">
-                Adding liquidity...
-              </Typography>
-              <div className={classes.spacer} />
-            </div>
-          </Collapse>
-        </div>
         <div>
-          <Collapse in={!addingLiquidity && !completed}>
+          <Collapse in={!completed}>
             {
               <>
                 {sourceContent}

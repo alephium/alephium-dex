@@ -32,7 +32,6 @@ function RemoveLiquidity() {
   const [totalLiquidityAmount, setTotalLiquidityAmount] = useState<bigint | undefined>(undefined)
   const [removeLiquidityResult, setRemoveLiquidityResult] = useState<RemoveLiquidityResult | undefined>(undefined)
   const [completed, setCompleted] = useState<boolean>(false)
-  const [removingLiquidity, setRemovingLiquidity] = useState<boolean>(false)
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
   const [error, setError] = useState<string | undefined>(undefined)
@@ -102,7 +101,6 @@ function RemoveLiquidity() {
     setAmountInput(undefined)
     setTotalLiquidityAmount(undefined)
     setCompleted(false)
-    setRemovingLiquidity(false)
     setRemoveLiquidityResult(undefined)
     setError(undefined)
   }, [])
@@ -132,14 +130,13 @@ function RemoveLiquidity() {
         onChange={handleAmountChanged}
         autoFocus={true}
         InputProps={{ disableUnderline: true }}
-        disabled={!!removingLiquidity || !!completed}
+        disabled={!!completed}
       />
     </div>
   )
 
   const handleRemoveLiquidity = useCallback(async () => {
     try {
-      setRemovingLiquidity(true)
       if (
         wallet !== undefined &&
         tokenPairState !== undefined &&
@@ -154,7 +151,6 @@ function RemoveLiquidity() {
 
         const result = await removeLiquidity(
           wallet.signer,
-          wallet.nodeProvider,
           wallet.address,
           tokenPairState.tokenPairId,
           amount,
@@ -165,11 +161,9 @@ function RemoveLiquidity() {
         )
         console.log(`remove liquidity succeed, tx id: ${result.txId}`)
         setCompleted(true)
-        setRemovingLiquidity(false)
       }
     } catch (error) {
       setError(`${error}`)
-      setRemovingLiquidity(false)
       console.error(`failed to remove liquidity, error: ${error}`)
     }
   }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, amount, removeLiquidityResult, slippage, deadline])
@@ -181,8 +175,7 @@ function RemoveLiquidity() {
     amount !== undefined &&
     totalLiquidityAmount !== undefined &&
     removeLiquidityResult !== undefined &&
-    !removingLiquidity && !completed && 
-    error === undefined &&
+    !completed && error === undefined &&
     getTokenPairStateError === undefined
   const removeLiquidityButton = (
     <ButtonWithLoader
@@ -240,7 +233,7 @@ function RemoveLiquidity() {
               fontSize={"inherit"}
               className={classes.successIcon}
             />
-            <Typography>Remove liquidity succeed!</Typography>
+            <Typography>The remove liquidity transaction has been submitted, please wait for confirmation.</Typography>
             <div className={classes.spacer} />
             <div className={classes.spacer} />
             <Button onClick={handleReset} variant="contained" color="primary">
@@ -248,21 +241,8 @@ function RemoveLiquidity() {
             </Button>
           </>
         </Collapse>
-        <div className={classes.loaderHolder}>
-          <Collapse in={!!removingLiquidity && !completed}>
-            <div className={classes.loaderHolder}>
-              <CircleLoader />
-              <div className={classes.spacer} />
-              <div className={classes.spacer} />
-              <Typography variant="h5">
-                Removing liquidity...
-              </Typography>
-              <div className={classes.spacer} />
-            </div>
-          </Collapse>
-        </div>
         <div>
-          <Collapse in={!removingLiquidity && !completed}>
+          <Collapse in={!completed}>
             {
               <>
                 {tokenPairContent}
