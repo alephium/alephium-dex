@@ -124,10 +124,6 @@ const AddLiquidity: FunctionComponent<IAddLiquidityProps> = (props) => {
         </div>
       </Popup>
       <div className="bg-base-200 sm:w-[450px] w-[95%] rounded-[15px] px-5 pb-10 pt-5 mb-5 sm:mb-0 mt-3 sm:mt-0">
-        <div className="relative">
-          <Slippage slippage={slippage} setSlippage={setSlippage} />
-        </div>
-        
         <div className="flex flex-col justify-between mt-10">
           <div className="flex flex-row justify-between">
             <span className="ml-3 font-bold text-white"></span>
@@ -186,7 +182,7 @@ const AddLiquidity: FunctionComponent<IAddLiquidityProps> = (props) => {
               fromColor="green-400"
               toColor="blue-500"
             >
-              Add Liquidity 
+              { wallet ? 'Add Liquidity' : 'Connect Wallet' }
             </ButtonBorderGradient>
           </div>
         </div>

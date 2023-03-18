@@ -18,27 +18,27 @@ function classNames(...classes: any) {
 }
 
 const App = () => {
-  const categories = ['Swap', 'AddLiquidity']
+  const categories = ['Swap', 'Pool']
 
   return (
     <Provider store={store}>
       <AlephiumConnectProvider addressGroup={network.groupIndex} network={networkName}>
         <div className="bg-neutral min-h-screen">
           <TopBar />
-            <div className="flex justify-center">
-              <div className="w-full max-w-md px-2 py-16 sm:px-0">
-                <Tab.Group>
-                  <Tab.List className="items-center flex space-x-1 rounded-xl p-1">
+          <div className="flex justify-center">
+            <div className="w-full max-w-md px-2 py-5 sm:px-0">
+              <Tab.Group>
+                <div className="flex justify-center">
+                  <Tab.List className="items-center flex space-x-1 rounded-xl bg-base-200/40 w-5/6 p-1.5 my-6">
                     {categories.map((category) => (
                       <Tab
                         key={category}
                         className={({ selected }) =>
                           classNames(
-                            'w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-blue-700',
-                            'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
+                            'w-full rounded-lg py-2.5 text-base font-bold leading-5 text-white focus:outline-none',
                             selected
-                              ? 'bg-white shadow'
-                              : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
+                              ? 'bg-gray-500 bg-opacity-20 shadow'
+                              : 'text-slate-500 hover:bg-white/[0.12] hover:text-white'
                           )
                         }
                       >
@@ -46,21 +46,22 @@ const App = () => {
                       </Tab>
                     ))}
                   </Tab.List>
-                  <Tab.Panels className="mt-2">
-                    <Tab.Panel key={categories[0]}>
-                      <div className="flex flex-col bg-neutral">
-                        <Swap />
-                      </div>
-                    </Tab.Panel>
-                    <Tab.Panel key={categories[1]}>
-                      <div className="flex flex-col bg-neutral">
-                        <AddLiquidity />
-                      </div>
-                    </Tab.Panel>
-                  </Tab.Panels>
-                </Tab.Group>
-              </div>
+                </div>
+                <Tab.Panels className="mt-2">
+                  <Tab.Panel key={categories[0]}>
+                    <div className="flex flex-col bg-neutral">
+                      <Swap />
+                    </div>
+                  </Tab.Panel>
+                  <Tab.Panel key={categories[1]}>
+                    <div className="flex flex-col bg-neutral">
+                      <AddLiquidity />
+                    </div>
+                  </Tab.Panel>
+                </Tab.Panels>
+              </Tab.Group>
             </div>
+          </div>
         </div>
         <ToastContainer position={toast.POSITION.BOTTOM_LEFT} />
       </AlephiumConnectProvider>

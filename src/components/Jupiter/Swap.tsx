@@ -197,7 +197,7 @@ const Swap: FunctionComponent<ISwapProps> = (props) => {
               fromColor="green-400"
               toColor="blue-500"
             >
-              Swap
+              { wallet ? 'Swap' : 'Connect Wallet' }
             </ButtonBorderGradient>
           </div>
         </div>
