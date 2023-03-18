@@ -20,7 +20,7 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
   addLiquidityResult: AddLiquidityResult | undefined,
 } {
   const { lastInput, inputValue, otherInputValue, tokenAInfo, tokenBInfo } = useSelector(selectMintState)
-  const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
+  const { state: tokenPairState, error: getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
 
   const parsedAmount = useMemo(() => {
     const tokenInfo = lastInput === 'TokenA' ? tokenAInfo : tokenBInfo

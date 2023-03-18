@@ -13,7 +13,7 @@ export function useDerivedSwapInfo(setError: (err: string | undefined) => void):
   swapType: 'ExactIn' | 'ExactOut' | undefined
 } {
   const { lastInput, inputValue, tokenInInfo, tokenOutInfo } = useSelector(selectSwapState)
-  const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenInInfo, tokenOutInfo)
+  const { state: tokenPairState, error: getTokenPairStateError } = useTokenPairState(tokenInInfo, tokenOutInfo)
 
   const parsedAmount = useMemo(() => {
     const tokenInfo = lastInput === 'TokenIn' ? tokenInInfo : tokenOutInfo

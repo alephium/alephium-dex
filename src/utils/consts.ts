@@ -11,7 +11,7 @@ export interface NetworkConfig {
 
 export type NetworkName = 'mainnet' | 'testnet' | 'devnet'
 
-export const networkName: NetworkName = process.env.REACT_APP_NETWORK as NetworkName
+export const networkName: NetworkName = (import.meta.env.VITE_NETWORK) as NetworkName
 
 export const network: NetworkConfig = getNetworkConfig(networkName)
 

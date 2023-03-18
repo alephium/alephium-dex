@@ -1,35 +1,57 @@
 import { TokenInfo } from "@alephium/token-list"
-import { getTokenPairState, TokenPairState } from "../utils/dex"
-import { useState, useEffect, useMemo } from 'react'
+import { getPairContractId, getTokenPairState, TokenPairState } from "../utils/dex"
+import { useEffect, useReducer, useRef } from 'react'
+
+interface InnerState {
+  state: TokenPairState | undefined
+  error: string | undefined
+}
+
+type Action = {
+  type: 'Fetching'
+} | {
+  type: 'Fetched',
+  state: TokenPairState
+} | {
+  type: 'Error',
+  error: string
+}
+
+function createReducer(state: InnerState, action: Action): InnerState {
+  switch (action.type) {
+    case 'Fetched':
+      return { state: action.state, error: undefined }
+    case 'Fetching':
+      return { state: undefined, error: undefined }
+    case 'Error':
+      return { state: undefined, error: action.error }
+  }
+}
 
 export function useTokenPairState(
   token0Info: TokenInfo | undefined,
   token1Info: TokenInfo | undefined
-): { tokenPairState: TokenPairState | undefined, getTokenPairStateError: string | undefined } {
-  const [state, setState] = useState<TokenPairState | undefined>(undefined)
-  const [error, setError] = useState<string | undefined>(undefined)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+): { state: TokenPairState | undefined, error: string | undefined } {
+  const cache = useRef<InnerState>({ state: undefined, error: undefined })
+  const [state, dispatch] = useReducer(createReducer, { state: undefined, error: undefined })
 
   useEffect(() => {
-    setError(undefined)
     if (token0Info !== undefined && token1Info !== undefined) {
-      setIsLoading(true)
+      if (cache.current?.state?.tokenPairId === getPairContractId(token0Info, token1Info)) {
+        return
+      }
+      dispatch({ type: 'Fetching' })
       getTokenPairState(token0Info, token1Info)
         .then((state) => {
-          setIsLoading(false)
-          setState(state)
+          cache.current = { state, error: undefined }
+          dispatch({ type: 'Fetched', state })
         })
         .catch((error) => {
-          setIsLoading(false)
-          setError(`${error}`)
-          setState(undefined)
+          cache.current = { state: undefined, error: `${error}` }
+          dispatch({ type: 'Error', error: `${error}` })
         })
     }
   }, [token0Info, token1Info])
 
-  return useMemo(() => {
-    return isLoading
-      ? { tokenPairState: undefined, getTokenPairStateError: undefined }
-      : { tokenPairState: state, getTokenPairStateError: error }
-  }, [isLoading, state, error])
+  return state
 }

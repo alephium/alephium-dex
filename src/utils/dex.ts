@@ -23,56 +23,16 @@ export const PairTokenDecimals = 18
 export const NumberRegex = new RegExp('^[0-9]*[.]?[0-9]*$')
 export const MaxPriceImpact = 5 // 5%
 
+export function checkNumber(func: any, e: any) {
+  if (NumberRegex.test(e.target.value)) {
+    func(e)
+  }
+}
+
 export interface TokenPair {
   token0Info: TokenInfo
   token1Info: TokenInfo
   tokenPairId: string
-}
-
-export class DexTokens {
-  static empty: DexTokens = new DexTokens()
-
-  tokenInfos: TokenInfo[]
-  tokenPairs: TokenPair[]
-  mapping: Map<string, string[]>
-
-  constructor(tokenInfos?: TokenInfo[], tokenPairs?: TokenPair[], mapping?: Map<string, string[]>) {
-    this.tokenInfos = tokenInfos ?? []
-    this.tokenPairs = tokenPairs ?? []
-    this.mapping = mapping ?? new Map<string, string[]>()
-  }
-
-  addTokenInfos(tokenInfos: TokenInfo[]): DexTokens {
-    const notExists = tokenInfos.filter((a) => !this.tokenInfos.some(b => a.id === b.id))
-    const newTokenInfos = this.tokenInfos.concat(notExists)
-    return new DexTokens(newTokenInfos, this.tokenPairs, this.mapping)
-  }
-
-  addTokenPairs(tokenPairs: TokenPair[]): DexTokens {
-    const notExists = tokenPairs.filter((a) => !this.tokenPairs.some(b => a.tokenPairId === b.tokenPairId))
-    const newTokenPairs = this.tokenPairs.concat(notExists)
-    return new DexTokens(this.tokenInfos, newTokenPairs, this.mapping)
-  }
-
-  addMappings(pairs: Array<[string, string[]]>): DexTokens {
-    const newMapping = new Map(this.mapping.entries())
-    pairs.forEach(([key, values]) => {
-      const current = newMapping.get(key)
-      if (current === undefined) {
-        newMapping.set(key, values)
-      } else {
-        newMapping.set(key, current.concat(values))
-      }
-    })
-    return new DexTokens(this.tokenInfos, this.tokenPairs, newMapping)
-  }
-
-  getAllowedTokenInfos(tokenId: string | undefined): TokenInfo[] {
-    if (tokenId === undefined) return this.tokenInfos
-    const allowed = this.mapping.get(tokenId)
-    if (allowed === undefined) return []
-    return this.tokenInfos.filter((tokenInfo) => allowed.includes(tokenInfo.id))
-  }
 }
 
 export function sortTokens(tokenAId: string, tokenBId: string): [string, string] {
@@ -90,12 +50,15 @@ export interface TokenPairState {
   totalSupply: bigint
 }
 
-export async function getTokenPairState(tokenAInfo: TokenInfo, tokenBInfo: TokenInfo): Promise<TokenPairState> {
-  const factoryId = network.factoryId
-  const groupIndex = network.groupIndex
+export function getPairContractId(tokenAInfo: TokenInfo, tokenBInfo: TokenInfo): string {
   const [token0Id, token1Id] = sortTokens(tokenAInfo.id, tokenBInfo.id)
   const path = token0Id + token1Id
-  const pairContractId = subContractId(factoryId, path, groupIndex)
+  return subContractId(network.factoryId, path, network.groupIndex)
+}
+
+export async function getTokenPairState(tokenAInfo: TokenInfo, tokenBInfo: TokenInfo): Promise<TokenPairState> {
+  const [token0Id, token1Id] = sortTokens(tokenAInfo.id, tokenBInfo.id)
+  const pairContractId = getPairContractId(tokenAInfo, tokenBInfo)
   const contractAddress = addressFromContractId(pairContractId)
   const tokenPair = TokenPairContract.at(contractAddress)
   try {
@@ -302,8 +265,8 @@ export function getAddLiquidityResult(state: TokenPairState, inputTokenId: strin
   const liquidityB = amountB * state.totalSupply / reserveB
   const liquidity = liquidityA < liquidityB ? liquidityA : liquidityB
   const totalSupply = state.totalSupply + liquidity
-  const percentage = BigNumber((100n * liquidity).toString())
-    .div(BigNumber(totalSupply.toString()))
+  const percentage = new BigNumber((100n * liquidity).toString())
+    .div(new BigNumber(totalSupply.toString()))
     .toFixed(5)
   const [tokenAId, tokenBId] = inputTokenId === state.token0Info.id
     ? [state.token0Info.id, state.token1Info.id]
@@ -419,8 +382,8 @@ export function getRemoveLiquidityResult(
   const amount1 = liquidity * tokenPairState.reserve1 / tokenPairState.totalSupply
   const remainShareAmount = tokenPairState.totalLiquidityAmount - liquidity
   const remainSupply = tokenPairState.totalSupply - liquidity
-  const remainSharePercentage = BigNumber((100n * remainShareAmount).toString())
-    .div(BigNumber(remainSupply.toString()))
+  const remainSharePercentage = new BigNumber((100n * remainShareAmount).toString())
+    .div(new BigNumber(remainSupply.toString()))
     .toFixed(5)
   return {
     token0Id: tokenPairState.token0Info.id,
@@ -567,9 +530,4 @@ export function tryGetBalance(balances: Map<string, bigint> | undefined, tokenIn
   }
   const balance = balances.get(tokenInfo.id)
   return balance === undefined ? '0' : bigIntToString(balance, tokenInfo.decimals)
-}
-
-export function tokenPairMatch(tokenPairState: TokenPairState | undefined, token0Info: TokenInfo | undefined, token1Info: TokenInfo | undefined) {
-  return (tokenPairState?.token0Info.id === token0Info?.id && tokenPairState?.token1Info.id === token1Info?.id) ||
-    (tokenPairState?.token1Info.id === token0Info?.id && tokenPairState?.token0Info.id === token1Info?.id)
 }
