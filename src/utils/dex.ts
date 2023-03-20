@@ -220,43 +220,90 @@ async function swapMaxIn(
   return result
 }
 
-function checkPriceImpact(state: TokenPairState, tokenInId: string, amountIn: bigint, amountOut: bigint) {
+export interface SwapDetails {
+  swapType: 'ExactIn' | 'ExactOut'
+  state: TokenPairState
+  tokenInInfo: TokenInfo
+  tokenOutInfo: TokenInfo
+  tokenInAmount: bigint,
+  maximalTokenInAmount: bigint | undefined,
+  tokenOutAmount: bigint,
+  minimalTokenOutAmount: bigint | undefined
+  priceImpact: number
+}
+
+export function getSwapDetails(
+  swapType: 'ExactIn' | 'ExactOut',
+  state: TokenPairState,
+  tokenInInfo: TokenInfo,
+  tokenOutInfo: TokenInfo,
+  tokenInAmount: bigint,
+  tokenOutAmount: bigint,
+  slippage: number
+): SwapDetails {
+  const priceImpact = calcPriceImpact(state, tokenInInfo.id, tokenInAmount, tokenOutAmount)
+  const result = { swapType, state, tokenInInfo, tokenOutInfo, tokenInAmount, tokenOutAmount, priceImpact }
+  return swapType === 'ExactIn'
+    ? {
+      ...result,
+      minimalTokenOutAmount: minimalAmount(tokenOutAmount, slippage),
+      maximalTokenInAmount: undefined
+    } : {
+      ...result,
+      maximalTokenInAmount: maximalAmount(tokenInAmount, slippage),
+      minimalTokenOutAmount: undefined
+    }
+}
+
+function calcPriceImpact(state: TokenPairState, tokenInId: string, amountIn: bigint, amountOut: bigint) {
   const [reserveIn, reserveOut] = state.token0Info.id === tokenInId
     ? [state.reserve0, state.reserve1]
     : [state.reserve1, state.reserve0]
-  const left = (reserveIn + amountIn) * reserveOut * 100n
-  const right = (reserveOut - amountOut) * (BigInt(MaxPriceImpact) + 100n) * reserveIn
-  if (left > right) {
-    throw new Error('Price impact too high')
-  }
+  const numerator = (reserveOut * (reserveIn + amountIn) - (reserveOut - amountOut) * reserveIn) * 100n
+  const denumerator = reserveIn * (reserveOut - amountOut)
+  const impact = BigNumber(numerator.toString()).div(BigNumber(denumerator.toString())).toFixed()
+  return parseFloat(impact)
 }
 
 export async function swap(
-  type: 'ExactIn' | 'ExactOut',
+  swapDetails: SwapDetails,
   balances: Map<string, bigint>,
   signer: SignerProvider,
   nodeProvider: NodeProvider,
   sender: string,
-  state: TokenPairState,
-  tokenInInfo: TokenInfo,
-  amountIn: bigint,
-  amountOut: bigint,
-  slippage: number,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  const available = balances.get(tokenInInfo.id) ?? 0n
-  if (available < amountIn) {
-    throw new Error(`not enough ${tokenInInfo.symbol} balance, available: ${bigIntToString(available, tokenInInfo.decimals)}`)
+  if (swapDetails.priceImpact >= MaxPriceImpact) {
+    throw new Error('Price impact too high')
   }
-  checkPriceImpact(state, tokenInInfo.id, amountIn, amountOut)
-
-  if (type === 'ExactIn') {
-    const amountOutMin = minimalAmount(amountOut, slippage)
-    return swapMinOut(signer, nodeProvider, sender, state.tokenPairId, tokenInInfo.id, amountIn, amountOutMin, ttl)
+  const available = balances.get(swapDetails.tokenInInfo.id) ?? 0n
+  if (available < swapDetails.tokenInAmount) {
+    throw new Error(`not enough ${swapDetails.tokenInInfo.symbol} balance, available: ${bigIntToString(available, swapDetails.tokenInInfo.decimals)}`)
   }
 
-  const amountInMax = maximalAmount(amountIn, slippage)
-  return swapMaxIn(signer, nodeProvider, sender, state.tokenPairId, tokenInInfo.id, amountInMax, amountOut, ttl)
+  if (swapDetails.swapType === 'ExactIn') {
+    return swapMinOut(
+      signer,
+      nodeProvider,
+      sender,
+      swapDetails.state.tokenPairId,
+      swapDetails.tokenInInfo.id,
+      swapDetails.tokenInAmount,
+      swapDetails.minimalTokenOutAmount!,
+      ttl
+    )
+  }
+
+  return swapMaxIn(
+    signer,
+    nodeProvider,
+    sender,
+    swapDetails.state.tokenPairId,
+    swapDetails.tokenInInfo.id,
+    swapDetails.maximalTokenInAmount!,
+    swapDetails.tokenOutAmount,
+    ttl
+  )
 }
 
 function isMemPooled(txStatus: node.TxStatus): txStatus is node.MemPooled {

@@ -1,13 +1,11 @@
-import { Button, Container, Link, Paper, Typography } from "@material-ui/core";
+import { Box, Card, Container, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
-import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
 import { useCallback, useState, useMemo } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
-import CircleLoader from "./CircleLoader";
 import HoverIcon from "./HoverIcon";
 import NumberTextField from "./NumberTextField";
-import { getExplorerLink, swap, tryGetBalance } from "../utils/dex";
+import { getSwapDetails, swap, SwapDetails, tryGetBalance } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useDeadline } from "../hooks/useDeadline";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
@@ -18,6 +16,8 @@ import { useDerivedSwapInfo } from "../state/swap/hooks";
 import { selectSwapState } from "../state/swap/selectors";
 import { commonStyles } from "./style";
 import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
+import BigNumber from "bignumber.js";
+import { prettifyExactAmount } from "@alephium/web3";
 
 function Swap() {
   const classes = commonStyles();
@@ -40,6 +40,21 @@ function Swap() {
 
   const { tokenInInfo, tokenOutInfo } = useSelector(selectSwapState)
   const { tokenInInput, tokenOutInput, tokenInAmount, tokenOutAmount, tokenPairState, swapType } = useDerivedSwapInfo(setError)
+
+  const swapDetails = useMemo(() => {
+    if (
+      swapType === undefined ||
+      tokenPairState === undefined ||
+      tokenInAmount === undefined ||
+      tokenOutAmount === undefined ||
+      tokenInInfo === undefined ||
+      tokenOutInfo === undefined
+    ) {
+      return undefined
+    }
+    const slippageTolerance = slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage
+    return getSwapDetails(swapType, tokenPairState, tokenInInfo, tokenOutInfo, tokenInAmount, tokenOutAmount, slippageTolerance)
+  }, [tokenInAmount, tokenOutAmount, tokenPairState, swapType, tokenInInfo, tokenOutInfo, slippage])
 
   const handleTokenInAmountChange = useCallback((event) => {
     dispatch(typeInput({ type: 'TokenIn', value: event.target.value }))
@@ -123,32 +138,16 @@ function Swap() {
   const handleSwap = useCallback(async () => {
     try {
       setSwapping(true)
-      if (
-        swapType !== undefined &&
-        wallet !== undefined &&
-        tokenPairState !== undefined &&
-        tokenInInfo !== undefined &&
-        tokenInAmount !== undefined &&
-        tokenOutAmount !== undefined
-      ) {
-        if (tokenInAmount === 0n) {
-          throw new Error('the input amount must be greater than 0')
-        }
-
+      if (wallet !== undefined && swapDetails !== undefined) {
         const result = await swap(
-          swapType,
+          swapDetails,
           balance,
           wallet.signer,
           wallet.nodeProvider,
           wallet.address,
-          tokenPairState,
-          tokenInInfo,
-          tokenInAmount,
-          tokenOutAmount,
-          slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage,
           deadline
         )
-        console.log(`swap succeed, tx id: ${result.txId}`)
+        console.log(`swap tx submitted, tx id: ${result.txId}`)
         setTxId(result.txId)
         setSwapping(false)
       }
@@ -157,17 +156,13 @@ function Swap() {
       setSwapping(false)
       console.error(`failed to swap, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenInInfo, tokenInAmount, tokenOutAmount, slippage, deadline, swapType, balance])
+  }, [wallet, swapDetails, slippage, deadline, balance])
 
   const readyToSwap =
     wallet !== undefined &&
-    tokenInInfo !== undefined &&
-    tokenOutInfo !== undefined &&
-    tokenInAmount !== undefined &&
-    tokenOutAmount !== undefined &&
-    swapType !== undefined &&
     !swapping && !completed &&
-    error === undefined
+    error === undefined &&
+    swapDetails !== undefined
   const swapButton = (
     <ButtonWithLoader
       disabled={!readyToSwap}
@@ -220,6 +215,7 @@ function Swap() {
                 <div className={classes.spacer} />
               </>
             }
+            <SwapDetailsCard swapDetails={swapDetails}></SwapDetailsCard>
             {swapButton}
           </Collapse>
         </div>
@@ -227,6 +223,75 @@ function Swap() {
       <div className={classes.spacer} />
     </Container>
   );
+}
+
+function formatPriceImpact(impact: number): string {
+  if (impact < 0.0001) {
+    return '< 0.0001'
+  }
+  return impact.toFixed(4)
+}
+
+function calcPrice(reserveIn: bigint, tokenInDecimals: number, reserveOut: bigint, tokenOutDecimals: number): string {
+  const numerator = reserveIn * (10n ** BigInt(tokenOutDecimals))
+  const denumerator = reserveOut * (10n ** BigInt(tokenInDecimals))
+  const price = BigNumber(numerator.toString()).div(BigNumber(denumerator.toString()))
+  const min = BigNumber('0.000001')
+  if (price.lt(min)) {
+    return `< ${min}`
+  }
+  return `= ${price.toFixed(6)}`
+}
+
+function SwapDetailsCard({ swapDetails } : { swapDetails : SwapDetails | undefined }) {
+  if (swapDetails === undefined) {
+    return null
+  }
+
+  const {
+    swapType,
+    state,
+    tokenInInfo,
+    tokenOutInfo,
+    tokenOutAmount,
+    maximalTokenInAmount,
+    minimalTokenOutAmount,
+    priceImpact
+  } = swapDetails
+  const [[reserveIn, tokenInDecimals], [reserveOut, tokenOutDecimals]] = state.token0Info.id === tokenInInfo.id
+    ? [[state.reserve0, state.token0Info.decimals], [state.reserve1, state.token1Info.decimals]]
+    : [[state.reserve1, state.token1Info.decimals], [state.reserve0, state.token0Info.decimals]]
+  return <Card variant='outlined' style={{ width: '100%', padding: '0', borderRadius: '10px' }}>
+    <div style={{ display: 'grid', gridAutoRows: 'auto', gridRowGap: '5px', paddingTop: '10px', paddingBottom: '10px' }}>
+      <DetailItem
+        itemName='Price:'
+        itemValue={`1 ${tokenOutInfo.symbol} ${calcPrice(reserveIn, tokenInDecimals, reserveOut, tokenOutDecimals)} ${tokenInInfo.symbol}`}
+      />
+      <DetailItem
+        itemName='Expected Output:'
+        itemValue={`${prettifyExactAmount(tokenOutAmount, tokenOutInfo.decimals)} ${tokenOutInfo.symbol}`}
+      />
+      <DetailItem
+        itemName='Price Impact:'
+        itemValue={`${formatPriceImpact(priceImpact)} %`}
+      />
+      <DetailItem
+        itemName={swapType === 'ExactIn' ? 'Minimal received after slippage:' : 'Maximum sent after slippage:'}
+        itemValue={
+          swapType === 'ExactIn'
+            ? `${prettifyExactAmount(minimalTokenOutAmount!, tokenOutInfo.decimals)} ${tokenOutInfo.symbol}`
+            : `${prettifyExactAmount(maximalTokenInAmount!, tokenInInfo.decimals)} ${tokenInInfo.symbol}`
+        }
+      />
+    </div>
+  </Card>
+}
+
+function DetailItem({ itemName, itemValue } : { itemName: string, itemValue: string }) {
+  return <Box pl={1.5} pr={1.5} style={{ justifyContent: 'space-between', display: 'flex', flexWrap: 'wrap', width: '100%', alignItems: 'center' }}>
+    <div style={{ fontWeight: '400', fontSize: '14', display: 'flex', textAlign: 'left', wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '50%' }}>{itemName}</div>
+    <div style={{ fontWeight: '400', fontSize: '14', textAlign: 'right', wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '50%' }}>{itemValue}</div>
+  </Box>
 }
 
 export default Swap;
