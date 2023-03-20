@@ -1,11 +1,9 @@
-import { Button, Container, Link, Paper, Typography } from "@material-ui/core";
+import { Container, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
-import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
 import { TokenInfo } from "@alephium/token-list"
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
-import CircleLoader from "./CircleLoader";
-import { tokenPairExist, createTokenPair, getExplorerLink } from "../utils/dex";
+import { tokenPairExist, createTokenPair } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { commonStyles } from "./style";
 import TokenSelectDialog from "./TokenSelectDialog";
