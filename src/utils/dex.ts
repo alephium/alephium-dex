@@ -468,7 +468,8 @@ export async function addLiquidity(
   return result
 }
 
-export interface RemoveLiquidityResult {
+export interface RemoveLiquidityDetails {
+  state: TokenPairState
   token0Id: string
   amount0: bigint
   token1Id: string
@@ -477,20 +478,23 @@ export interface RemoveLiquidityResult {
   remainSharePercentage: number
 }
 
-export function getRemoveLiquidityResult(
-  tokenPairState: TokenPairState & { totalLiquidityAmount: bigint } , liquidity: bigint
-): RemoveLiquidityResult {
-  if (liquidity > tokenPairState.totalLiquidityAmount) {
+export function getRemoveLiquidityDetails(
+  tokenPairState: TokenPairState,
+  totalLiquidityAmount: bigint,
+  liquidity: bigint
+): RemoveLiquidityDetails {
+  if (liquidity > totalLiquidityAmount) {
     throw new Error('liquidity exceed total liquidity amount')
   }
   const amount0 = liquidity * tokenPairState.reserve0 / tokenPairState.totalSupply
   const amount1 = liquidity * tokenPairState.reserve1 / tokenPairState.totalSupply
-  const remainShareAmount = tokenPairState.totalLiquidityAmount - liquidity
+  const remainShareAmount = totalLiquidityAmount - liquidity
   const remainSupply = tokenPairState.totalSupply - liquidity
   const remainSharePercentage = BigNumber((100n * remainShareAmount).toString())
     .div(BigNumber(remainSupply.toString()))
     .toFixed(5)
   return {
+    state: tokenPairState,
     token0Id: tokenPairState.token0Info.id,
     amount0,
     token1Id: tokenPairState.token1Info.id,
