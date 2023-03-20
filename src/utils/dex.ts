@@ -330,7 +330,8 @@ export async function waitTxSubmitted(
   await waitTxSubmitted(provider, txId, maxTimes - 1)
 }
 
-export interface AddLiquidityResult {
+export interface AddLiquidityDetails {
+  state: TokenPairState,
   tokenAId: string
   tokenBId: string
   amountA: bigint
@@ -339,7 +340,12 @@ export interface AddLiquidityResult {
   sharePercentage: number
 }
 
-export function getInitAddLiquidityResult(tokenAId: string, tokenBId: string, amountA: bigint, amountB: bigint): AddLiquidityResult {
+export function getInitAddLiquidityDetails(
+  tokenAId: string,
+  tokenBId: string,
+  amountA: bigint,
+  amountB: bigint
+): Omit<AddLiquidityDetails, 'state'> {
   const liquidity = sqrt(amountA * amountB)
   if (liquidity <= MINIMUM_LIQUIDITY) {
     throw new Error('insufficient initial liquidity')
@@ -354,7 +360,7 @@ export function getInitAddLiquidityResult(tokenAId: string, tokenBId: string, am
   }
 }
 
-export function getAddLiquidityResult(state: TokenPairState, inputTokenId: string, inputAmount: bigint, inputType: 'TokenA' | 'TokenB'): AddLiquidityResult {
+export function getAddLiquidityDetails(state: TokenPairState, inputTokenId: string, inputAmount: bigint, inputType: 'TokenA' | 'TokenB'): AddLiquidityDetails {
   const [reserveA, reserveB] = inputTokenId === state.token0Info.id
     ? [state.reserve0, state.reserve1]
     : [state.reserve1, state.reserve0]
@@ -366,18 +372,16 @@ export function getAddLiquidityResult(state: TokenPairState, inputTokenId: strin
   const percentage = BigNumber((100n * liquidity).toString())
     .div(BigNumber(totalSupply.toString()))
     .toFixed(5)
-  const [tokenAId, tokenBId] = inputTokenId === state.token0Info.id
-    ? [state.token0Info.id, state.token1Info.id]
-    : [state.token1Info.id, state.token0Info.id]
-  const result = {
-    tokenAId: inputType === 'TokenA' ? tokenAId : tokenBId,
-    tokenBId: inputType === 'TokenA' ? tokenBId : tokenAId,
+  const tokenBId = inputTokenId === state.token0Info.id ? state.token1Info.id : state.token0Info.id
+  return {
+    state: state,
+    tokenAId: inputType === 'TokenA' ? inputTokenId : tokenBId,
+    tokenBId: inputType === 'TokenA' ? tokenBId : inputTokenId,
     amountA: inputType === 'TokenA' ? inputAmount : amountB,
     amountB: inputType === 'TokenA' ? amountB : inputAmount,
     shareAmount: liquidity,
     sharePercentage: parseFloat(percentage)
   }
-  return result
 }
 
 function sqrt(y: bigint): bigint {

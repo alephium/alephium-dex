@@ -1,4 +1,4 @@
-import { Box, Card, Container, Paper, Typography } from "@material-ui/core";
+import { Card, Container, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
 import { useCallback, useState, useMemo } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
@@ -18,6 +18,7 @@ import { commonStyles } from "./style";
 import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
 import BigNumber from "bignumber.js";
 import { prettifyExactAmount } from "@alephium/web3";
+import { DetailItem } from "./DetailsItem";
 
 function Swap() {
   const classes = commonStyles();
@@ -285,13 +286,6 @@ function SwapDetailsCard({ swapDetails } : { swapDetails : SwapDetails | undefin
       />
     </div>
   </Card>
-}
-
-function DetailItem({ itemName, itemValue } : { itemName: string, itemValue: string }) {
-  return <Box pl={1.5} pr={1.5} style={{ justifyContent: 'space-between', display: 'flex', flexWrap: 'wrap', width: '100%', alignItems: 'center' }}>
-    <div style={{ fontWeight: '400', fontSize: '14', display: 'flex', textAlign: 'left', wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '50%' }}>{itemName}</div>
-    <div style={{ fontWeight: '400', fontSize: '14', textAlign: 'right', wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '50%' }}>{itemValue}</div>
-  </Box>
 }
 
 export default Swap;

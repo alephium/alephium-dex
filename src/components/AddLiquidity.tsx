@@ -1,11 +1,10 @@
-import { Button, Container, Link, Paper, Typography } from "@material-ui/core";
+import { Card, Container, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
-import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
 import { useCallback, useMemo, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import NumberTextField from "./NumberTextField";
-import { addLiquidity, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityResult, TokenPairState, tryGetBalance, getExplorerLink } from "../utils/dex";
+import { addLiquidity, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityDetails, tryGetBalance } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
@@ -16,8 +15,8 @@ import { useDerivedMintInfo } from "../state/mint/hooks";
 import { selectMintState } from "../state/mint/selectors";
 import { commonStyles } from "./style";
 import { useHistory } from "react-router-dom";
-import CircleLoader from "./CircleLoader";
 import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
+import { DetailItem } from "./DetailsItem";
 
 function AddLiquidity() {
   const classes = commonStyles();
@@ -40,7 +39,7 @@ function AddLiquidity() {
   }, [dispatch]);
 
   const { tokenAInfo, tokenBInfo } = useSelector(selectMintState)
-  const { tokenAInput, tokenBInput, tokenAAmount, tokenBAmount, tokenPairState, addLiquidityResult } = useDerivedMintInfo(setError)
+  const { tokenAInput, tokenBInput, tokenAAmount, tokenBAmount, tokenPairState, addLiquidityDetails } = useDerivedMintInfo(setError)
 
   const handleTokenAAmountChange = useCallback((event) => {
     const hasLiquidity = tokenPairState !== undefined && tokenPairState.reserve0 > 0n
@@ -130,10 +129,6 @@ function AddLiquidity() {
         tokenAAmount !== undefined &&
         tokenBAmount !== undefined
       ) {
-        if (tokenAAmount === 0n || tokenBAmount === 0n) {
-          throw new Error('the input amount must be greater than 0')
-        }
-
         const result = await addLiquidity(
           balance,
           wallet.signer,
@@ -178,35 +173,6 @@ function AddLiquidity() {
     </ButtonWithLoader>
   );
 
-  const formatAddLiquidityResult = (state: TokenPairState, result: AddLiquidityResult, slippage: number | 'auto') => {
-    const slippageTolerance = slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage
-    const [tokenA, tokenB] = result.tokenAId === state.token0Info.id
-      ? [{ info: state.token0Info, amount: result.amountA }, { info: state.token1Info, amount: result.amountB }]
-      : [{ info: state.token1Info, amount: result.amountA }, { info: state.token0Info, amount: result.amountB }]
-    return <>
-      <div className={classes.notification}>
-        <p className={classes.leftAlign}>Share amount:</p>
-        <p className={classes.rightAlign}>{bigIntToString(result.shareAmount, PairTokenDecimals)}</p>
-      </div>
-      <div className={classes.notification}>
-        <p className={classes.leftAlign}>Share percentage:</p>
-        <p className={classes.rightAlign}>{result.sharePercentage}%</p>
-      </div>
-      {state.reserve0 > 0n ? (
-        <>
-          <div className={classes.notification}>
-            <p className={classes.leftAlign}>Minimal amount of {tokenA.info.symbol}:</p>
-            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(tokenA.amount, slippageTolerance), tokenA.info.decimals)}</p>
-          </div>
-          <div className={classes.notification}>
-            <p className={classes.leftAlign}>Minimal amount of {tokenB.info.symbol}:</p>
-            <p className={classes.rightAlign}>{bigIntToString(minimalAmount(tokenB.amount, slippageTolerance), tokenB.info.decimals)}</p>
-          </div>
-        </>
-      ) : null}
-    </>
-  }
-
   return (
     <Container className={classes.centeredContainer} maxWidth="sm">
       <div className={classes.titleBar}></div>
@@ -247,7 +213,7 @@ function AddLiquidity() {
                 <div className={classes.spacer} />
               </>
             }
-            {addLiquidityResult && tokenPairState && !error ? (formatAddLiquidityResult(tokenPairState, addLiquidityResult, slippage)) : null}
+            <AddLiquidityDetailsCard details={addLiquidityDetails} slippage={slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage}></AddLiquidityDetailsCard>
             {addLiquidityButton}
           </Collapse>
         </div>
@@ -255,6 +221,37 @@ function AddLiquidity() {
       <div className={classes.spacer} />
     </Container>
   );
+}
+
+function AddLiquidityDetailsCard({ details, slippage } : { details: AddLiquidityDetails | undefined, slippage: number }) {
+  if (details === undefined) {
+    return null
+  }
+
+  const { state, tokenAId, shareAmount, sharePercentage, amountA, amountB } = details
+  const [tokenA, tokenB] = tokenAId === state.token0Info.id
+      ? [{ info: state.token0Info, amount: amountA }, { info: state.token1Info, amount: amountB }]
+      : [{ info: state.token1Info, amount: amountA }, { info: state.token0Info, amount: amountB }]
+  return <Card variant='outlined' style={{ width: '100%', padding: '0', borderRadius: '10px' }}>
+    <div style={{ display: 'grid', gridAutoRows: 'auto', gridRowGap: '5px', paddingTop: '10px', paddingBottom: '10px' }}>
+      <DetailItem
+        itemName='Liquidity token amount:'
+        itemValue={`${bigIntToString(shareAmount, PairTokenDecimals)}`}
+      />
+      <DetailItem
+        itemName='Share percentage:'
+        itemValue={`${sharePercentage} %`}
+      />
+      <DetailItem
+        itemName={`Minimal amount of ${tokenA.info.symbol} after slippage:`}
+        itemValue={`${bigIntToString(minimalAmount(tokenA.amount, slippage), tokenA.info.decimals)} ${tokenA.info.symbol}`}
+      />
+      <DetailItem
+        itemName={`Minimal amount of ${tokenB.info.symbol} after slippage:`}
+        itemValue={`${bigIntToString(minimalAmount(tokenB.amount, slippage), tokenB.info.decimals)} ${tokenB.info.symbol}`}
+      />
+    </div>
+  </Card>
 }
 
 export default AddLiquidity;
