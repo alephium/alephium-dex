@@ -15,8 +15,7 @@ export const networkName: NetworkName = process.env.REACT_APP_NETWORK as Network
 
 export const network: NetworkConfig = getNetworkConfig(networkName)
 
-export const checkTxConfirmedFrequency = networkName === 'devnet' ? 1 : 15 // seconds
-export const eventPollingInterval = networkName === 'devnet' ? 1 : 15 // seconds
+export const PollingInterval = networkName === 'devnet' ? 1 : 15 // seconds
 
 function getNetworkConfig(network: NetworkName): NetworkConfig {
   if (network === 'mainnet') {

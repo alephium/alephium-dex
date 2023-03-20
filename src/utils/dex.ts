@@ -10,7 +10,7 @@ import {
   DUST_AMOUNT
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
-import { checkTxConfirmedFrequency, network, networkName } from "./consts"
+import { PollingInterval, network, networkName } from "./consts"
 import BigNumber from "bignumber.js"
 import { parseUnits } from "ethers/lib/utils";
 import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, RemoveLiquidity, CreatePair } from "../../artifacts/ts"
@@ -79,6 +79,14 @@ export function sortTokens(tokenAId: string, tokenBId: string): [string, string]
   const tokenA = BigInt('0x' + tokenAId)
   const tokenB = BigInt('0x' + tokenBId)
   return tokenA < tokenB ? [tokenAId, tokenBId] : [tokenBId, tokenAId]
+}
+
+export function getExplorerLink(txId: string): string {
+  return networkName === 'mainnet'
+    ? `https://explorer.alephium.org/transactions/${txId}`
+    : networkName === 'testnet'
+    ? `https://explorer.testnet.alephium.org/transactions/${txId}`
+    : `http://localhost:3000/${txId}`
 }
 
 export interface TokenPairState {
@@ -158,6 +166,7 @@ function deadline(ttl: number): bigint {
 
 async function swapMinOut(
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   pairId: string,
   tokenInId: string,
@@ -165,7 +174,7 @@ async function swapMinOut(
   amountOutMin: bigint,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  return await SwapMinOut.execute(signer, {
+  const result = await SwapMinOut.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -179,10 +188,13 @@ async function swapMinOut(
       ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountIn }]
       : [{ id: ALPH_TOKEN_ID, amount: amountIn + DUST_AMOUNT }]
   })
+  await waitTxSubmitted(nodeProvider, result.txId)
+  return result
 }
 
 async function swapMaxIn(
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   pairId: string,
   tokenInId: string,
@@ -190,7 +202,7 @@ async function swapMaxIn(
   amountOut: bigint,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  return await SwapMaxIn.execute(signer, {
+  const result = await SwapMaxIn.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -204,6 +216,8 @@ async function swapMaxIn(
       ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountInMax }]
       : [{ id: ALPH_TOKEN_ID, amount: amountInMax + DUST_AMOUNT }]
   })
+  await waitTxSubmitted(nodeProvider, result.txId)
+  return result
 }
 
 function checkPriceImpact(state: TokenPairState, tokenInId: string, amountIn: bigint, amountOut: bigint) {
@@ -221,6 +235,7 @@ export async function swap(
   type: 'ExactIn' | 'ExactOut',
   balances: Map<string, bigint>,
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   state: TokenPairState,
   tokenInInfo: TokenInfo,
@@ -237,36 +252,35 @@ export async function swap(
 
   if (type === 'ExactIn') {
     const amountOutMin = minimalAmount(amountOut, slippage)
-    return await swapMinOut(signer, sender, state.tokenPairId, tokenInInfo.id, amountIn, amountOutMin, ttl)
+    return swapMinOut(signer, nodeProvider, sender, state.tokenPairId, tokenInInfo.id, amountIn, amountOutMin, ttl)
   }
 
   const amountInMax = maximalAmount(amountIn, slippage)
-  return await swapMaxIn(signer, sender, state.tokenPairId, tokenInInfo.id, amountInMax, amountOut, ttl)
+  return swapMaxIn(signer, nodeProvider, sender, state.tokenPairId, tokenInInfo.id, amountInMax, amountOut, ttl)
 }
 
-function isConfirmed(txStatus: node.TxStatus): txStatus is node.Confirmed {
-  return txStatus.type === 'Confirmed'
+function isMemPooled(txStatus: node.TxStatus): txStatus is node.MemPooled {
+  return txStatus.type === 'MemPooled'
 }
 
-async function checkScriptExecutionResult(provider: NodeProvider, txId: string) {
-  const details = await provider.transactions.getTransactionsDetailsTxid(txId)
-  if (!details.scriptExecutionOk) {
-    throw new Error('Failed to call contract')
-  }
-}
-
-export async function waitTxConfirmed(
+export async function waitTxSubmitted(
   provider: NodeProvider,
   txId: string,
-  confirmations: number
-): Promise<node.Confirmed> {
-  const status = await provider.transactions.getTransactionsStatus({ txId: txId })
-  if (isConfirmed(status) && status.chainConfirmations >= confirmations) {
-    await checkScriptExecutionResult(provider, txId)
-    return status
+  maxTimes: number = 30
+): Promise<void> {
+  try {
+    const status = await provider.transactions.getTransactionsStatus({ txId: txId })
+    if (isMemPooled(status)) {
+      return
+    }
+  } catch (error) {
+    console.log(`Get transaction status error: ${error}`)
+    if (maxTimes === 0) {
+      throw error
+    }
   }
-  await new Promise((r) => setTimeout(r, checkTxConfirmedFrequency * 1000))
-  return waitTxConfirmed(provider, txId, confirmations)
+  await new Promise((r) => setTimeout(r, PollingInterval * 1000))
+  await waitTxSubmitted(provider, txId, maxTimes - 1)
 }
 
 export interface AddLiquidityResult {
@@ -354,6 +368,7 @@ function maximalAmount(amount: bigint, slippage: number): bigint {
 export async function addLiquidity(
   balances: Map<string, bigint>,
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   tokenPairState: TokenPairState,
   tokenAInfo: TokenInfo,
@@ -382,7 +397,7 @@ export async function addLiquidity(
   const [amount0Desired, amount1Desired, amount0Min, amount1Min] = tokenAInfo.id === tokenPairState.token0Info.id
     ? [amountADesired, amountBDesired, amountAMin, amountBMin]
     : [amountBDesired, amountADesired, amountBMin, amountAMin]
-  return await AddLiquidity.execute(signer, {
+  const result = await AddLiquidity.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -398,6 +413,8 @@ export async function addLiquidity(
       { id: tokenBInfo.id, amount: amountBDesired }
     ]
   })
+  await waitTxSubmitted(nodeProvider, result.txId)
+  return result
 }
 
 export interface RemoveLiquidityResult {
@@ -434,6 +451,7 @@ export function getRemoveLiquidityResult(
 
 export async function removeLiquidity(
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   pairId: string,
   liquidity: bigint,
@@ -444,7 +462,7 @@ export async function removeLiquidity(
 ): Promise<SignExecuteScriptTxResult> {
   const amount0Min = minimalAmount(amount0Desired, slippage)
   const amount1Min = minimalAmount(amount1Desired, slippage)
-  return await RemoveLiquidity.execute(signer, {
+  const result = await RemoveLiquidity.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -456,6 +474,8 @@ export async function removeLiquidity(
     },
     tokens: [{ id: pairId, amount: liquidity }]
   })
+  await waitTxSubmitted(nodeProvider, result.txId)
+  return result
 }
 
 export async function tokenPairExist(nodeProvider: NodeProvider, tokenAId: string, tokenBId: string): Promise<boolean> {
@@ -479,6 +499,7 @@ export async function tokenPairExist(nodeProvider: NodeProvider, tokenAId: strin
 
 export async function createTokenPair(
   signer: SignerProvider,
+  nodeProvider: NodeProvider,
   sender: string,
   tokenAId: string,
   tokenBId: string
@@ -501,6 +522,7 @@ export async function createTokenPair(
       { id: tokenBId, amount: 1n },
     ]
   })
+  await waitTxSubmitted(nodeProvider, result.txId)
   return { ...result, tokenPairId: pairContractId }
 }
 

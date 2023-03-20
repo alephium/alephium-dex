@@ -1,7 +1,7 @@
-import { Button, Container, Paper, Typography } from "@material-ui/core";
+import { Button, Container, Link, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
 import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import NumberTextField from "./NumberTextField";
@@ -12,7 +12,8 @@ import {
   getRemoveLiquidityResult,
   PairTokenDecimals,
   stringToBigInt,
-  bigIntToString
+  bigIntToString,
+  getExplorerLink
 } from "../utils/dex";
 import { formatUnits } from "ethers/lib/utils";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
@@ -21,6 +22,8 @@ import { useDeadline } from "../hooks/useDeadline";
 import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
 import { commonStyles } from "./style";
 import { useTokenPairState } from "../state/useTokenPairState";
+import CircleLoader from "./CircleLoader";
+import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
 
 function RemoveLiquidity() {
   const classes = commonStyles();
@@ -30,7 +33,8 @@ function RemoveLiquidity() {
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
   const [totalLiquidityAmount, setTotalLiquidityAmount] = useState<bigint | undefined>(undefined)
   const [removeLiquidityResult, setRemoveLiquidityResult] = useState<RemoveLiquidityResult | undefined>(undefined)
-  const [completed, setCompleted] = useState<boolean>(false)
+  const [txId, setTxId] = useState<string | undefined>(undefined)
+  const [removingLiquidity, setRemovingLiquidity] = useState<boolean>(false)
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
   const [error, setError] = useState<string | undefined>(undefined)
@@ -99,7 +103,8 @@ function RemoveLiquidity() {
     setAmount(undefined)
     setAmountInput(undefined)
     setTotalLiquidityAmount(undefined)
-    setCompleted(false)
+    setTxId(undefined)
+    setRemovingLiquidity(false)
     setRemoveLiquidityResult(undefined)
     setError(undefined)
   }, [])
@@ -122,6 +127,8 @@ function RemoveLiquidity() {
       />
     </div>
   )
+
+  const completed = useMemo(() => txId !== undefined, [txId])
   
   const amountInputBox = (
     <div className={classes.tokenContainer}>
@@ -131,13 +138,14 @@ function RemoveLiquidity() {
         onChange={handleAmountChanged}
         autoFocus={true}
         InputProps={{ disableUnderline: true }}
-        disabled={!!completed}
+        disabled={!!removingLiquidity || !!completed}
       />
     </div>
   )
 
   const handleRemoveLiquidity = useCallback(async () => {
     try {
+      setRemovingLiquidity(true)
       if (
         wallet !== undefined &&
         tokenPairState !== undefined &&
@@ -152,6 +160,7 @@ function RemoveLiquidity() {
 
         const result = await removeLiquidity(
           wallet.signer,
+          wallet.nodeProvider,
           wallet.address,
           tokenPairState.tokenPairId,
           amount,
@@ -161,10 +170,12 @@ function RemoveLiquidity() {
           deadline
         )
         console.log(`remove liquidity succeed, tx id: ${result.txId}`)
-        setCompleted(true)
+        setTxId(txId)
+        setRemovingLiquidity(false)
       }
     } catch (error) {
       setError(`${error}`)
+      setRemovingLiquidity(false)
       console.error(`failed to remove liquidity, error: ${error}`)
     }
   }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, amount, removeLiquidityResult, slippage, deadline])
@@ -176,7 +187,8 @@ function RemoveLiquidity() {
     amount !== undefined &&
     totalLiquidityAmount !== undefined &&
     removeLiquidityResult !== undefined &&
-    !completed && error === undefined &&
+    !removingLiquidity && !completed && 
+    error === undefined &&
     getTokenPairStateError === undefined
   const removeLiquidityButton = (
     <ButtonWithLoader
@@ -228,20 +240,16 @@ function RemoveLiquidity() {
       </Typography>
       <div className={classes.spacer} />
       <Paper className={classes.mainPaper}>
-        <Collapse in={!!completed}>
-          <>
-            <CheckCircleOutlineRoundedIcon
-              fontSize={"inherit"}
-              className={classes.successIcon}
-            />
-            <Typography>The remove liquidity transaction has been submitted, please wait for confirmation.</Typography>
-            <div className={classes.spacer} />
-            <div className={classes.spacer} />
-            <Button onClick={handleReset} variant="contained" color="primary">
-              Remove More Liquidity!
-            </Button>
-          </>
-        </Collapse>
+        <WaitingForTxSubmission
+          open={!!removingLiquidity && !completed}
+          text="Adding Liquidity"
+        />
+        <TransactionSubmit
+          open={!!completed}
+          txId={txId!}
+          buttonText="Remove More Liquidity"
+          onClick={handleReset}
+        />
         {wallet === undefined ?
           <div>
             <Typography variant="h6" color="error" className={classes.error}>
@@ -250,7 +258,7 @@ function RemoveLiquidity() {
           </div> : null
         }
         <div>
-          <Collapse in={!completed && wallet !== undefined}>
+          <Collapse in={!removingLiquidity && !completed}>
             {
               <>
                 {tokenPairContent}

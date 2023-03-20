@@ -1,11 +1,11 @@
-import { Button, Container, Paper, Typography } from "@material-ui/core";
+import { Button, Container, Link, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
 import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
 import { useCallback, useMemo, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import NumberTextField from "./NumberTextField";
-import { addLiquidity, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityResult, TokenPairState, tryGetBalance } from "../utils/dex";
+import { addLiquidity, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityResult, TokenPairState, tryGetBalance, getExplorerLink } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
@@ -16,10 +16,13 @@ import { useDerivedMintInfo } from "../state/mint/hooks";
 import { selectMintState } from "../state/mint/selectors";
 import { commonStyles } from "./style";
 import { useHistory } from "react-router-dom";
+import CircleLoader from "./CircleLoader";
+import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
 
 function AddLiquidity() {
   const classes = commonStyles();
-  const [completed, setCompleted] = useState<boolean>(false)
+  const [txId, setTxId] = useState<string | undefined>(undefined)
+  const [addingLiquidity, setAddingLiquidity] = useState<boolean>(false)
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
   const dispatch = useDispatch()
@@ -49,9 +52,12 @@ function AddLiquidity() {
     dispatch(typeInput({ type: 'TokenB', value: event.target.value, hasLiquidity }))
   }, [dispatch, tokenPairState])
 
+  const completed = useMemo(() => txId !== undefined, [txId])
+
   const redirectToSwap = useCallback(() => {
     dispatch(reset())
-    setCompleted(false)
+    setTxId(undefined)
+    setAddingLiquidity(false)
     setError(undefined)
     history.push('/swap')
   }, [history])
@@ -80,7 +86,7 @@ function AddLiquidity() {
           onChange={handleTokenAAmountChange}
           autoFocus={true}
           InputProps={{ disableUnderline: true }}
-          disabled={!!completed}
+          disabled={!!addingLiquidity || !!completed}
         />
       </div>
       {tokenABalance ?
@@ -103,7 +109,7 @@ function AddLiquidity() {
           value={tokenBInput !== undefined ? tokenBInput : ''}
           onChange={handleTokenBAmountChange}
           InputProps={{ disableUnderline: true }}
-          disabled={!!completed}
+          disabled={!!addingLiquidity || !!completed}
         />
       </div>
       {tokenBBalance ?
@@ -115,6 +121,7 @@ function AddLiquidity() {
 
   const handleAddLiquidity = useCallback(async () => {
     try {
+      setAddingLiquidity(true)
       if (
         wallet !== undefined &&
         tokenPairState !== undefined &&
@@ -130,6 +137,7 @@ function AddLiquidity() {
         const result = await addLiquidity(
           balance,
           wallet.signer,
+          wallet.nodeProvider,
           wallet.address,
           tokenPairState,
           tokenAInfo,
@@ -140,10 +148,12 @@ function AddLiquidity() {
           deadline
         )
         console.log(`add liquidity succeed, tx id: ${result.txId}`)
-        setCompleted(true)
+        setTxId(result.txId)
+        setAddingLiquidity(false)
       }
     } catch (error) {
       setError(`${error}`)
+      setAddingLiquidity(false)
       console.error(`failed to add liquidity, error: ${error}`)
     }
   }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline, balance])
@@ -154,7 +164,8 @@ function AddLiquidity() {
     tokenBInfo !== undefined &&
     tokenAAmount !== undefined &&
     tokenBAmount !== undefined &&
-    !completed && error === undefined
+    !addingLiquidity && !completed && 
+    error === undefined
   const addLiquidityButton = (
     <ButtonWithLoader
       disabled={!readyToAddLiquidity}
@@ -204,20 +215,16 @@ function AddLiquidity() {
       </Typography>
       <div className={classes.spacer} />
       <Paper className={classes.mainPaper}>
-        <Collapse in={!!completed}>
-          <>
-            <CheckCircleOutlineRoundedIcon
-              fontSize={"inherit"}
-              className={classes.successIcon}
-            />
-            <Typography>The add liquidity transaction has been submitted, please wait for confirmation.</Typography>
-            <div className={classes.spacer} />
-            <div className={classes.spacer} />
-            <Button onClick={redirectToSwap} variant="contained" color="primary">
-              Swap coins
-            </Button>
-          </>
-        </Collapse>
+        <WaitingForTxSubmission
+          open={!!addingLiquidity && !completed}
+          text="Adding Liquidity"
+        />
+        <TransactionSubmit
+          open={!!completed}
+          txId={txId!}
+          buttonText="Swap Coins"
+          onClick={redirectToSwap}
+        />
         {wallet === undefined ?
           <div>
             <Typography variant="h6" color="error" className={classes.error}>
@@ -226,7 +233,7 @@ function AddLiquidity() {
           </div> : null
         }
         <div>
-          <Collapse in={!completed && wallet !== undefined}>
+          <Collapse in={!addingLiquidity && !completed && wallet !== undefined}>
             {
               <>
                 {sourceContent}

@@ -1,12 +1,13 @@
-import { Button, Container, Paper, Typography } from "@material-ui/core";
+import { Button, Container, Link, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
 import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
 import { useCallback, useState, useMemo } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
+import CircleLoader from "./CircleLoader";
 import HoverIcon from "./HoverIcon";
 import NumberTextField from "./NumberTextField";
-import { swap, tryGetBalance } from "../utils/dex";
+import { getExplorerLink, swap, tryGetBalance } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useDeadline } from "../hooks/useDeadline";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
@@ -16,10 +17,12 @@ import { reset, selectTokenIn, selectTokenOut, switchTokens, typeInput } from ".
 import { useDerivedSwapInfo } from "../state/swap/hooks";
 import { selectSwapState } from "../state/swap/selectors";
 import { commonStyles } from "./style";
+import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
 
 function Swap() {
   const classes = commonStyles();
-  const [completed, setCompleted] = useState<boolean>(false)
+  const [txId, setTxId] = useState<string | undefined>(undefined)
+  const [swapping, setSwapping] = useState<boolean>(false)
   const dispatch = useDispatch()
   const [error, setError] = useState<string | undefined>(undefined)
   const [slippage,] = useSlippageTolerance()
@@ -52,7 +55,8 @@ function Swap() {
 
   const handleReset = useCallback(() => {
     dispatch(reset())
-    setCompleted(false)
+    setTxId(undefined)
+    setSwapping(false)
     setError(undefined)
   }, [dispatch])
 
@@ -63,6 +67,8 @@ function Swap() {
   const tokenOutBalance = useMemo(() => {
     return tryGetBalance(balance, tokenOutInfo)
   }, [balance, tokenOutInfo])
+
+  const completed = useMemo(() => txId !== undefined, [txId])
 
   const sourceContent = (
     <div className={classes.tokenContainerWithBalance}>
@@ -80,7 +86,7 @@ function Swap() {
           onChange={handleTokenInAmountChange}
           autoFocus={true}
           InputProps={{ disableUnderline: true }}
-          disabled={!!completed}
+          disabled={!!swapping || !!completed}
         />
       </div>
       {tokenInBalance ?
@@ -104,7 +110,7 @@ function Swap() {
           value={tokenOutInput !== undefined ? tokenOutInput : ''}
           onChange={handleTokenOutAmountChange}
           InputProps={{ disableUnderline: true }}
-          disabled={!!completed}
+          disabled={!!swapping || !!completed}
         />
       </div>
       {tokenOutBalance ?
@@ -116,6 +122,7 @@ function Swap() {
 
   const handleSwap = useCallback(async () => {
     try {
+      setSwapping(true)
       if (
         swapType !== undefined &&
         wallet !== undefined &&
@@ -132,6 +139,7 @@ function Swap() {
           swapType,
           balance,
           wallet.signer,
+          wallet.nodeProvider,
           wallet.address,
           tokenPairState,
           tokenInInfo,
@@ -141,10 +149,12 @@ function Swap() {
           deadline
         )
         console.log(`swap succeed, tx id: ${result.txId}`)
-        setCompleted(true)
+        setTxId(result.txId)
+        setSwapping(false)
       }
     } catch (error) {
       setError(`${error}`)
+      setSwapping(false)
       console.error(`failed to swap, error: ${error}`)
     }
   }, [wallet, tokenPairState, tokenInInfo, tokenInAmount, tokenOutAmount, slippage, deadline, swapType, balance])
@@ -156,7 +166,8 @@ function Swap() {
     tokenInAmount !== undefined &&
     tokenOutAmount !== undefined &&
     swapType !== undefined &&
-    !completed && error === undefined
+    !swapping && !completed &&
+    error === undefined
   const swapButton = (
     <ButtonWithLoader
       disabled={!readyToSwap}
@@ -177,20 +188,16 @@ function Swap() {
       </Typography>
       <div className={classes.spacer} />
       <Paper className={classes.mainPaper}>
-        <Collapse in={!!completed}>
-          <>
-            <CheckCircleOutlineRoundedIcon
-              fontSize={"inherit"}
-              className={classes.successIcon}
-            />
-            <Typography>The swap transaction has been submitted, please wait for confirmation.</Typography>
-            <div className={classes.spacer} />
-            <div className={classes.spacer} />
-            <Button onClick={handleReset} variant="contained" color="primary">
-              Swap More Coins
-            </Button>
-          </>
-        </Collapse>
+        <WaitingForTxSubmission
+          open={!!swapping && !completed}
+          text="Adding Liquidity"
+        />
+        <TransactionSubmit
+          open={!!completed}
+          txId={txId!}
+          buttonText="Swap More Coins"
+          onClick={handleReset}
+        />
         {wallet === undefined ?
           <div>
             <Typography variant="h6" color="error" className={classes.error}>
@@ -199,7 +206,7 @@ function Swap() {
           </div> : null
         }
         <div>
-          <Collapse in={!completed && wallet !== undefined}>
+          <Collapse in={!swapping && !completed && wallet !== undefined}>
             {
               <>
                 {sourceContent}
