@@ -20,7 +20,7 @@ import { useDeadline } from "../hooks/useDeadline";
 import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
 import { commonStyles } from "./style";
 import { useTokenPairState } from "../state/useTokenPairState";
-import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
+import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
 import { DetailItem } from "./DetailsItem";
 import { useHistory } from "react-router-dom";
 
@@ -216,7 +216,7 @@ function RemoveLiquidity() {
           open={!!removingLiquidity && !completed}
           text="Removing Liquidity"
         />
-        <TransactionSubmit
+        <TransactionSubmitted
           open={!!completed}
           txId={txId!}
           buttonText="Swap Coins"

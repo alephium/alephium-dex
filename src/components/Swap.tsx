@@ -15,7 +15,7 @@ import { reset, selectTokenIn, selectTokenOut, switchTokens, typeInput } from ".
 import { useDerivedSwapInfo } from "../state/swap/hooks";
 import { selectSwapState } from "../state/swap/selectors";
 import { commonStyles } from "./style";
-import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
+import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
 import BigNumber from "bignumber.js";
 import { DetailItem } from "./DetailsItem";
 
@@ -187,7 +187,7 @@ function Swap() {
           open={!!swapping && !completed}
           text="Swapping"
         />
-        <TransactionSubmit
+        <TransactionSubmitted
           open={!!completed}
           txId={txId!}
           buttonText="Swap More Coins"

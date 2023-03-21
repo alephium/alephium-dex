@@ -8,7 +8,7 @@ import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWal
 import { commonStyles } from "./style";
 import TokenSelectDialog from "./TokenSelectDialog";
 import { useHistory } from "react-router-dom";
-import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
+import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
 
 function AddPool() {
   const commonClasses = commonStyles();
@@ -127,7 +127,7 @@ function AddPool() {
           open={!!addingPool && !completed}
           text="Adding Pool"
         />
-        <TransactionSubmit
+        <TransactionSubmitted
           open={!!completed}
           txId={txId!}
           buttonText="Add Liquidity"

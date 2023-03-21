@@ -11,7 +11,7 @@ interface TransactionSubmitProps {
   onClick: () => void
 }
 
-export function TransactionSubmit({
+export function TransactionSubmitted({
   open,
   txId,
   buttonText,

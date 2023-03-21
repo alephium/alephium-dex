@@ -15,7 +15,7 @@ import { useDerivedMintInfo } from "../state/mint/hooks";
 import { selectMintState } from "../state/mint/selectors";
 import { commonStyles } from "./style";
 import { useHistory } from "react-router-dom";
-import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
+import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
 import { DetailItem } from "./DetailsItem";
 
 function AddLiquidity() {
@@ -186,7 +186,7 @@ function AddLiquidity() {
           open={!!addingLiquidity && !completed}
           text="Adding Liquidity"
         />
-        <TransactionSubmit
+        <TransactionSubmitted
           open={!!completed}
           txId={txId!}
           buttonText="Swap Coins"
