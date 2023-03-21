@@ -78,10 +78,10 @@ function AddPool() {
   const handleAddPool = useCallback(async () => {
     try {
       setAddingPool(true)
-      if (wallet !== undefined && tokenAInfo !== undefined && tokenBInfo !== undefined) {
+      if (wallet !== undefined && wallet.signer.explorerProvider !== undefined && tokenAInfo !== undefined && tokenBInfo !== undefined) {
         const result = await createTokenPair(
           wallet.signer,
-          wallet.nodeProvider,
+          wallet.signer.explorerProvider,
           wallet.address,
           tokenAInfo.id,
           tokenBInfo.id
@@ -125,7 +125,7 @@ function AddPool() {
       <Paper className={commonClasses.mainPaper}>
         <WaitingForTxSubmission
           open={!!addingPool && !completed}
-          text="Adding Liquidity"
+          text="Adding Pool"
         />
         <TransactionSubmit
           open={!!completed}

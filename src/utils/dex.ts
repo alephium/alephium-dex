@@ -4,10 +4,10 @@ import {
   SignerProvider,
   SignExecuteScriptTxResult,
   NodeProvider,
-  node,
   ALPH_TOKEN_ID,
   prettifyTokenAmount,
-  DUST_AMOUNT
+  DUST_AMOUNT,
+  ExplorerProvider
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
 import { PollingInterval, network, networkName } from "./consts"
@@ -166,7 +166,7 @@ function deadline(ttl: number): bigint {
 
 async function swapMinOut(
   signer: SignerProvider,
-  nodeProvider: NodeProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   pairId: string,
   tokenInId: string,
@@ -188,13 +188,13 @@ async function swapMinOut(
       ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountIn }]
       : [{ id: ALPH_TOKEN_ID, amount: amountIn + DUST_AMOUNT }]
   })
-  await waitTxSubmitted(nodeProvider, result.txId)
+  await waitTxSubmitted(explorerProvider, result.txId)
   return result
 }
 
 async function swapMaxIn(
   signer: SignerProvider,
-  nodeProvider: NodeProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   pairId: string,
   tokenInId: string,
@@ -216,7 +216,7 @@ async function swapMaxIn(
       ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountInMax }]
       : [{ id: ALPH_TOKEN_ID, amount: amountInMax + DUST_AMOUNT }]
   })
-  await waitTxSubmitted(nodeProvider, result.txId)
+  await waitTxSubmitted(explorerProvider, result.txId)
   return result
 }
 
@@ -269,7 +269,7 @@ export async function swap(
   swapDetails: SwapDetails,
   balances: Map<string, bigint>,
   signer: SignerProvider,
-  nodeProvider: NodeProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
@@ -284,7 +284,7 @@ export async function swap(
   if (swapDetails.swapType === 'ExactIn') {
     return swapMinOut(
       signer,
-      nodeProvider,
+      explorerProvider,
       sender,
       swapDetails.state.tokenPairId,
       swapDetails.tokenInInfo.id,
@@ -296,7 +296,7 @@ export async function swap(
 
   return swapMaxIn(
     signer,
-    nodeProvider,
+    explorerProvider,
     sender,
     swapDetails.state.tokenPairId,
     swapDetails.tokenInInfo.id,
@@ -306,20 +306,14 @@ export async function swap(
   )
 }
 
-function isMemPooled(txStatus: node.TxStatus): txStatus is node.MemPooled {
-  return txStatus.type === 'MemPooled'
-}
-
 export async function waitTxSubmitted(
-  provider: NodeProvider,
+  provider: ExplorerProvider,
   txId: string,
   maxTimes: number = 30
 ): Promise<void> {
   try {
-    const status = await provider.transactions.getTransactionsStatus({ txId: txId })
-    if (isMemPooled(status)) {
-      return
-    }
+    await provider.transactions.getTransactionsTransactionHash(txId)
+    return
   } catch (error) {
     console.log(`Get transaction status error: ${error}`)
     if (maxTimes === 0) {
@@ -419,7 +413,7 @@ function maximalAmount(amount: bigint, slippage: number): bigint {
 export async function addLiquidity(
   balances: Map<string, bigint>,
   signer: SignerProvider,
-  nodeProvider: NodeProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   tokenPairState: TokenPairState,
   tokenAInfo: TokenInfo,
@@ -464,7 +458,7 @@ export async function addLiquidity(
       { id: tokenBInfo.id, amount: amountBDesired }
     ]
   })
-  await waitTxSubmitted(nodeProvider, result.txId)
+  await waitTxSubmitted(explorerProvider, result.txId)
   return result
 }
 
@@ -506,7 +500,7 @@ export function getRemoveLiquidityDetails(
 
 export async function removeLiquidity(
   signer: SignerProvider,
-  nodeProvider: NodeProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   pairId: string,
   liquidity: bigint,
@@ -529,7 +523,7 @@ export async function removeLiquidity(
     },
     tokens: [{ id: pairId, amount: liquidity }]
   })
-  await waitTxSubmitted(nodeProvider, result.txId)
+  await waitTxSubmitted(explorerProvider, result.txId)
   return result
 }
 
@@ -554,7 +548,7 @@ export async function tokenPairExist(nodeProvider: NodeProvider, tokenAId: strin
 
 export async function createTokenPair(
   signer: SignerProvider,
-  nodeProvider: NodeProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   tokenAId: string,
   tokenBId: string
@@ -577,7 +571,7 @@ export async function createTokenPair(
       { id: tokenBId, amount: 1n },
     ]
   })
-  await waitTxSubmitted(nodeProvider, result.txId)
+  await waitTxSubmitted(explorerProvider, result.txId)
   return { ...result, tokenPairId: pairContractId }
 }
 

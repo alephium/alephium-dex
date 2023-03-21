@@ -149,6 +149,7 @@ function RemoveLiquidity() {
       setRemovingLiquidity(true)
       if (
         wallet !== undefined &&
+        wallet.signer.explorerProvider !== undefined &&
         tokenPairState !== undefined &&
         removeLiquidityDetails !== undefined &&
         tokenAInfo !== undefined &&
@@ -161,7 +162,7 @@ function RemoveLiquidity() {
 
         const result = await removeLiquidity(
           wallet.signer,
-          wallet.nodeProvider,
+          wallet.signer.explorerProvider,
           wallet.address,
           tokenPairState.tokenPairId,
           amount,

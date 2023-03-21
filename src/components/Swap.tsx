@@ -138,12 +138,12 @@ function Swap() {
   const handleSwap = useCallback(async () => {
     try {
       setSwapping(true)
-      if (wallet !== undefined && swapDetails !== undefined) {
+      if (wallet !== undefined && wallet.signer.explorerProvider !== undefined && swapDetails !== undefined) {
         const result = await swap(
           swapDetails,
           balance,
           wallet.signer,
-          wallet.nodeProvider,
+          wallet.signer.explorerProvider,
           wallet.address,
           deadline
         )
@@ -185,7 +185,7 @@ function Swap() {
       <Paper className={classes.mainPaper}>
         <WaitingForTxSubmission
           open={!!swapping && !completed}
-          text="Adding Liquidity"
+          text="Swapping"
         />
         <TransactionSubmit
           open={!!completed}

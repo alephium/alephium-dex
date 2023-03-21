@@ -123,6 +123,7 @@ function AddLiquidity() {
       setAddingLiquidity(true)
       if (
         wallet !== undefined &&
+        wallet.signer.explorerProvider !== undefined &&
         tokenPairState !== undefined &&
         tokenAInfo !== undefined &&
         tokenBInfo !== undefined &&
@@ -132,7 +133,7 @@ function AddLiquidity() {
         const result = await addLiquidity(
           balance,
           wallet.signer,
-          wallet.nodeProvider,
+          wallet.signer.explorerProvider,
           wallet.address,
           tokenPairState,
           tokenAInfo,
