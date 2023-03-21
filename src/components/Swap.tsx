@@ -1,12 +1,11 @@
-import { Button, Container, Paper, Typography } from "@material-ui/core";
+import { Card, Container, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
-import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
 import { useCallback, useState, useMemo } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import HoverIcon from "./HoverIcon";
 import NumberTextField from "./NumberTextField";
-import { swap, tryGetBalance } from "../utils/dex";
+import { bigIntToString, getSwapDetails, swap, SwapDetails, tryGetBalance } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useDeadline } from "../hooks/useDeadline";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
@@ -16,10 +15,14 @@ import { reset, selectTokenIn, selectTokenOut, switchTokens, typeInput } from ".
 import { useDerivedSwapInfo } from "../state/swap/hooks";
 import { selectSwapState } from "../state/swap/selectors";
 import { commonStyles } from "./style";
+import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
+import BigNumber from "bignumber.js";
+import { DetailItem } from "./DetailsItem";
 
 function Swap() {
   const classes = commonStyles();
-  const [completed, setCompleted] = useState<boolean>(false)
+  const [txId, setTxId] = useState<string | undefined>(undefined)
+  const [swapping, setSwapping] = useState<boolean>(false)
   const dispatch = useDispatch()
   const [error, setError] = useState<string | undefined>(undefined)
   const [slippage,] = useSlippageTolerance()
@@ -38,6 +41,21 @@ function Swap() {
   const { tokenInInfo, tokenOutInfo } = useSelector(selectSwapState)
   const { tokenInInput, tokenOutInput, tokenInAmount, tokenOutAmount, tokenPairState, swapType } = useDerivedSwapInfo(setError)
 
+  const swapDetails = useMemo(() => {
+    if (
+      swapType === undefined ||
+      tokenPairState === undefined ||
+      tokenInAmount === undefined ||
+      tokenOutAmount === undefined ||
+      tokenInInfo === undefined ||
+      tokenOutInfo === undefined
+    ) {
+      return undefined
+    }
+    const slippageTolerance = slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage
+    return getSwapDetails(swapType, tokenPairState, tokenInInfo, tokenOutInfo, tokenInAmount, tokenOutAmount, slippageTolerance)
+  }, [tokenInAmount, tokenOutAmount, tokenPairState, swapType, tokenInInfo, tokenOutInfo, slippage])
+
   const handleTokenInAmountChange = useCallback((event) => {
     dispatch(typeInput({ type: 'TokenIn', value: event.target.value }))
   }, [dispatch])
@@ -52,7 +70,8 @@ function Swap() {
 
   const handleReset = useCallback(() => {
     dispatch(reset())
-    setCompleted(false)
+    setTxId(undefined)
+    setSwapping(false)
     setError(undefined)
   }, [dispatch])
 
@@ -63,6 +82,8 @@ function Swap() {
   const tokenOutBalance = useMemo(() => {
     return tryGetBalance(balance, tokenOutInfo)
   }, [balance, tokenOutInfo])
+
+  const completed = useMemo(() => txId !== undefined, [txId])
 
   const sourceContent = (
     <div className={classes.tokenContainerWithBalance}>
@@ -80,7 +101,7 @@ function Swap() {
           onChange={handleTokenInAmountChange}
           autoFocus={true}
           InputProps={{ disableUnderline: true }}
-          disabled={!!completed}
+          disabled={!!swapping || !!completed}
         />
       </div>
       {tokenInBalance ?
@@ -104,7 +125,7 @@ function Swap() {
           value={tokenOutInput !== undefined ? tokenOutInput : ''}
           onChange={handleTokenOutAmountChange}
           InputProps={{ disableUnderline: true }}
-          disabled={!!completed}
+          disabled={!!swapping || !!completed}
         />
       </div>
       {tokenOutBalance ?
@@ -116,47 +137,32 @@ function Swap() {
 
   const handleSwap = useCallback(async () => {
     try {
-      if (
-        swapType !== undefined &&
-        wallet !== undefined &&
-        tokenPairState !== undefined &&
-        tokenInInfo !== undefined &&
-        tokenInAmount !== undefined &&
-        tokenOutAmount !== undefined
-      ) {
-        if (tokenInAmount === 0n) {
-          throw new Error('the input amount must be greater than 0')
-        }
-
+      setSwapping(true)
+      if (wallet !== undefined && wallet.signer.explorerProvider !== undefined && swapDetails !== undefined) {
         const result = await swap(
-          swapType,
+          swapDetails,
           balance,
           wallet.signer,
+          wallet.signer.explorerProvider,
           wallet.address,
-          tokenPairState,
-          tokenInInfo,
-          tokenInAmount,
-          tokenOutAmount,
-          slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage,
           deadline
         )
-        console.log(`swap succeed, tx id: ${result.txId}`)
-        setCompleted(true)
+        console.log(`swap tx submitted, tx id: ${result.txId}`)
+        setTxId(result.txId)
+        setSwapping(false)
       }
     } catch (error) {
       setError(`${error}`)
+      setSwapping(false)
       console.error(`failed to swap, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenInInfo, tokenInAmount, tokenOutAmount, slippage, deadline, swapType, balance])
+  }, [wallet, swapDetails, slippage, deadline, balance])
 
   const readyToSwap =
     wallet !== undefined &&
-    tokenInInfo !== undefined &&
-    tokenOutInfo !== undefined &&
-    tokenInAmount !== undefined &&
-    tokenOutAmount !== undefined &&
-    swapType !== undefined &&
-    !completed && error === undefined
+    !swapping && !completed &&
+    error === undefined &&
+    swapDetails !== undefined
   const swapButton = (
     <ButtonWithLoader
       disabled={!readyToSwap}
@@ -177,20 +183,16 @@ function Swap() {
       </Typography>
       <div className={classes.spacer} />
       <Paper className={classes.mainPaper}>
-        <Collapse in={!!completed}>
-          <>
-            <CheckCircleOutlineRoundedIcon
-              fontSize={"inherit"}
-              className={classes.successIcon}
-            />
-            <Typography>The swap transaction has been submitted, please wait for confirmation.</Typography>
-            <div className={classes.spacer} />
-            <div className={classes.spacer} />
-            <Button onClick={handleReset} variant="contained" color="primary">
-              Swap More Coins
-            </Button>
-          </>
-        </Collapse>
+        <WaitingForTxSubmission
+          open={!!swapping && !completed}
+          text="Swapping"
+        />
+        <TransactionSubmitted
+          open={!!completed}
+          txId={txId!}
+          buttonText="Swap More Coins"
+          onClick={handleReset}
+        />
         {wallet === undefined ?
           <div>
             <Typography variant="h6" color="error" className={classes.error}>
@@ -199,7 +201,7 @@ function Swap() {
           </div> : null
         }
         <div>
-          <Collapse in={!completed && wallet !== undefined}>
+          <Collapse in={!swapping && !completed && wallet !== undefined}>
             {
               <>
                 {sourceContent}
@@ -213,6 +215,7 @@ function Swap() {
                 <div className={classes.spacer} />
               </>
             }
+            <SwapDetailsCard swapDetails={swapDetails}></SwapDetailsCard>
             {swapButton}
           </Collapse>
         </div>
@@ -220,6 +223,68 @@ function Swap() {
       <div className={classes.spacer} />
     </Container>
   );
+}
+
+function formatPriceImpact(impact: number): string {
+  if (impact < 0.0001) {
+    return '< 0.0001'
+  }
+  return impact.toFixed(4)
+}
+
+function calcPrice(reserveIn: bigint, tokenInDecimals: number, reserveOut: bigint, tokenOutDecimals: number): string {
+  const numerator = reserveIn * (10n ** BigInt(tokenOutDecimals))
+  const denumerator = reserveOut * (10n ** BigInt(tokenInDecimals))
+  const price = BigNumber(numerator.toString()).div(BigNumber(denumerator.toString()))
+  const min = BigNumber('0.000001')
+  if (price.lt(min)) {
+    return `< ${min}`
+  }
+  return `= ${price.toFixed(6)}`
+}
+
+function SwapDetailsCard({ swapDetails } : { swapDetails : SwapDetails | undefined }) {
+  if (swapDetails === undefined) {
+    return null
+  }
+
+  const {
+    swapType,
+    state,
+    tokenInInfo,
+    tokenOutInfo,
+    tokenOutAmount,
+    maximalTokenInAmount,
+    minimalTokenOutAmount,
+    priceImpact
+  } = swapDetails
+  const [[reserveIn, tokenInDecimals], [reserveOut, tokenOutDecimals]] = state.token0Info.id === tokenInInfo.id
+    ? [[state.reserve0, state.token0Info.decimals], [state.reserve1, state.token1Info.decimals]]
+    : [[state.reserve1, state.token1Info.decimals], [state.reserve0, state.token0Info.decimals]]
+  return <Card variant='outlined' style={{ width: '100%', padding: '0', borderRadius: '10px' }}>
+    <div style={{ display: 'grid', gridAutoRows: 'auto', gridRowGap: '5px', paddingTop: '10px', paddingBottom: '10px' }}>
+      <DetailItem
+        itemName='Price:'
+        itemValue={`1 ${tokenOutInfo.symbol} ${calcPrice(reserveIn, tokenInDecimals, reserveOut, tokenOutDecimals)} ${tokenInInfo.symbol}`}
+      />
+      <DetailItem
+        itemName='Expected Output:'
+        itemValue={`${bigIntToString(tokenOutAmount, tokenOutInfo.decimals)} ${tokenOutInfo.symbol}`}
+      />
+      <DetailItem
+        itemName='Price Impact:'
+        itemValue={`${formatPriceImpact(priceImpact)} %`}
+      />
+      <DetailItem
+        itemName={swapType === 'ExactIn' ? 'Minimal received after slippage:' : 'Maximum sent after slippage:'}
+        itemValue={
+          swapType === 'ExactIn'
+            ? `${bigIntToString(minimalTokenOutAmount!, tokenOutInfo.decimals)} ${tokenOutInfo.symbol}`
+            : `${bigIntToString(maximalTokenInAmount!, tokenInInfo.decimals)} ${tokenInInfo.symbol}`
+        }
+      />
+    </div>
+  </Card>
 }
 
 export default Swap;

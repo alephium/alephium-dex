@@ -1,8 +1,8 @@
 import { useSelector } from 'react-redux'
 import {
-  AddLiquidityResult,
-  getAddLiquidityResult,
-  getInitAddLiquidityResult,
+  AddLiquidityDetails,
+  getAddLiquidityDetails,
+  getInitAddLiquidityDetails,
   TokenPairState,
   tryBigIntToString,
   tryStringToBigInt
@@ -17,7 +17,7 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
   tokenAAmount: bigint | undefined,
   tokenBAmount: bigint | undefined,
   tokenPairState: TokenPairState | undefined,
-  addLiquidityResult: AddLiquidityResult | undefined,
+  addLiquidityDetails: AddLiquidityDetails | undefined,
 } {
   const { lastInput, inputValue, otherInputValue, tokenAInfo, tokenBInfo } = useSelector(selectMintState)
   const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
@@ -44,7 +44,7 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
     }
   }, [otherInputValue, lastInput, tokenAInfo, tokenBInfo, setError])
 
-  const addLiquidityResult = useMemo(() => {
+  const addLiquidityDetails = useMemo(() => {
     try {
       setError(getTokenPairStateError)
       if (tokenAInfo === undefined || tokenBInfo === undefined) {
@@ -53,11 +53,11 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
       const [tokenAId, tokenBId] = lastInput === 'TokenA' ? [tokenAInfo.id, tokenBInfo.id] : [tokenBInfo.id, tokenAInfo.id]
       if (tokenPairState !== undefined && tokenPairState.reserve0 === 0n) {
         return parsedAmount !== undefined && otherAmount !== undefined
-          ? getInitAddLiquidityResult(tokenAId, tokenBId, parsedAmount, otherAmount)
+          ? { state: tokenPairState, ...getInitAddLiquidityDetails(tokenAId, tokenBId, parsedAmount, otherAmount) }
           : undefined
       }
       return parsedAmount !== undefined && tokenPairState && lastInput
-        ? getAddLiquidityResult(tokenPairState, tokenAId, parsedAmount, lastInput)
+        ? getAddLiquidityDetails(tokenPairState, tokenAId, parsedAmount, lastInput)
         : undefined
     } catch (error) {
       console.log(`${error}`)
@@ -71,19 +71,19 @@ export function useDerivedMintInfo(setError: (err: string | undefined) => void):
       const [tokenAInput, tokenBInput, tokenAAmount, tokenBAmount] = lastInput === 'TokenA'
         ? [inputValue, otherInputValue, parsedAmount, otherAmount]
         : [otherInputValue, inputValue, otherAmount, parsedAmount]
-      return { tokenAInput, tokenBInput, tokenAAmount, tokenBAmount, tokenPairState, addLiquidityResult }
+      return { tokenAInput, tokenBInput, tokenAAmount, tokenBAmount, tokenPairState, addLiquidityDetails: addLiquidityDetails }
     }
 
     try {
-      const tokenAInput = lastInput === 'TokenA' ? inputValue : tryBigIntToString(addLiquidityResult?.amountA, tokenAInfo?.decimals)
-      const tokenBInput = lastInput === 'TokenB' ? inputValue : tryBigIntToString(addLiquidityResult?.amountB, tokenBInfo?.decimals)
-      const tokenAAmount = lastInput === 'TokenA' ? parsedAmount : addLiquidityResult?.amountA
-      const tokenBAmount = lastInput === 'TokenB' ? parsedAmount : addLiquidityResult?.amountB
-      return { tokenAInput, tokenBInput, tokenAAmount, tokenBAmount, tokenPairState, addLiquidityResult }
+      const tokenAInput = lastInput === 'TokenA' ? inputValue : tryBigIntToString(addLiquidityDetails?.amountA, tokenAInfo?.decimals)
+      const tokenBInput = lastInput === 'TokenB' ? inputValue : tryBigIntToString(addLiquidityDetails?.amountB, tokenBInfo?.decimals)
+      const tokenAAmount = lastInput === 'TokenA' ? parsedAmount : addLiquidityDetails?.amountA
+      const tokenBAmount = lastInput === 'TokenB' ? parsedAmount : addLiquidityDetails?.amountB
+      return { tokenAInput, tokenBInput, tokenAAmount, tokenBAmount, tokenPairState, addLiquidityDetails: addLiquidityDetails }
     } catch (error) {
       console.log(`${error}`)
       setError(`${error}`)
-      return { tokenAInput: undefined, tokenBInput: undefined, tokenAAmount: undefined, tokenBAmount: undefined, tokenPairState, addLiquidityResult }
+      return { tokenAInput: undefined, tokenBInput: undefined, tokenAAmount: undefined, tokenBAmount: undefined, tokenPairState, addLiquidityDetails }
     }
-  }, [tokenPairState, lastInput, inputValue, otherInputValue, parsedAmount, otherAmount, addLiquidityResult, tokenAInfo, tokenBInfo, setError])
+  }, [tokenPairState, lastInput, inputValue, otherInputValue, parsedAmount, otherAmount, addLiquidityDetails, tokenAInfo, tokenBInfo, setError])
 }

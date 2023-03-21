@@ -1,15 +1,14 @@
-import { Button, Container, Paper, Typography } from "@material-ui/core";
+import { Card, Container, Paper, Typography } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
-import CheckCircleOutlineRoundedIcon from "@material-ui/icons/CheckCircleOutlineRounded";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import NumberTextField from "./NumberTextField";
 import { TokenInfo } from '@alephium/token-list'
 import {
   removeLiquidity,
-  RemoveLiquidityResult,
-  getRemoveLiquidityResult,
+  RemoveLiquidityDetails,
+  getRemoveLiquidityDetails,
   PairTokenDecimals,
   stringToBigInt,
   bigIntToString
@@ -21,6 +20,9 @@ import { useDeadline } from "../hooks/useDeadline";
 import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
 import { commonStyles } from "./style";
 import { useTokenPairState } from "../state/useTokenPairState";
+import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
+import { DetailItem } from "./DetailsItem";
+import { useHistory } from "react-router-dom";
 
 function RemoveLiquidity() {
   const classes = commonStyles();
@@ -29,13 +31,15 @@ function RemoveLiquidity() {
   const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
   const [totalLiquidityAmount, setTotalLiquidityAmount] = useState<bigint | undefined>(undefined)
-  const [removeLiquidityResult, setRemoveLiquidityResult] = useState<RemoveLiquidityResult | undefined>(undefined)
-  const [completed, setCompleted] = useState<boolean>(false)
+  const [removeLiquidityDetails, setRemoveLiquidityDetails] = useState<RemoveLiquidityDetails | undefined>(undefined)
+  const [txId, setTxId] = useState<string | undefined>(undefined)
+  const [removingLiquidity, setRemovingLiquidity] = useState<boolean>(false)
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
   const availableBalance = useAvailableBalances()
+  const history = useHistory()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     setTokenAInfo(tokenInfo);
@@ -56,7 +60,7 @@ function RemoveLiquidity() {
   }, [tokenPairState, getTokenPairStateError, availableBalance])
 
   useEffect(() => {
-    setRemoveLiquidityResult(undefined)
+    setRemoveLiquidityDetails(undefined)
     try {
       if (
         tokenPairState !== undefined &&
@@ -65,8 +69,8 @@ function RemoveLiquidity() {
         amount !== undefined &&
         totalLiquidityAmount !== undefined
       ) {
-        const result = getRemoveLiquidityResult({ ...tokenPairState, totalLiquidityAmount }, amount)
-        setRemoveLiquidityResult(result)
+        const result = getRemoveLiquidityDetails(tokenPairState, totalLiquidityAmount, amount)
+        setRemoveLiquidityDetails(result)
       }
     } catch (error) {
       setError(`${error}`)
@@ -77,7 +81,7 @@ function RemoveLiquidity() {
   const handleAmountChanged = useCallback(
     (event) => {
       setError(undefined)
-      setRemoveLiquidityResult(undefined)
+      setRemoveLiquidityDetails(undefined)
       if (event.target.value === '') {
         setAmount(undefined)
         setAmountInput(undefined)
@@ -93,16 +97,18 @@ function RemoveLiquidity() {
     }, []
   )
 
-  const handleReset = useCallback(() => {
+  const redirectToSwap = useCallback(() => {
     setTokenAInfo(undefined)
     setTokenBInfo(undefined)
     setAmount(undefined)
     setAmountInput(undefined)
     setTotalLiquidityAmount(undefined)
-    setCompleted(false)
-    setRemoveLiquidityResult(undefined)
+    setTxId(undefined)
+    setRemovingLiquidity(false)
+    setRemoveLiquidityDetails(undefined)
     setError(undefined)
-  }, [])
+    history.push('/swap')
+  }, [history])
 
   const tokenPairContent = (
     <div className={classes.tokenPairContainer}>
@@ -122,6 +128,8 @@ function RemoveLiquidity() {
       />
     </div>
   )
+
+  const completed = useMemo(() => txId !== undefined, [txId])
   
   const amountInputBox = (
     <div className={classes.tokenContainer}>
@@ -131,17 +139,19 @@ function RemoveLiquidity() {
         onChange={handleAmountChanged}
         autoFocus={true}
         InputProps={{ disableUnderline: true }}
-        disabled={!!completed}
+        disabled={!!removingLiquidity || !!completed}
       />
     </div>
   )
 
   const handleRemoveLiquidity = useCallback(async () => {
     try {
+      setRemovingLiquidity(true)
       if (
         wallet !== undefined &&
+        wallet.signer.explorerProvider !== undefined &&
         tokenPairState !== undefined &&
-        removeLiquidityResult !== undefined &&
+        removeLiquidityDetails !== undefined &&
         tokenAInfo !== undefined &&
         tokenBInfo !== undefined &&
         amount !== undefined
@@ -152,22 +162,25 @@ function RemoveLiquidity() {
 
         const result = await removeLiquidity(
           wallet.signer,
+          wallet.signer.explorerProvider,
           wallet.address,
           tokenPairState.tokenPairId,
           amount,
-          removeLiquidityResult.amount0,
-          removeLiquidityResult.amount1,
+          removeLiquidityDetails.amount0,
+          removeLiquidityDetails.amount1,
           slippage === 'auto' ? DEFAULT_SLIPPAGE : slippage,
           deadline
         )
         console.log(`remove liquidity succeed, tx id: ${result.txId}`)
-        setCompleted(true)
+        setTxId(result.txId)
+        setRemovingLiquidity(false)
       }
     } catch (error) {
       setError(`${error}`)
+      setRemovingLiquidity(false)
       console.error(`failed to remove liquidity, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, amount, removeLiquidityResult, slippage, deadline])
+  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, amount, removeLiquidityDetails, slippage, deadline])
 
   const readyToRemoveLiquidity =
     wallet !== undefined &&
@@ -175,8 +188,9 @@ function RemoveLiquidity() {
     tokenBInfo !== undefined &&
     amount !== undefined &&
     totalLiquidityAmount !== undefined &&
-    removeLiquidityResult !== undefined &&
-    !completed && error === undefined &&
+    removeLiquidityDetails !== undefined &&
+    !removingLiquidity && !completed && 
+    error === undefined &&
     getTokenPairStateError === undefined
   const removeLiquidityButton = (
     <ButtonWithLoader
@@ -190,36 +204,6 @@ function RemoveLiquidity() {
     </ButtonWithLoader>
   );
 
-  const getTokenAmount = (removeLiquidityResult: RemoveLiquidityResult, tokenInfo: TokenInfo): string => {
-    const amount = tokenInfo.id === removeLiquidityResult.token0Id ? removeLiquidityResult.amount0 : removeLiquidityResult.amount1
-    return formatUnits(amount, tokenInfo.decimals)
-  }
-
-  const formatRemoveLiquidityResult = (result: RemoveLiquidityResult, amount: bigint) => {
-    return <>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>Remove share amount:</p>
-          <p className={classes.rightAlign}>{bigIntToString(amount, PairTokenDecimals)}</p>
-        </div>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>Token {tokenAInfo!.name}:</p>
-          <p className={classes.rightAlign}>{getTokenAmount(result, tokenAInfo!)}</p>
-        </div>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>Token {tokenBInfo!.name}:</p>
-          <p className={classes.rightAlign}>{getTokenAmount(result, tokenBInfo!).toString()}</p>
-        </div>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>Remain share amount:</p>
-          <p className={classes.rightAlign}>{formatUnits(result.remainShareAmount, PairTokenDecimals)}</p>
-        </div>
-        <div className={classes.notification}>
-          <p className={classes.leftAlign}>Remain share percentage:</p>
-          <p className={classes.rightAlign}>{result.remainSharePercentage}%</p>
-        </div>
-      </>
-  }
-
   return (
     <Container className={classes.centeredContainer} maxWidth="sm">
       <div className={classes.titleBar}></div>
@@ -228,20 +212,16 @@ function RemoveLiquidity() {
       </Typography>
       <div className={classes.spacer} />
       <Paper className={classes.mainPaper}>
-        <Collapse in={!!completed}>
-          <>
-            <CheckCircleOutlineRoundedIcon
-              fontSize={"inherit"}
-              className={classes.successIcon}
-            />
-            <Typography>The remove liquidity transaction has been submitted, please wait for confirmation.</Typography>
-            <div className={classes.spacer} />
-            <div className={classes.spacer} />
-            <Button onClick={handleReset} variant="contained" color="primary">
-              Remove More Liquidity!
-            </Button>
-          </>
-        </Collapse>
+        <WaitingForTxSubmission
+          open={!!removingLiquidity && !completed}
+          text="Removing Liquidity"
+        />
+        <TransactionSubmitted
+          open={!!completed}
+          txId={txId!}
+          buttonText="Swap Coins"
+          onClick={redirectToSwap}
+        />
         {wallet === undefined ?
           <div>
             <Typography variant="h6" color="error" className={classes.error}>
@@ -250,7 +230,7 @@ function RemoveLiquidity() {
           </div> : null
         }
         <div>
-          <Collapse in={!completed && wallet !== undefined}>
+          <Collapse in={!removingLiquidity && !completed && wallet !== undefined}>
             {
               <>
                 {tokenPairContent}
@@ -264,9 +244,12 @@ function RemoveLiquidity() {
                   </>
                 ): null}
                 {amountInputBox}
-                {wallet !== undefined ? (
                 <>
-                  {removeLiquidityResult && amount && !error ? (formatRemoveLiquidityResult(removeLiquidityResult, amount)): null}
+                  <div className={classes.spacer} />
+                  {error === undefined && getTokenPairStateError === undefined
+                    ? <RemoveLiquidityDetailsCard details={removeLiquidityDetails} amount={amount}/>
+                    : null
+                  }
                   {error ? (
                     <Typography variant="body2" color="error" className={classes.error}>
                       {error}
@@ -276,7 +259,7 @@ function RemoveLiquidity() {
                       {getTokenPairStateError}
                     </Typography>
                   ) : null}
-                </>) : <></>}
+                </>
                 <div className={classes.spacer} />
                 {removeLiquidityButton}
               </>
@@ -287,6 +270,37 @@ function RemoveLiquidity() {
       <div className={classes.spacer} />
     </Container>
   );
+}
+
+function RemoveLiquidityDetailsCard({ details, amount } : { details: RemoveLiquidityDetails | undefined, amount: bigint | undefined }) {
+  if (details === undefined || amount === undefined) {
+    return null
+  }
+  const { state, remainShareAmount, remainSharePercentage } = details
+  const getTokenAmount = (tokenInfo: TokenInfo): string => {
+    const tokenAmount = tokenInfo.id === details.token0Id ? details.amount0 : details.amount1
+    return bigIntToString(tokenAmount, tokenInfo.decimals)
+  }
+  return <Card variant='outlined' style={{ width: '100%', padding: '0', borderRadius: '10px' }}>
+    <div style={{ display: 'grid', gridAutoRows: 'auto', gridRowGap: '5px', paddingTop: '10px', paddingBottom: '10px' }}>
+      <DetailItem
+        itemName={`The number of ${state.token0Info.symbol} you will receive:`}
+        itemValue={`${getTokenAmount(state.token0Info)} ${state.token0Info.symbol}`}
+      />
+      <DetailItem
+        itemName={`The number of ${state.token1Info.symbol} you will receive:`}
+        itemValue={`${getTokenAmount(state.token1Info)} ${state.token1Info.symbol}`}
+      />
+      <DetailItem
+        itemName={'Remain share amount:'}
+        itemValue={`${bigIntToString(remainShareAmount, PairTokenDecimals)}`}
+      />
+      <DetailItem
+        itemName={`Remain share percentage:`}
+        itemValue={`${remainSharePercentage} %`}
+      />
+    </div>
+  </Card>
 }
 
 export default RemoveLiquidity;

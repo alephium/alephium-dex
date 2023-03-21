@@ -1,13 +1,15 @@
-import { Container, Paper, Typography, Button } from "@material-ui/core";
+import { Container, Paper, Typography, Button, Card } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
 import { useState, useCallback, useMemo } from "react";
-import { bigIntToString, PairTokenDecimals } from "../utils/dex";
+import { bigIntToString, PairTokenDecimals, TokenPairState } from "../utils/dex";
 import { commonStyles } from "./style";
 import { TokenInfo } from "@alephium/token-list";
 import { useTokenPairState } from "../state/useTokenPairState";
 import TokenSelectDialog from "./TokenSelectDialog";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { DetailItem } from "./DetailsItem";
+import BigNumber from "bignumber.js";
 
 function shortContractId(id: string): string {
   return id.slice(0, 6) + '...' + id.slice(-6)
@@ -28,37 +30,6 @@ function Pool() {
   const handleTokenBChange = useCallback((tokenInfo) => {
     setTokenBInfo(tokenInfo)
   }, [])
-
-  const tokenInfo = useMemo(() => {
-    return <>
-      {tokenPairState ? (
-        <>
-        <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>Token Pair Id:</p>
-          <p className={commonClasses.rightAlign}>
-            <CopyToClipboard text={tokenPairState.tokenPairId}>
-              <Button style={{ background: 'transparent', height: '15px' }}>
-                <span style={{ fontSize: "15px", fontFamily: "monospace" }}>{shortContractId(tokenPairState.tokenPairId)}</span>
-              </Button>
-            </CopyToClipboard>
-          </p>
-        </div>
-        <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>{tokenPairState.token0Info.name}({tokenPairState.token0Info.symbol}) Reserve:</p>
-          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve0, tokenPairState.token0Info.decimals)}</p>
-        </div>
-        <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>{tokenPairState.token1Info.name}({tokenPairState.token1Info.symbol}) Reserve:</p>
-          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.reserve1, tokenPairState.token1Info.decimals)}</p>
-        </div>
-        <div className={commonClasses.notification}>
-          <p className={commonClasses.leftAlign}>Liquidity token total supply:</p>
-          <p className={commonClasses.rightAlign}>{bigIntToString(tokenPairState.totalSupply, PairTokenDecimals)}</p>
-        </div>
-        </>
-      ) : null}
-    </>
-  }, [tokenPairState, commonClasses])
 
   const tokenPairContent = (
     <div className={commonClasses.tokenPairContainer}>
@@ -100,13 +71,14 @@ function Pool() {
               <>
                 {tokenPairContent}
                 <div className={commonClasses.spacer} />
+                <div className={commonClasses.spacer} />
                 {getTokenPairStateError ? (
                   (
                     <Typography variant="body2" color="error" className={commonClasses.error}>
                       {getTokenPairStateError}
                     </Typography>
                   )
-                ) : tokenInfo}
+                ) : <PoolDetailsCard state={tokenPairState} balance={balance} />}
               </>
             }
           </Collapse>
@@ -114,6 +86,39 @@ function Pool() {
       </Paper>
     </Container>
   );
+}
+
+function PoolDetailsCard({ state, balance } : { state: TokenPairState | undefined, balance: Map<string, bigint> }) {
+  if (state === undefined) {
+    return null
+  }
+
+  const poolTokenBalance = balance.get(state.tokenPairId) ?? 0n
+  const sharePecentage = BigNumber((poolTokenBalance * 100n).toString()).div(BigNumber(state.totalSupply.toString())).toFixed(5)
+  return <Card variant='outlined' style={{ width: '100%', padding: '0', borderRadius: '10px' }}>
+    <div style={{ display: 'grid', gridAutoRows: 'auto', gridRowGap: '5px', paddingTop: '10px', paddingBottom: '10px' }}>
+      <DetailItem
+        itemName={`Pooled ${state.token0Info.symbol}:`}
+        itemValue={`${bigIntToString(state.reserve0, state.token0Info.decimals)} ${state.token0Info.symbol}`}
+      />
+      <DetailItem
+        itemName={`Pooled ${state.token1Info.symbol}:`}
+        itemValue={`${bigIntToString(state.reserve1, state.token1Info.decimals)} ${state.token1Info.symbol}`}
+      />
+      <DetailItem
+        itemName={'Liquidity token total supply:'}
+        itemValue={`${bigIntToString(state.totalSupply, PairTokenDecimals)}`}
+      />
+      <DetailItem
+        itemName={'Your total pool tokens:'}
+        itemValue={`${bigIntToString(poolTokenBalance, PairTokenDecimals)}`}
+      />
+      <DetailItem
+        itemName={'Your pool share:'}
+        itemValue={`${parseFloat(sharePecentage)} %`}
+      />
+    </div>
+  </Card>
 }
 
 export default Pool;

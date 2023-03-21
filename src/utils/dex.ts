@@ -4,13 +4,13 @@ import {
   SignerProvider,
   SignExecuteScriptTxResult,
   NodeProvider,
-  node,
   ALPH_TOKEN_ID,
   prettifyTokenAmount,
-  DUST_AMOUNT
+  DUST_AMOUNT,
+  ExplorerProvider
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
-import { checkTxConfirmedFrequency, network, networkName } from "./consts"
+import { PollingInterval, network, networkName } from "./consts"
 import BigNumber from "bignumber.js"
 import { parseUnits } from "ethers/lib/utils";
 import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, RemoveLiquidity, CreatePair } from "../../artifacts/ts"
@@ -79,6 +79,14 @@ export function sortTokens(tokenAId: string, tokenBId: string): [string, string]
   const tokenA = BigInt('0x' + tokenAId)
   const tokenB = BigInt('0x' + tokenBId)
   return tokenA < tokenB ? [tokenAId, tokenBId] : [tokenBId, tokenAId]
+}
+
+export function getExplorerLink(txId: string): string {
+  return networkName === 'mainnet'
+    ? `https://explorer.alephium.org/transactions/${txId}`
+    : networkName === 'testnet'
+    ? `https://explorer.testnet.alephium.org/transactions/${txId}`
+    : `http://localhost:3000/${txId}`
 }
 
 export interface TokenPairState {
@@ -158,6 +166,7 @@ function deadline(ttl: number): bigint {
 
 async function swapMinOut(
   signer: SignerProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   pairId: string,
   tokenInId: string,
@@ -165,7 +174,7 @@ async function swapMinOut(
   amountOutMin: bigint,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  return await SwapMinOut.execute(signer, {
+  const result = await SwapMinOut.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -179,10 +188,13 @@ async function swapMinOut(
       ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountIn }]
       : [{ id: ALPH_TOKEN_ID, amount: amountIn + DUST_AMOUNT }]
   })
+  await waitTxSubmitted(explorerProvider, result.txId)
+  return result
 }
 
 async function swapMaxIn(
   signer: SignerProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   pairId: string,
   tokenInId: string,
@@ -190,7 +202,7 @@ async function swapMaxIn(
   amountOut: bigint,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  return await SwapMaxIn.execute(signer, {
+  const result = await SwapMaxIn.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -204,72 +216,116 @@ async function swapMaxIn(
       ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountInMax }]
       : [{ id: ALPH_TOKEN_ID, amount: amountInMax + DUST_AMOUNT }]
   })
+  await waitTxSubmitted(explorerProvider, result.txId)
+  return result
 }
 
-function checkPriceImpact(state: TokenPairState, tokenInId: string, amountIn: bigint, amountOut: bigint) {
+export interface SwapDetails {
+  swapType: 'ExactIn' | 'ExactOut'
+  state: TokenPairState
+  tokenInInfo: TokenInfo
+  tokenOutInfo: TokenInfo
+  tokenInAmount: bigint,
+  maximalTokenInAmount: bigint | undefined,
+  tokenOutAmount: bigint,
+  minimalTokenOutAmount: bigint | undefined
+  priceImpact: number
+}
+
+export function getSwapDetails(
+  swapType: 'ExactIn' | 'ExactOut',
+  state: TokenPairState,
+  tokenInInfo: TokenInfo,
+  tokenOutInfo: TokenInfo,
+  tokenInAmount: bigint,
+  tokenOutAmount: bigint,
+  slippage: number
+): SwapDetails {
+  const priceImpact = calcPriceImpact(state, tokenInInfo.id, tokenInAmount, tokenOutAmount)
+  const result = { swapType, state, tokenInInfo, tokenOutInfo, tokenInAmount, tokenOutAmount, priceImpact }
+  return swapType === 'ExactIn'
+    ? {
+      ...result,
+      minimalTokenOutAmount: minimalAmount(tokenOutAmount, slippage),
+      maximalTokenInAmount: undefined
+    } : {
+      ...result,
+      maximalTokenInAmount: maximalAmount(tokenInAmount, slippage),
+      minimalTokenOutAmount: undefined
+    }
+}
+
+function calcPriceImpact(state: TokenPairState, tokenInId: string, amountIn: bigint, amountOut: bigint) {
   const [reserveIn, reserveOut] = state.token0Info.id === tokenInId
     ? [state.reserve0, state.reserve1]
     : [state.reserve1, state.reserve0]
-  const left = (reserveIn + amountIn) * reserveOut * 100n
-  const right = (reserveOut - amountOut) * (BigInt(MaxPriceImpact) + 100n) * reserveIn
-  if (left > right) {
-    throw new Error('Price impact too high')
-  }
+  const numerator = (reserveOut * (reserveIn + amountIn) - (reserveOut - amountOut) * reserveIn) * 100n
+  const denumerator = reserveIn * (reserveOut - amountOut)
+  const impact = BigNumber(numerator.toString()).div(BigNumber(denumerator.toString())).toFixed()
+  return parseFloat(impact)
 }
 
 export async function swap(
-  type: 'ExactIn' | 'ExactOut',
+  swapDetails: SwapDetails,
   balances: Map<string, bigint>,
   signer: SignerProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
-  state: TokenPairState,
-  tokenInInfo: TokenInfo,
-  amountIn: bigint,
-  amountOut: bigint,
-  slippage: number,
   ttl: number
 ): Promise<SignExecuteScriptTxResult> {
-  const available = balances.get(tokenInInfo.id) ?? 0n
-  if (available < amountIn) {
-    throw new Error(`not enough ${tokenInInfo.symbol} balance, available: ${bigIntToString(available, tokenInInfo.decimals)}`)
+  if (swapDetails.priceImpact >= MaxPriceImpact) {
+    throw new Error('Price impact too high')
   }
-  checkPriceImpact(state, tokenInInfo.id, amountIn, amountOut)
-
-  if (type === 'ExactIn') {
-    const amountOutMin = minimalAmount(amountOut, slippage)
-    return await swapMinOut(signer, sender, state.tokenPairId, tokenInInfo.id, amountIn, amountOutMin, ttl)
+  const available = balances.get(swapDetails.tokenInInfo.id) ?? 0n
+  if (available < swapDetails.tokenInAmount) {
+    throw new Error(`not enough ${swapDetails.tokenInInfo.symbol} balance, available: ${bigIntToString(available, swapDetails.tokenInInfo.decimals)}`)
   }
 
-  const amountInMax = maximalAmount(amountIn, slippage)
-  return await swapMaxIn(signer, sender, state.tokenPairId, tokenInInfo.id, amountInMax, amountOut, ttl)
-}
-
-function isConfirmed(txStatus: node.TxStatus): txStatus is node.Confirmed {
-  return txStatus.type === 'Confirmed'
-}
-
-async function checkScriptExecutionResult(provider: NodeProvider, txId: string) {
-  const details = await provider.transactions.getTransactionsDetailsTxid(txId)
-  if (!details.scriptExecutionOk) {
-    throw new Error('Failed to call contract')
+  if (swapDetails.swapType === 'ExactIn') {
+    return swapMinOut(
+      signer,
+      explorerProvider,
+      sender,
+      swapDetails.state.tokenPairId,
+      swapDetails.tokenInInfo.id,
+      swapDetails.tokenInAmount,
+      swapDetails.minimalTokenOutAmount!,
+      ttl
+    )
   }
+
+  return swapMaxIn(
+    signer,
+    explorerProvider,
+    sender,
+    swapDetails.state.tokenPairId,
+    swapDetails.tokenInInfo.id,
+    swapDetails.maximalTokenInAmount!,
+    swapDetails.tokenOutAmount,
+    ttl
+  )
 }
 
-export async function waitTxConfirmed(
-  provider: NodeProvider,
+export async function waitTxSubmitted(
+  provider: ExplorerProvider,
   txId: string,
-  confirmations: number
-): Promise<node.Confirmed> {
-  const status = await provider.transactions.getTransactionsStatus({ txId: txId })
-  if (isConfirmed(status) && status.chainConfirmations >= confirmations) {
-    await checkScriptExecutionResult(provider, txId)
-    return status
+  maxTimes: number = 30
+): Promise<void> {
+  try {
+    await provider.transactions.getTransactionsTransactionHash(txId)
+    return
+  } catch (error) {
+    console.log(`Get transaction status error: ${error}`)
+    if (maxTimes === 0) {
+      throw error
+    }
   }
-  await new Promise((r) => setTimeout(r, checkTxConfirmedFrequency * 1000))
-  return waitTxConfirmed(provider, txId, confirmations)
+  await new Promise((r) => setTimeout(r, PollingInterval * 1000))
+  await waitTxSubmitted(provider, txId, maxTimes - 1)
 }
 
-export interface AddLiquidityResult {
+export interface AddLiquidityDetails {
+  state: TokenPairState,
   tokenAId: string
   tokenBId: string
   amountA: bigint
@@ -278,7 +334,12 @@ export interface AddLiquidityResult {
   sharePercentage: number
 }
 
-export function getInitAddLiquidityResult(tokenAId: string, tokenBId: string, amountA: bigint, amountB: bigint): AddLiquidityResult {
+export function getInitAddLiquidityDetails(
+  tokenAId: string,
+  tokenBId: string,
+  amountA: bigint,
+  amountB: bigint
+): Omit<AddLiquidityDetails, 'state'> {
   const liquidity = sqrt(amountA * amountB)
   if (liquidity <= MINIMUM_LIQUIDITY) {
     throw new Error('insufficient initial liquidity')
@@ -293,7 +354,7 @@ export function getInitAddLiquidityResult(tokenAId: string, tokenBId: string, am
   }
 }
 
-export function getAddLiquidityResult(state: TokenPairState, inputTokenId: string, inputAmount: bigint, inputType: 'TokenA' | 'TokenB'): AddLiquidityResult {
+export function getAddLiquidityDetails(state: TokenPairState, inputTokenId: string, inputAmount: bigint, inputType: 'TokenA' | 'TokenB'): AddLiquidityDetails {
   const [reserveA, reserveB] = inputTokenId === state.token0Info.id
     ? [state.reserve0, state.reserve1]
     : [state.reserve1, state.reserve0]
@@ -305,18 +366,16 @@ export function getAddLiquidityResult(state: TokenPairState, inputTokenId: strin
   const percentage = BigNumber((100n * liquidity).toString())
     .div(BigNumber(totalSupply.toString()))
     .toFixed(5)
-  const [tokenAId, tokenBId] = inputTokenId === state.token0Info.id
-    ? [state.token0Info.id, state.token1Info.id]
-    : [state.token1Info.id, state.token0Info.id]
-  const result = {
-    tokenAId: inputType === 'TokenA' ? tokenAId : tokenBId,
-    tokenBId: inputType === 'TokenA' ? tokenBId : tokenAId,
+  const tokenBId = inputTokenId === state.token0Info.id ? state.token1Info.id : state.token0Info.id
+  return {
+    state: state,
+    tokenAId: inputType === 'TokenA' ? inputTokenId : tokenBId,
+    tokenBId: inputType === 'TokenA' ? tokenBId : inputTokenId,
     amountA: inputType === 'TokenA' ? inputAmount : amountB,
     amountB: inputType === 'TokenA' ? amountB : inputAmount,
     shareAmount: liquidity,
     sharePercentage: parseFloat(percentage)
   }
-  return result
 }
 
 function sqrt(y: bigint): bigint {
@@ -354,6 +413,7 @@ function maximalAmount(amount: bigint, slippage: number): bigint {
 export async function addLiquidity(
   balances: Map<string, bigint>,
   signer: SignerProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   tokenPairState: TokenPairState,
   tokenAInfo: TokenInfo,
@@ -382,7 +442,7 @@ export async function addLiquidity(
   const [amount0Desired, amount1Desired, amount0Min, amount1Min] = tokenAInfo.id === tokenPairState.token0Info.id
     ? [amountADesired, amountBDesired, amountAMin, amountBMin]
     : [amountBDesired, amountADesired, amountBMin, amountAMin]
-  return await AddLiquidity.execute(signer, {
+  const result = await AddLiquidity.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -398,9 +458,12 @@ export async function addLiquidity(
       { id: tokenBInfo.id, amount: amountBDesired }
     ]
   })
+  await waitTxSubmitted(explorerProvider, result.txId)
+  return result
 }
 
-export interface RemoveLiquidityResult {
+export interface RemoveLiquidityDetails {
+  state: TokenPairState
   token0Id: string
   amount0: bigint
   token1Id: string
@@ -409,20 +472,23 @@ export interface RemoveLiquidityResult {
   remainSharePercentage: number
 }
 
-export function getRemoveLiquidityResult(
-  tokenPairState: TokenPairState & { totalLiquidityAmount: bigint } , liquidity: bigint
-): RemoveLiquidityResult {
-  if (liquidity > tokenPairState.totalLiquidityAmount) {
+export function getRemoveLiquidityDetails(
+  tokenPairState: TokenPairState,
+  totalLiquidityAmount: bigint,
+  liquidity: bigint
+): RemoveLiquidityDetails {
+  if (liquidity > totalLiquidityAmount) {
     throw new Error('liquidity exceed total liquidity amount')
   }
   const amount0 = liquidity * tokenPairState.reserve0 / tokenPairState.totalSupply
   const amount1 = liquidity * tokenPairState.reserve1 / tokenPairState.totalSupply
-  const remainShareAmount = tokenPairState.totalLiquidityAmount - liquidity
+  const remainShareAmount = totalLiquidityAmount - liquidity
   const remainSupply = tokenPairState.totalSupply - liquidity
   const remainSharePercentage = BigNumber((100n * remainShareAmount).toString())
     .div(BigNumber(remainSupply.toString()))
     .toFixed(5)
   return {
+    state: tokenPairState,
     token0Id: tokenPairState.token0Info.id,
     amount0,
     token1Id: tokenPairState.token1Info.id,
@@ -434,6 +500,7 @@ export function getRemoveLiquidityResult(
 
 export async function removeLiquidity(
   signer: SignerProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   pairId: string,
   liquidity: bigint,
@@ -444,7 +511,7 @@ export async function removeLiquidity(
 ): Promise<SignExecuteScriptTxResult> {
   const amount0Min = minimalAmount(amount0Desired, slippage)
   const amount1Min = minimalAmount(amount1Desired, slippage)
-  return await RemoveLiquidity.execute(signer, {
+  const result = await RemoveLiquidity.execute(signer, {
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -456,6 +523,8 @@ export async function removeLiquidity(
     },
     tokens: [{ id: pairId, amount: liquidity }]
   })
+  await waitTxSubmitted(explorerProvider, result.txId)
+  return result
 }
 
 export async function tokenPairExist(nodeProvider: NodeProvider, tokenAId: string, tokenBId: string): Promise<boolean> {
@@ -479,6 +548,7 @@ export async function tokenPairExist(nodeProvider: NodeProvider, tokenAId: strin
 
 export async function createTokenPair(
   signer: SignerProvider,
+  explorerProvider: ExplorerProvider,
   sender: string,
   tokenAId: string,
   tokenBId: string
@@ -501,6 +571,7 @@ export async function createTokenPair(
       { id: tokenBId, amount: 1n },
     ]
   })
+  await waitTxSubmitted(explorerProvider, result.txId)
   return { ...result, tokenPairId: pairContractId }
 }
 
