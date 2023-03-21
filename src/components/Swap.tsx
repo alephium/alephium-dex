@@ -5,7 +5,7 @@ import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import HoverIcon from "./HoverIcon";
 import NumberTextField from "./NumberTextField";
-import { getSwapDetails, swap, SwapDetails, tryGetBalance } from "../utils/dex";
+import { bigIntToString, getSwapDetails, swap, SwapDetails, tryGetBalance } from "../utils/dex";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
 import { useDeadline } from "../hooks/useDeadline";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
@@ -17,7 +17,6 @@ import { selectSwapState } from "../state/swap/selectors";
 import { commonStyles } from "./style";
 import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
 import BigNumber from "bignumber.js";
-import { prettifyExactAmount } from "@alephium/web3";
 import { DetailItem } from "./DetailsItem";
 
 function Swap() {
@@ -270,7 +269,7 @@ function SwapDetailsCard({ swapDetails } : { swapDetails : SwapDetails | undefin
       />
       <DetailItem
         itemName='Expected Output:'
-        itemValue={`${prettifyExactAmount(tokenOutAmount, tokenOutInfo.decimals)} ${tokenOutInfo.symbol}`}
+        itemValue={`${bigIntToString(tokenOutAmount, tokenOutInfo.decimals)} ${tokenOutInfo.symbol}`}
       />
       <DetailItem
         itemName='Price Impact:'
@@ -280,8 +279,8 @@ function SwapDetailsCard({ swapDetails } : { swapDetails : SwapDetails | undefin
         itemName={swapType === 'ExactIn' ? 'Minimal received after slippage:' : 'Maximum sent after slippage:'}
         itemValue={
           swapType === 'ExactIn'
-            ? `${prettifyExactAmount(minimalTokenOutAmount!, tokenOutInfo.decimals)} ${tokenOutInfo.symbol}`
-            : `${prettifyExactAmount(maximalTokenInAmount!, tokenInInfo.decimals)} ${tokenInInfo.symbol}`
+            ? `${bigIntToString(minimalTokenOutAmount!, tokenOutInfo.decimals)} ${tokenOutInfo.symbol}`
+            : `${bigIntToString(maximalTokenInAmount!, tokenInInfo.decimals)} ${tokenInInfo.symbol}`
         }
       />
     </div>
