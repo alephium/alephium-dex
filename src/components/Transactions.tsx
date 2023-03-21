@@ -28,7 +28,7 @@ export function TransactionSubmit({
       <div className={classes.spacer} />
       <Link
         target="_blank"
-        href={getExplorerLink(txId!)}
+        href={getExplorerLink(txId)}
         rel="noreferrer"
         variant='body2'
       >

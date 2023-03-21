@@ -22,6 +22,7 @@ import { commonStyles } from "./style";
 import { useTokenPairState } from "../state/useTokenPairState";
 import { TransactionSubmit, WaitingForTxSubmission } from "./Transactions";
 import { DetailItem } from "./DetailsItem";
+import { useHistory } from "react-router-dom";
 
 function RemoveLiquidity() {
   const classes = commonStyles();
@@ -38,6 +39,7 @@ function RemoveLiquidity() {
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
   const availableBalance = useAvailableBalances()
+  const history = useHistory()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     setTokenAInfo(tokenInfo);
@@ -95,7 +97,7 @@ function RemoveLiquidity() {
     }, []
   )
 
-  const handleReset = useCallback(() => {
+  const redirectToSwap = useCallback(() => {
     setTokenAInfo(undefined)
     setTokenBInfo(undefined)
     setAmount(undefined)
@@ -105,7 +107,8 @@ function RemoveLiquidity() {
     setRemovingLiquidity(false)
     setRemoveLiquidityDetails(undefined)
     setError(undefined)
-  }, [])
+    history.push('/swap')
+  }, [history])
 
   const tokenPairContent = (
     <div className={classes.tokenPairContainer}>
@@ -168,7 +171,7 @@ function RemoveLiquidity() {
           deadline
         )
         console.log(`remove liquidity succeed, tx id: ${result.txId}`)
-        setTxId(txId)
+        setTxId(result.txId)
         setRemovingLiquidity(false)
       }
     } catch (error) {
@@ -210,13 +213,13 @@ function RemoveLiquidity() {
       <Paper className={classes.mainPaper}>
         <WaitingForTxSubmission
           open={!!removingLiquidity && !completed}
-          text="Adding Liquidity"
+          text="Removing Liquidity"
         />
         <TransactionSubmit
           open={!!completed}
           txId={txId!}
-          buttonText="Remove More Liquidity"
-          onClick={handleReset}
+          buttonText="Swap Coins"
+          onClick={redirectToSwap}
         />
         {wallet === undefined ?
           <div>
