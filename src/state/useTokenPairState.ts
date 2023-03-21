@@ -11,19 +11,27 @@ export function useTokenPairState(
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   useEffect(() => {
-    setError(undefined)
+    let mounted = true
+
     if (token0Info !== undefined && token1Info !== undefined) {
       setIsLoading(true)
       getTokenPairState(token0Info, token1Info)
         .then((state) => {
-          setIsLoading(false)
-          setState(state)
+          if (mounted) {
+            setIsLoading(false)
+            setState(state)
+            setError(undefined)
+          }
         })
         .catch((error) => {
-          setIsLoading(false)
-          setError(`${error}`)
-          setState(undefined)
+          if (mounted) {
+            setIsLoading(false)
+            setError(`${error}`)
+            setState(undefined)
+          }
         })
+
+      return () => { mounted = false }
     }
   }, [token0Info, token1Info])
 
