@@ -451,7 +451,7 @@ export async function addLiquidity(
       amount1Min: amount1Min,
       deadline: deadline(ttl)
     },
-    attoAlphAmount: extraDustAmount(tokenAInfo.id, tokenBInfo.id),
+    attoAlphAmount: extraDustAmount(tokenAInfo.id, tokenBInfo.id) + DUST_AMOUNT, // `DUST_AMOUNT` for liquidity token
     tokens: [
       { id: tokenAInfo.id, amount: amountADesired },
       { id: tokenBInfo.id, amount: amountBDesired }
