@@ -164,7 +164,7 @@ function RemoveLiquidity() {
           wallet.signer,
           wallet.signer.explorerProvider,
           wallet.address,
-          tokenPairState.tokenPairId,
+          tokenPairState,
           amount,
           removeLiquidityDetails.amount0,
           removeLiquidityDetails.amount1,

@@ -168,7 +168,7 @@ async function swapMinOut(
   signer: SignerProvider,
   explorerProvider: ExplorerProvider,
   sender: string,
-  pairId: string,
+  state: TokenPairState,
   tokenInId: string,
   amountIn: bigint,
   amountOutMin: bigint,
@@ -178,15 +178,14 @@ async function swapMinOut(
     initialFields: {
       sender: sender,
       router: network.routerId,
-      pair: pairId,
+      pair: state.tokenPairId,
       tokenInId: tokenInId,
       amountIn: amountIn,
       amountOutMin: amountOutMin,
       deadline: deadline(ttl)
     },
-    tokens: tokenInId !== ALPH_TOKEN_ID
-      ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountIn }]
-      : [{ id: ALPH_TOKEN_ID, amount: amountIn + DUST_AMOUNT }]
+    attoAlphAmount: extraDustAmount(state.token0Info.id, state.token1Info.id),
+    tokens: [{ id: tokenInId, amount: amountIn }]
   })
   await waitTxSubmitted(explorerProvider, result.txId)
   return result
@@ -196,7 +195,7 @@ async function swapMaxIn(
   signer: SignerProvider,
   explorerProvider: ExplorerProvider,
   sender: string,
-  pairId: string,
+  state: TokenPairState,
   tokenInId: string,
   amountInMax: bigint,
   amountOut: bigint,
@@ -206,15 +205,14 @@ async function swapMaxIn(
     initialFields: {
       sender: sender,
       router: network.routerId,
-      pair: pairId,
+      pair: state.tokenPairId,
       tokenInId: tokenInId,
       amountInMax: amountInMax,
       amountOut: amountOut,
       deadline: deadline(ttl)
     },
-    tokens: tokenInId !== ALPH_TOKEN_ID
-      ? [{ id: ALPH_TOKEN_ID, amount: DUST_AMOUNT }, { id: tokenInId, amount: amountInMax }]
-      : [{ id: ALPH_TOKEN_ID, amount: amountInMax + DUST_AMOUNT }]
+    attoAlphAmount: extraDustAmount(state.token0Info.id, state.token1Info.id),
+    tokens: [{ id: tokenInId, amount: amountInMax }]
   })
   await waitTxSubmitted(explorerProvider, result.txId)
   return result
@@ -286,7 +284,7 @@ export async function swap(
       signer,
       explorerProvider,
       sender,
-      swapDetails.state.tokenPairId,
+      swapDetails.state,
       swapDetails.tokenInInfo.id,
       swapDetails.tokenInAmount,
       swapDetails.minimalTokenOutAmount!,
@@ -298,7 +296,7 @@ export async function swap(
     signer,
     explorerProvider,
     sender,
-    swapDetails.state.tokenPairId,
+    swapDetails.state,
     swapDetails.tokenInInfo.id,
     swapDetails.maximalTokenInAmount!,
     swapDetails.tokenOutAmount,
@@ -453,6 +451,7 @@ export async function addLiquidity(
       amount1Min: amount1Min,
       deadline: deadline(ttl)
     },
+    attoAlphAmount: extraDustAmount(tokenAInfo.id, tokenBInfo.id),
     tokens: [
       { id: tokenAInfo.id, amount: amountADesired },
       { id: tokenBInfo.id, amount: amountBDesired }
@@ -502,7 +501,7 @@ export async function removeLiquidity(
   signer: SignerProvider,
   explorerProvider: ExplorerProvider,
   sender: string,
-  pairId: string,
+  state: TokenPairState,
   liquidity: bigint,
   amount0Desired: bigint,
   amount1Desired: bigint,
@@ -515,13 +514,14 @@ export async function removeLiquidity(
     initialFields: {
       sender: sender,
       router: network.routerId,
-      pairId: pairId,
+      pairId: state.tokenPairId,
       liquidity: liquidity,
       amount0Min: amount0Min,
       amount1Min: amount1Min,
       deadline: deadline(ttl)
     },
-    tokens: [{ id: pairId, amount: liquidity }]
+    attoAlphAmount: extraDustAmount(state.token0Info.id, state.token1Info.id) + DUST_AMOUNT, // `DUST_AMOUNT` for liquidity token
+    tokens: [{ id: state.tokenPairId, amount: liquidity }]
   })
   await waitTxSubmitted(explorerProvider, result.txId)
   return result
@@ -546,6 +546,13 @@ export async function tokenPairExist(nodeProvider: NodeProvider, tokenAId: strin
       })
 }
 
+function extraDustAmount(tokenAId: string, tokenBId: string): bigint {
+  if (tokenAId === ALPH_TOKEN_ID || tokenBId === ALPH_TOKEN_ID) {
+    return DUST_AMOUNT * 2n
+  }
+  return DUST_AMOUNT * 3n
+}
+
 export async function createTokenPair(
   signer: SignerProvider,
   explorerProvider: ExplorerProvider,
@@ -565,7 +572,7 @@ export async function createTokenPair(
       tokenAId: tokenAId,
       tokenBId: tokenBId
     },
-    attoAlphAmount: 10n ** 18n,
+    attoAlphAmount: 10n ** 18n + extraDustAmount(tokenAId, tokenBId),
     tokens: [
       { id: tokenAId, amount: 1n },
       { id: tokenBId, amount: 1n },
