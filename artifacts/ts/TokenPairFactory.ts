@@ -51,28 +51,29 @@ class Factory extends ContractFactory<
     return new TokenPairFactoryInstance(address);
   }
 
-  async testSortTokensMethod(
-    params: TestContractParams<
-      TokenPairFactoryTypes.Fields,
-      { tokenA: HexString; tokenB: HexString }
-    >
-  ): Promise<TestContractResult<[HexString, HexString]>> {
-    return testMethod(this, "sortTokens", params);
-  }
-
-  async testCreatePairMethod(
-    params: TestContractParams<
-      TokenPairFactoryTypes.Fields,
-      {
-        payer: HexString;
-        alphAmount: bigint;
-        tokenAId: HexString;
-        tokenBId: HexString;
-      }
-    >
-  ): Promise<TestContractResult<null>> {
-    return testMethod(this, "createPair", params);
-  }
+  tests = {
+    sortTokens: async (
+      params: TestContractParams<
+        TokenPairFactoryTypes.Fields,
+        { tokenA: HexString; tokenB: HexString }
+      >
+    ): Promise<TestContractResult<[HexString, HexString]>> => {
+      return testMethod(this, "sortTokens", params);
+    },
+    createPair: async (
+      params: TestContractParams<
+        TokenPairFactoryTypes.Fields,
+        {
+          payer: HexString;
+          alphAmount: bigint;
+          tokenAId: HexString;
+          tokenBId: HexString;
+        }
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "createPair", params);
+    },
+  };
 }
 
 // Use this object to test and deploy the contract

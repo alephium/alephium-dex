@@ -79,59 +79,56 @@ class Factory extends ContractFactory<
     return new ExampleOracleSimpleInstance(address);
   }
 
-  async testFullMulMethod(
-    params: TestContractParams<
-      ExampleOracleSimpleTypes.Fields,
-      { x: bigint; y: bigint }
-    >
-  ): Promise<TestContractResult<[bigint, bigint]>> {
-    return testMethod(this, "fullMul", params);
-  }
-
-  async testMulDivMethod(
-    params: TestContractParams<
-      ExampleOracleSimpleTypes.Fields,
-      { a: bigint; b: bigint; denominator: bigint }
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "mulDiv", params);
-  }
-
-  async testFractionMethod(
-    params: TestContractParams<
-      ExampleOracleSimpleTypes.Fields,
-      { numerator: bigint; denominator: bigint }
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "fraction", params);
-  }
-
-  async testCurrentCumulativePricesMethod(
-    params: TestContractParams<
-      ExampleOracleSimpleTypes.Fields,
-      { currentBlockTimeStamp: bigint }
-    >
-  ): Promise<TestContractResult<[bigint, bigint]>> {
-    return testMethod(this, "currentCumulativePrices", params);
-  }
-
-  async testUpdateMethod(
-    params: Omit<
-      TestContractParams<ExampleOracleSimpleTypes.Fields, never>,
-      "testArgs"
-    >
-  ): Promise<TestContractResult<null>> {
-    return testMethod(this, "update", params);
-  }
-
-  async testConsultMethod(
-    params: TestContractParams<
-      ExampleOracleSimpleTypes.Fields,
-      { tokenId: HexString; amountIn: bigint }
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "consult", params);
-  }
+  tests = {
+    fullMul: async (
+      params: TestContractParams<
+        ExampleOracleSimpleTypes.Fields,
+        { x: bigint; y: bigint }
+      >
+    ): Promise<TestContractResult<[bigint, bigint]>> => {
+      return testMethod(this, "fullMul", params);
+    },
+    mulDiv: async (
+      params: TestContractParams<
+        ExampleOracleSimpleTypes.Fields,
+        { a: bigint; b: bigint; denominator: bigint }
+      >
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "mulDiv", params);
+    },
+    fraction: async (
+      params: TestContractParams<
+        ExampleOracleSimpleTypes.Fields,
+        { numerator: bigint; denominator: bigint }
+      >
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "fraction", params);
+    },
+    currentCumulativePrices: async (
+      params: TestContractParams<
+        ExampleOracleSimpleTypes.Fields,
+        { currentBlockTimeStamp: bigint }
+      >
+    ): Promise<TestContractResult<[bigint, bigint]>> => {
+      return testMethod(this, "currentCumulativePrices", params);
+    },
+    update: async (
+      params: Omit<
+        TestContractParams<ExampleOracleSimpleTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "update", params);
+    },
+    consult: async (
+      params: TestContractParams<
+        ExampleOracleSimpleTypes.Fields,
+        { tokenId: HexString; amountIn: bigint }
+      >
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "consult", params);
+    },
+  };
 }
 
 // Use this object to test and deploy the contract
@@ -139,7 +136,7 @@ export const ExampleOracleSimple = new Factory(
   Contract.fromJson(
     ExampleOracleSimpleContractJson,
     "",
-    "f46f5471d4fc2752ddab67231b9be781ac5b5bfed980d0f39402cb5e042f03cf"
+    "db728f2254d74eb30dbf85b4dc55e0d5a00bdc0c7b09c6cd94d8b2128f220bc8"
   )
 );
 
@@ -153,29 +150,28 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
     return fetchContractState(ExampleOracleSimple, this);
   }
 
-  async callFullMulMethod(
-    params: ExampleOracleSimpleTypes.CallMethodParams<"fullMul">
-  ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"fullMul">> {
-    return callMethod(ExampleOracleSimple, this, "fullMul", params);
-  }
-
-  async callMulDivMethod(
-    params: ExampleOracleSimpleTypes.CallMethodParams<"mulDiv">
-  ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"mulDiv">> {
-    return callMethod(ExampleOracleSimple, this, "mulDiv", params);
-  }
-
-  async callFractionMethod(
-    params: ExampleOracleSimpleTypes.CallMethodParams<"fraction">
-  ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"fraction">> {
-    return callMethod(ExampleOracleSimple, this, "fraction", params);
-  }
-
-  async callConsultMethod(
-    params: ExampleOracleSimpleTypes.CallMethodParams<"consult">
-  ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"consult">> {
-    return callMethod(ExampleOracleSimple, this, "consult", params);
-  }
+  methods = {
+    fullMul: async (
+      params: ExampleOracleSimpleTypes.CallMethodParams<"fullMul">
+    ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"fullMul">> => {
+      return callMethod(ExampleOracleSimple, this, "fullMul", params);
+    },
+    mulDiv: async (
+      params: ExampleOracleSimpleTypes.CallMethodParams<"mulDiv">
+    ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"mulDiv">> => {
+      return callMethod(ExampleOracleSimple, this, "mulDiv", params);
+    },
+    fraction: async (
+      params: ExampleOracleSimpleTypes.CallMethodParams<"fraction">
+    ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"fraction">> => {
+      return callMethod(ExampleOracleSimple, this, "fraction", params);
+    },
+    consult: async (
+      params: ExampleOracleSimpleTypes.CallMethodParams<"consult">
+    ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"consult">> => {
+      return callMethod(ExampleOracleSimple, this, "consult", params);
+    },
+  };
 
   async multicall<Calls extends ExampleOracleSimpleTypes.MultiCallParams>(
     calls: Calls

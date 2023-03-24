@@ -26,7 +26,7 @@ describe('test token pair factory', () => {
         { id: tokenAId, amount: 1n },
         { id: tokenBId, amount: 1n }
       ]
-      const testResult = await TokenPairFactory.testCreatePairMethod({
+      const testResult = await TokenPairFactory.tests.createPair({
         initialFields: fixture.selfState.fields,
         address: fixture.address,
         existingContracts: fixture.dependencies,

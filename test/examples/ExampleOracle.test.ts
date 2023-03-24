@@ -29,7 +29,7 @@ describe('test example oracle', () => {
     const { contractState } = await mint(tokenPairFixture, sender, token0Amount, token1Amount)
 
     async function test(fixture: ContractFixture<ExampleOracleSimpleTypes.Fields>, blockTimeStamp: number) {
-      return ExampleOracleSimple.testUpdateMethod({
+      return ExampleOracleSimple.tests.update({
         blockTimeStamp: blockTimeStamp,
         address: fixture.address,
         initialFields: fixture.selfState.fields,
@@ -51,7 +51,7 @@ describe('test example oracle', () => {
     expect(exampleOracleState.fields.price0Average).toEqual(expectedPrice[0])
     expect(exampleOracleState.fields.price1Average).toEqual(expectedPrice[1])
 
-    const consult0 = await ExampleOracleSimple.testConsultMethod({
+    const consult0 = await ExampleOracleSimple.tests.consult({
       address: fixture1.address,
       initialFields: exampleOracleState.fields,
       existingContracts: fixture1.dependencies,
@@ -59,7 +59,7 @@ describe('test example oracle', () => {
     })
     expect(consult0.returns).toEqual(token1Amount)
 
-    const consult1 = await ExampleOracleSimple.testConsultMethod({
+    const consult1 = await ExampleOracleSimple.tests.consult({
       address: fixture1.address,
       initialFields: exampleOracleState.fields,
       existingContracts: fixture1.dependencies,

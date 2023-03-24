@@ -1,4 +1,4 @@
-import "std/token_interface"
+import "std/fungible_token_interface"
 
 Contract TokenPair(
   token0Id: ByteVec,
@@ -9,7 +9,7 @@ Contract TokenPair(
   mut price0CumulativeLast: U256,
   mut price1CumulativeLast: U256,
   mut totalSupply: U256
-) extends Math(), Constants() implements IToken {
+) extends Math(), Constants() implements IFungibleToken {
 
   event Mint(sender: Address, amount0: U256, amount1: U256, liquidity: U256)
   event Burn(sender: Address, amount0: U256, amount1: U256, liquidity: U256)

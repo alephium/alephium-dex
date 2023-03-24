@@ -59,20 +59,21 @@ class Factory extends ContractFactory<MathTestInstance, {}> {
     return new MathTestInstance(address);
   }
 
-  async testUqdivMethod(
-    params: Omit<
-      TestContractParams<never, { a: bigint; b: bigint }>,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "uqdiv", params);
-  }
-
-  async testSqrtMethod(
-    params: Omit<TestContractParams<never, { y: bigint }>, "initialFields">
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "sqrt", params);
-  }
+  tests = {
+    uqdiv: async (
+      params: Omit<
+        TestContractParams<never, { a: bigint; b: bigint }>,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "uqdiv", params);
+    },
+    sqrt: async (
+      params: Omit<TestContractParams<never, { y: bigint }>, "initialFields">
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "sqrt", params);
+    },
+  };
 }
 
 // Use this object to test and deploy the contract
@@ -94,17 +95,18 @@ export class MathTestInstance extends ContractInstance {
     return fetchContractState(MathTest, this);
   }
 
-  async callUqdivMethod(
-    params: MathTestTypes.CallMethodParams<"uqdiv">
-  ): Promise<MathTestTypes.CallMethodResult<"uqdiv">> {
-    return callMethod(MathTest, this, "uqdiv", params);
-  }
-
-  async callSqrtMethod(
-    params: MathTestTypes.CallMethodParams<"sqrt">
-  ): Promise<MathTestTypes.CallMethodResult<"sqrt">> {
-    return callMethod(MathTest, this, "sqrt", params);
-  }
+  methods = {
+    uqdiv: async (
+      params: MathTestTypes.CallMethodParams<"uqdiv">
+    ): Promise<MathTestTypes.CallMethodResult<"uqdiv">> => {
+      return callMethod(MathTest, this, "uqdiv", params);
+    },
+    sqrt: async (
+      params: MathTestTypes.CallMethodParams<"sqrt">
+    ): Promise<MathTestTypes.CallMethodResult<"sqrt">> => {
+      return callMethod(MathTest, this, "sqrt", params);
+    },
+  };
 
   async multicall<Calls extends MathTestTypes.MultiCallParams>(
     calls: Calls
