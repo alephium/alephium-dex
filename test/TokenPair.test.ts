@@ -41,7 +41,7 @@ describe('test token pair', () => {
     const token0Amount = expandTo18Decimals(1n)
     const token1Amount = expandTo18Decimals(4n)
     const expectedLiquidity = expandTo18Decimals(2n)
-    const mintResult = await TokenPair.testMintMethod({
+    const mintResult = await TokenPair.tests.mint({
       initialFields: fixture.selfState.fields,
       initialAsset: fixture.selfState.asset,
       address: fixture.address,
@@ -81,7 +81,7 @@ describe('test token pair', () => {
     const token1Amount = expandTo18Decimals(4n)
     const { contractState } = await mint(fixture, sender, token0Amount, token1Amount)
     const expectedLiquidity = expandTo18Decimals(2n)
-    const mintResult = await TokenPair.testMintMethod({
+    const mintResult = await TokenPair.tests.mint({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
       address: fixture.address,
@@ -145,7 +145,7 @@ describe('test token pair', () => {
       const [swapAmount, token0Amount, token1Amount, expectedOutputAmount] = swapTestCase
       const { contractState } = await mint(fixture, sender, token0Amount, token1Amount)
       const func = async (outputAmount: bigint) => {
-        return TokenPair.testSwapMethod({
+        return TokenPair.tests.swap({
           initialFields: contractState.fields,
           initialAsset: contractState.asset,
           address: fixture.address,
@@ -180,7 +180,7 @@ describe('test token pair', () => {
     const swapAmount = expandTo18Decimals(1)
     const expectedOutputAmount = 1662497915624478906n
 
-    const swapResult = await TokenPair.testSwapMethod({
+    const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
       address: fixture.address,
@@ -231,7 +231,7 @@ describe('test token pair', () => {
     const swapAmount = expandTo18Decimals(1)
     const expectedOutputAmount = 453305446940074565n
 
-    const swapResult = await TokenPair.testSwapMethod({
+    const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
       address: fixture.address,
@@ -286,7 +286,7 @@ describe('test token pair', () => {
     const swapAmount = expandTo18Decimals(1)
     const expectedOutputAmount = 1662497915624478906n
 
-    const swapResult = await TokenPair.testSwapMethod({
+    const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
       address: fixture.address,
@@ -341,7 +341,7 @@ describe('test token pair', () => {
     const swapAmount = expandTo18Decimals(1)
     const expectedOutputAmount = 453305446940074565n
 
-    const swapResult = await TokenPair.testSwapMethod({
+    const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
       address: fixture.address,
@@ -393,7 +393,7 @@ describe('test token pair', () => {
     const swapAmount = expandTo18Decimals(1)
     const expectedOutputAmount = 453305446940074565n
 
-    const swapResult = await TokenPair.testSwapMethod({
+    const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
       address: fixture.address,
@@ -454,7 +454,7 @@ describe('test token pair', () => {
     const swapAmount = expandTo18Decimals(1)
     const expectedOutputAmount = 453305446940074565n
 
-    const swapResult = await TokenPair.testSwapMethod({
+    const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
       address: fixture.address,
@@ -486,7 +486,7 @@ describe('test token pair', () => {
 
     const expectedLiquidity = expandTo18Decimals(3)
     const liquidity = expectedLiquidity - MinimumLiquidity
-    const burnResult = await TokenPair.testBurnMethod({
+    const burnResult = await TokenPair.tests.burn({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
       address: fixture.address,
@@ -533,7 +533,7 @@ describe('test token pair', () => {
 
     const blockTimeStamp = contractState.fields.blockTimeStampLast
 
-    const result0 = await TokenPair.testUpdateMethod({
+    const result0 = await TokenPair.tests.update({
       blockTimeStamp: (Number(blockTimeStamp) + 1) * 1000,
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
@@ -549,7 +549,7 @@ describe('test token pair', () => {
     expect(tokenPairState0.fields.blockTimeStampLast).toEqual(blockTimeStamp + 1n)
 
     const swapAmount = expandTo18Decimals(3)
-    const result1 = await TokenPair.testSwapMethod({
+    const result1 = await TokenPair.tests.swap({
       blockTimeStamp: (Number(blockTimeStamp) + 10) * 1000,
       initialFields: tokenPairState0.fields,
       initialAsset: tokenPairState0.asset,
@@ -580,7 +580,7 @@ describe('test token pair', () => {
     expect(tokenPairState1.fields.reserve1).toEqual(expandTo18Decimals(2))
 
     const newPrice = encodePrice(expandTo18Decimals(6), expandTo18Decimals(2))
-    const result2 = await TokenPair.testUpdateMethod({
+    const result2 = await TokenPair.tests.update({
       blockTimeStamp: (Number(blockTimeStamp) + 20) * 1000,
       initialFields: tokenPairState1.fields,
       initialAsset: tokenPairState1.asset,

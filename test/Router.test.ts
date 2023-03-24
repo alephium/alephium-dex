@@ -30,7 +30,7 @@ describe('test router', () => {
       amount0Min: bigint,
       amount1Min: bigint
     ): Promise<[bigint, bigint]> {
-      const result = await Router.testAddLiquidity_Method({
+      const result = await Router.tests.addLiquidity_({
         address: routerFixture.address,
         existingContracts: routerFixture.dependencies,
         testArgs: {
@@ -77,7 +77,7 @@ describe('test router', () => {
       amount1Min: bigint,
       deadline: bigint
     ) {
-      return Router.testAddLiquidityMethod({
+      return Router.tests.addLiquidity({
         address: routerFixture.address,
         testArgs: {
           tokenPair: tokenPairState.contractId,
@@ -140,7 +140,7 @@ describe('test router', () => {
       amount1Min: bigint,
       deadline: bigint
     ) {
-      return Router.testRemoveLiquidityMethod({
+      return Router.tests.removeLiquidity({
         address: routerFixture.address,
         testArgs: {
           tokenPairId: tokenPairState.contractId,
@@ -208,7 +208,7 @@ describe('test router', () => {
     const { contractState } = await mint(tokenPairFixture, sender, 1000n, 30000n)
 
     async function testGetReserveInAndReserveOut(tokenPairState: ContractState, tokenInId: string) {
-      return Router.testGetReserveInAndReserveOutMethod({
+      return Router.tests.getReserveInAndReserveOut({
         address: routerFixture.address,
         testArgs: { tokenPair: tokenPairState.contractId, tokenInId: tokenInId },
         existingContracts: routerFixture.dependencies.concat([tokenPairState])
@@ -234,7 +234,7 @@ describe('test router', () => {
       amountOutMin: bigint,
       deadline: bigint
     ) {
-      return Router.testSwapExactTokenForTokenMethod({
+      return Router.tests.swapExactTokenForToken({
         address: routerFixture.address,
         testArgs: {
           tokenPair: tokenPairState.contractId,
@@ -299,7 +299,7 @@ describe('test router', () => {
       amountOut: bigint,
       deadline: bigint
     ) {
-      return Router.testSwapTokenForExactTokenMethod({
+      return Router.tests.swapTokenForExactToken({
         address: routerFixture.address,
         testArgs: {
           tokenPair: tokenPairState.contractId,

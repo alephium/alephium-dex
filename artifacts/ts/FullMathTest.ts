@@ -63,32 +63,35 @@ class Factory extends ContractFactory<FullMathTestInstance, {}> {
     return new FullMathTestInstance(address);
   }
 
-  async testFullMulMethod(
-    params: Omit<
-      TestContractParams<never, { x: bigint; y: bigint }>,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<[bigint, bigint]>> {
-    return testMethod(this, "fullMul", params);
-  }
-
-  async testMulDivMethod(
-    params: Omit<
-      TestContractParams<never, { a: bigint; b: bigint; denominator: bigint }>,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "mulDiv", params);
-  }
-
-  async testFractionMethod(
-    params: Omit<
-      TestContractParams<never, { numerator: bigint; denominator: bigint }>,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "fraction", params);
-  }
+  tests = {
+    fullMul: async (
+      params: Omit<
+        TestContractParams<never, { x: bigint; y: bigint }>,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<[bigint, bigint]>> => {
+      return testMethod(this, "fullMul", params);
+    },
+    mulDiv: async (
+      params: Omit<
+        TestContractParams<
+          never,
+          { a: bigint; b: bigint; denominator: bigint }
+        >,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "mulDiv", params);
+    },
+    fraction: async (
+      params: Omit<
+        TestContractParams<never, { numerator: bigint; denominator: bigint }>,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "fraction", params);
+    },
+  };
 }
 
 // Use this object to test and deploy the contract
@@ -96,7 +99,7 @@ export const FullMathTest = new Factory(
   Contract.fromJson(
     FullMathTestContractJson,
     "",
-    "66b46a3a668275c0f51ca6f0696288489ebfd1de2748f65021824d57534b6d6f"
+    "d6834220b59d306adb6cd548433f9e1ab4f20c155cad9c80ef89be27cb82a286"
   )
 );
 
@@ -110,23 +113,23 @@ export class FullMathTestInstance extends ContractInstance {
     return fetchContractState(FullMathTest, this);
   }
 
-  async callFullMulMethod(
-    params: FullMathTestTypes.CallMethodParams<"fullMul">
-  ): Promise<FullMathTestTypes.CallMethodResult<"fullMul">> {
-    return callMethod(FullMathTest, this, "fullMul", params);
-  }
-
-  async callMulDivMethod(
-    params: FullMathTestTypes.CallMethodParams<"mulDiv">
-  ): Promise<FullMathTestTypes.CallMethodResult<"mulDiv">> {
-    return callMethod(FullMathTest, this, "mulDiv", params);
-  }
-
-  async callFractionMethod(
-    params: FullMathTestTypes.CallMethodParams<"fraction">
-  ): Promise<FullMathTestTypes.CallMethodResult<"fraction">> {
-    return callMethod(FullMathTest, this, "fraction", params);
-  }
+  methods = {
+    fullMul: async (
+      params: FullMathTestTypes.CallMethodParams<"fullMul">
+    ): Promise<FullMathTestTypes.CallMethodResult<"fullMul">> => {
+      return callMethod(FullMathTest, this, "fullMul", params);
+    },
+    mulDiv: async (
+      params: FullMathTestTypes.CallMethodParams<"mulDiv">
+    ): Promise<FullMathTestTypes.CallMethodResult<"mulDiv">> => {
+      return callMethod(FullMathTest, this, "mulDiv", params);
+    },
+    fraction: async (
+      params: FullMathTestTypes.CallMethodParams<"fraction">
+    ): Promise<FullMathTestTypes.CallMethodResult<"fraction">> => {
+      return callMethod(FullMathTest, this, "fraction", params);
+    },
+  };
 
   async multicall<Calls extends FullMathTestTypes.MultiCallParams>(
     calls: Calls

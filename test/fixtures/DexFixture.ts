@@ -197,7 +197,7 @@ export async function mint(
   }
 
   const inputAssets = [{ address: sender, asset: { alphAmount: alphAmount, tokens: tokens } }]
-  const testResult = await TokenPair.testMintMethod({
+  const testResult = await TokenPair.tests.mint({
     initialFields: initFields,
     initialAsset: initAsset,
     address: tokenPairFixture.address,

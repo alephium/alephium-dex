@@ -142,114 +142,105 @@ class Factory extends ContractFactory<
     return new TokenPairInstance(address);
   }
 
-  async testGetSymbolMethod(
-    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-  ): Promise<TestContractResult<HexString>> {
-    return testMethod(this, "getSymbol", params);
-  }
-
-  async testGetNameMethod(
-    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-  ): Promise<TestContractResult<HexString>> {
-    return testMethod(this, "getName", params);
-  }
-
-  async testGetDecimalsMethod(
-    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "getDecimals", params);
-  }
-
-  async testGetTotalSupplyMethod(
-    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "getTotalSupply", params);
-  }
-
-  async testUqdivMethod(
-    params: TestContractParams<TokenPairTypes.Fields, { a: bigint; b: bigint }>
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "uqdiv", params);
-  }
-
-  async testSqrtMethod(
-    params: TestContractParams<TokenPairTypes.Fields, { y: bigint }>
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "sqrt", params);
-  }
-
-  async testGetTokenPairMethod(
-    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-  ): Promise<TestContractResult<[HexString, HexString]>> {
-    return testMethod(this, "getTokenPair", params);
-  }
-
-  async testGetReservesMethod(
-    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-  ): Promise<TestContractResult<[bigint, bigint]>> {
-    return testMethod(this, "getReserves", params);
-  }
-
-  async testGetBlockTimeStampLastMethod(
-    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "getBlockTimeStampLast", params);
-  }
-
-  async testGetPrice0CumulativeLastMethod(
-    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "getPrice0CumulativeLast", params);
-  }
-
-  async testGetPrice1CumulativeLastMethod(
-    params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "getPrice1CumulativeLast", params);
-  }
-
-  async testUpdateMethod(
-    params: TestContractParams<
-      TokenPairTypes.Fields,
-      { newReserve0: bigint; newReserve1: bigint }
-    >
-  ): Promise<TestContractResult<null>> {
-    return testMethod(this, "update", params);
-  }
-
-  async testMintMethod(
-    params: TestContractParams<
-      TokenPairTypes.Fields,
-      { sender: HexString; amount0: bigint; amount1: bigint }
-    >
-  ): Promise<TestContractResult<bigint>> {
-    return testMethod(this, "mint", params);
-  }
-
-  async testBurnMethod(
-    params: TestContractParams<
-      TokenPairTypes.Fields,
-      { sender: HexString; liquidity: bigint }
-    >
-  ): Promise<TestContractResult<[bigint, bigint]>> {
-    return testMethod(this, "burn", params);
-  }
-
-  async testSwapMethod(
-    params: TestContractParams<
-      TokenPairTypes.Fields,
-      {
-        sender: HexString;
-        to: HexString;
-        amount0In: bigint;
-        amount1In: bigint;
-        amount0Out: bigint;
-        amount1Out: bigint;
-      }
-    >
-  ): Promise<TestContractResult<null>> {
-    return testMethod(this, "swap", params);
-  }
+  tests = {
+    getSymbol: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<HexString>> => {
+      return testMethod(this, "getSymbol", params);
+    },
+    getName: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<HexString>> => {
+      return testMethod(this, "getName", params);
+    },
+    getDecimals: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "getDecimals", params);
+    },
+    getTotalSupply: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "getTotalSupply", params);
+    },
+    uqdiv: async (
+      params: TestContractParams<
+        TokenPairTypes.Fields,
+        { a: bigint; b: bigint }
+      >
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "uqdiv", params);
+    },
+    sqrt: async (
+      params: TestContractParams<TokenPairTypes.Fields, { y: bigint }>
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "sqrt", params);
+    },
+    getTokenPair: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<[HexString, HexString]>> => {
+      return testMethod(this, "getTokenPair", params);
+    },
+    getReserves: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<[bigint, bigint]>> => {
+      return testMethod(this, "getReserves", params);
+    },
+    getBlockTimeStampLast: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "getBlockTimeStampLast", params);
+    },
+    getPrice0CumulativeLast: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "getPrice0CumulativeLast", params);
+    },
+    getPrice1CumulativeLast: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "getPrice1CumulativeLast", params);
+    },
+    update: async (
+      params: TestContractParams<
+        TokenPairTypes.Fields,
+        { newReserve0: bigint; newReserve1: bigint }
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "update", params);
+    },
+    mint: async (
+      params: TestContractParams<
+        TokenPairTypes.Fields,
+        { sender: HexString; amount0: bigint; amount1: bigint }
+      >
+    ): Promise<TestContractResult<bigint>> => {
+      return testMethod(this, "mint", params);
+    },
+    burn: async (
+      params: TestContractParams<
+        TokenPairTypes.Fields,
+        { sender: HexString; liquidity: bigint }
+      >
+    ): Promise<TestContractResult<[bigint, bigint]>> => {
+      return testMethod(this, "burn", params);
+    },
+    swap: async (
+      params: TestContractParams<
+        TokenPairTypes.Fields,
+        {
+          sender: HexString;
+          to: HexString;
+          amount0In: bigint;
+          amount1In: bigint;
+          amount0Out: bigint;
+          amount1Out: bigint;
+        }
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "swap", params);
+    },
+  };
 }
 
 // Use this object to test and deploy the contract
@@ -330,128 +321,118 @@ export class TokenPairInstance extends ContractInstance {
     );
   }
 
-  async callGetSymbolMethod(
-    params?: TokenPairTypes.CallMethodParams<"getSymbol">
-  ): Promise<TokenPairTypes.CallMethodResult<"getSymbol">> {
-    return callMethod(
-      TokenPair,
-      this,
-      "getSymbol",
-      params === undefined ? {} : params
-    );
-  }
-
-  async callGetNameMethod(
-    params?: TokenPairTypes.CallMethodParams<"getName">
-  ): Promise<TokenPairTypes.CallMethodResult<"getName">> {
-    return callMethod(
-      TokenPair,
-      this,
-      "getName",
-      params === undefined ? {} : params
-    );
-  }
-
-  async callGetDecimalsMethod(
-    params?: TokenPairTypes.CallMethodParams<"getDecimals">
-  ): Promise<TokenPairTypes.CallMethodResult<"getDecimals">> {
-    return callMethod(
-      TokenPair,
-      this,
-      "getDecimals",
-      params === undefined ? {} : params
-    );
-  }
-
-  async callGetTotalSupplyMethod(
-    params?: TokenPairTypes.CallMethodParams<"getTotalSupply">
-  ): Promise<TokenPairTypes.CallMethodResult<"getTotalSupply">> {
-    return callMethod(
-      TokenPair,
-      this,
-      "getTotalSupply",
-      params === undefined ? {} : params
-    );
-  }
-
-  async callUqdivMethod(
-    params: TokenPairTypes.CallMethodParams<"uqdiv">
-  ): Promise<TokenPairTypes.CallMethodResult<"uqdiv">> {
-    return callMethod(TokenPair, this, "uqdiv", params);
-  }
-
-  async callSqrtMethod(
-    params: TokenPairTypes.CallMethodParams<"sqrt">
-  ): Promise<TokenPairTypes.CallMethodResult<"sqrt">> {
-    return callMethod(TokenPair, this, "sqrt", params);
-  }
-
-  async callGetTokenPairMethod(
-    params?: TokenPairTypes.CallMethodParams<"getTokenPair">
-  ): Promise<TokenPairTypes.CallMethodResult<"getTokenPair">> {
-    return callMethod(
-      TokenPair,
-      this,
-      "getTokenPair",
-      params === undefined ? {} : params
-    );
-  }
-
-  async callGetReservesMethod(
-    params?: TokenPairTypes.CallMethodParams<"getReserves">
-  ): Promise<TokenPairTypes.CallMethodResult<"getReserves">> {
-    return callMethod(
-      TokenPair,
-      this,
-      "getReserves",
-      params === undefined ? {} : params
-    );
-  }
-
-  async callGetBlockTimeStampLastMethod(
-    params?: TokenPairTypes.CallMethodParams<"getBlockTimeStampLast">
-  ): Promise<TokenPairTypes.CallMethodResult<"getBlockTimeStampLast">> {
-    return callMethod(
-      TokenPair,
-      this,
-      "getBlockTimeStampLast",
-      params === undefined ? {} : params
-    );
-  }
-
-  async callGetPrice0CumulativeLastMethod(
-    params?: TokenPairTypes.CallMethodParams<"getPrice0CumulativeLast">
-  ): Promise<TokenPairTypes.CallMethodResult<"getPrice0CumulativeLast">> {
-    return callMethod(
-      TokenPair,
-      this,
-      "getPrice0CumulativeLast",
-      params === undefined ? {} : params
-    );
-  }
-
-  async callGetPrice1CumulativeLastMethod(
-    params?: TokenPairTypes.CallMethodParams<"getPrice1CumulativeLast">
-  ): Promise<TokenPairTypes.CallMethodResult<"getPrice1CumulativeLast">> {
-    return callMethod(
-      TokenPair,
-      this,
-      "getPrice1CumulativeLast",
-      params === undefined ? {} : params
-    );
-  }
-
-  async callMintMethod(
-    params: TokenPairTypes.CallMethodParams<"mint">
-  ): Promise<TokenPairTypes.CallMethodResult<"mint">> {
-    return callMethod(TokenPair, this, "mint", params);
-  }
-
-  async callBurnMethod(
-    params: TokenPairTypes.CallMethodParams<"burn">
-  ): Promise<TokenPairTypes.CallMethodResult<"burn">> {
-    return callMethod(TokenPair, this, "burn", params);
-  }
+  methods = {
+    getSymbol: async (
+      params?: TokenPairTypes.CallMethodParams<"getSymbol">
+    ): Promise<TokenPairTypes.CallMethodResult<"getSymbol">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "getSymbol",
+        params === undefined ? {} : params
+      );
+    },
+    getName: async (
+      params?: TokenPairTypes.CallMethodParams<"getName">
+    ): Promise<TokenPairTypes.CallMethodResult<"getName">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "getName",
+        params === undefined ? {} : params
+      );
+    },
+    getDecimals: async (
+      params?: TokenPairTypes.CallMethodParams<"getDecimals">
+    ): Promise<TokenPairTypes.CallMethodResult<"getDecimals">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "getDecimals",
+        params === undefined ? {} : params
+      );
+    },
+    getTotalSupply: async (
+      params?: TokenPairTypes.CallMethodParams<"getTotalSupply">
+    ): Promise<TokenPairTypes.CallMethodResult<"getTotalSupply">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "getTotalSupply",
+        params === undefined ? {} : params
+      );
+    },
+    uqdiv: async (
+      params: TokenPairTypes.CallMethodParams<"uqdiv">
+    ): Promise<TokenPairTypes.CallMethodResult<"uqdiv">> => {
+      return callMethod(TokenPair, this, "uqdiv", params);
+    },
+    sqrt: async (
+      params: TokenPairTypes.CallMethodParams<"sqrt">
+    ): Promise<TokenPairTypes.CallMethodResult<"sqrt">> => {
+      return callMethod(TokenPair, this, "sqrt", params);
+    },
+    getTokenPair: async (
+      params?: TokenPairTypes.CallMethodParams<"getTokenPair">
+    ): Promise<TokenPairTypes.CallMethodResult<"getTokenPair">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "getTokenPair",
+        params === undefined ? {} : params
+      );
+    },
+    getReserves: async (
+      params?: TokenPairTypes.CallMethodParams<"getReserves">
+    ): Promise<TokenPairTypes.CallMethodResult<"getReserves">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "getReserves",
+        params === undefined ? {} : params
+      );
+    },
+    getBlockTimeStampLast: async (
+      params?: TokenPairTypes.CallMethodParams<"getBlockTimeStampLast">
+    ): Promise<TokenPairTypes.CallMethodResult<"getBlockTimeStampLast">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "getBlockTimeStampLast",
+        params === undefined ? {} : params
+      );
+    },
+    getPrice0CumulativeLast: async (
+      params?: TokenPairTypes.CallMethodParams<"getPrice0CumulativeLast">
+    ): Promise<TokenPairTypes.CallMethodResult<"getPrice0CumulativeLast">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "getPrice0CumulativeLast",
+        params === undefined ? {} : params
+      );
+    },
+    getPrice1CumulativeLast: async (
+      params?: TokenPairTypes.CallMethodParams<"getPrice1CumulativeLast">
+    ): Promise<TokenPairTypes.CallMethodResult<"getPrice1CumulativeLast">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "getPrice1CumulativeLast",
+        params === undefined ? {} : params
+      );
+    },
+    mint: async (
+      params: TokenPairTypes.CallMethodParams<"mint">
+    ): Promise<TokenPairTypes.CallMethodResult<"mint">> => {
+      return callMethod(TokenPair, this, "mint", params);
+    },
+    burn: async (
+      params: TokenPairTypes.CallMethodParams<"burn">
+    ): Promise<TokenPairTypes.CallMethodResult<"burn">> => {
+      return callMethod(TokenPair, this, "burn", params);
+    },
+  };
 
   async multicall<Calls extends TokenPairTypes.MultiCallParams>(
     calls: Calls

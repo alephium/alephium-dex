@@ -74,131 +74,130 @@ class Factory extends ContractFactory<RouterInstance, {}> {
     return new RouterInstance(address);
   }
 
-  async testAddLiquidity_Method(
-    params: Omit<
-      TestContractParams<
-        never,
-        {
-          reserve0: bigint;
-          reserve1: bigint;
-          amount0Desired: bigint;
-          amount1Desired: bigint;
-          amount0Min: bigint;
-          amount1Min: bigint;
-        }
-      >,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<[bigint, bigint]>> {
-    return testMethod(this, "addLiquidity_", params);
-  }
-
-  async testAddLiquidityMethod(
-    params: Omit<
-      TestContractParams<
-        never,
-        {
-          tokenPair: HexString;
-          sender: HexString;
-          amount0Desired: bigint;
-          amount1Desired: bigint;
-          amount0Min: bigint;
-          amount1Min: bigint;
-          deadline: bigint;
-        }
-      >,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<[bigint, bigint, bigint]>> {
-    return testMethod(this, "addLiquidity", params);
-  }
-
-  async testRemoveLiquidityMethod(
-    params: Omit<
-      TestContractParams<
-        never,
-        {
-          tokenPairId: HexString;
-          sender: HexString;
-          liquidity: bigint;
-          amount0Min: bigint;
-          amount1Min: bigint;
-          deadline: bigint;
-        }
-      >,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<[bigint, bigint]>> {
-    return testMethod(this, "removeLiquidity", params);
-  }
-
-  async testGetReserveInAndReserveOutMethod(
-    params: Omit<
-      TestContractParams<never, { tokenPair: HexString; tokenInId: HexString }>,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<[bigint, bigint]>> {
-    return testMethod(this, "getReserveInAndReserveOut", params);
-  }
-
-  async testSwapExactTokenForTokenMethod(
-    params: Omit<
-      TestContractParams<
-        never,
-        {
-          tokenPair: HexString;
-          sender: HexString;
-          tokenInId: HexString;
-          amountIn: bigint;
-          amountOutMin: bigint;
-          to: HexString;
-          deadline: bigint;
-        }
-      >,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<null>> {
-    return testMethod(this, "swapExactTokenForToken", params);
-  }
-
-  async testSwapTokenForExactTokenMethod(
-    params: Omit<
-      TestContractParams<
-        never,
-        {
-          tokenPair: HexString;
-          sender: HexString;
-          tokenInId: HexString;
-          amountInMax: bigint;
-          amountOut: bigint;
-          to: HexString;
-          deadline: bigint;
-        }
-      >,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<null>> {
-    return testMethod(this, "swapTokenForExactToken", params);
-  }
-
-  async testSwapMethod(
-    params: Omit<
-      TestContractParams<
-        never,
-        {
-          tokenPair: HexString;
-          sender: HexString;
-          to: HexString;
-          tokenInId: HexString;
-          amountIn: bigint;
-          amountOut: bigint;
-        }
-      >,
-      "initialFields"
-    >
-  ): Promise<TestContractResult<null>> {
-    return testMethod(this, "swap", params);
-  }
+  tests = {
+    addLiquidity_: async (
+      params: Omit<
+        TestContractParams<
+          never,
+          {
+            reserve0: bigint;
+            reserve1: bigint;
+            amount0Desired: bigint;
+            amount1Desired: bigint;
+            amount0Min: bigint;
+            amount1Min: bigint;
+          }
+        >,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<[bigint, bigint]>> => {
+      return testMethod(this, "addLiquidity_", params);
+    },
+    addLiquidity: async (
+      params: Omit<
+        TestContractParams<
+          never,
+          {
+            tokenPair: HexString;
+            sender: HexString;
+            amount0Desired: bigint;
+            amount1Desired: bigint;
+            amount0Min: bigint;
+            amount1Min: bigint;
+            deadline: bigint;
+          }
+        >,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<[bigint, bigint, bigint]>> => {
+      return testMethod(this, "addLiquidity", params);
+    },
+    removeLiquidity: async (
+      params: Omit<
+        TestContractParams<
+          never,
+          {
+            tokenPairId: HexString;
+            sender: HexString;
+            liquidity: bigint;
+            amount0Min: bigint;
+            amount1Min: bigint;
+            deadline: bigint;
+          }
+        >,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<[bigint, bigint]>> => {
+      return testMethod(this, "removeLiquidity", params);
+    },
+    getReserveInAndReserveOut: async (
+      params: Omit<
+        TestContractParams<
+          never,
+          { tokenPair: HexString; tokenInId: HexString }
+        >,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<[bigint, bigint]>> => {
+      return testMethod(this, "getReserveInAndReserveOut", params);
+    },
+    swapExactTokenForToken: async (
+      params: Omit<
+        TestContractParams<
+          never,
+          {
+            tokenPair: HexString;
+            sender: HexString;
+            tokenInId: HexString;
+            amountIn: bigint;
+            amountOutMin: bigint;
+            to: HexString;
+            deadline: bigint;
+          }
+        >,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "swapExactTokenForToken", params);
+    },
+    swapTokenForExactToken: async (
+      params: Omit<
+        TestContractParams<
+          never,
+          {
+            tokenPair: HexString;
+            sender: HexString;
+            tokenInId: HexString;
+            amountInMax: bigint;
+            amountOut: bigint;
+            to: HexString;
+            deadline: bigint;
+          }
+        >,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "swapTokenForExactToken", params);
+    },
+    swap: async (
+      params: Omit<
+        TestContractParams<
+          never,
+          {
+            tokenPair: HexString;
+            sender: HexString;
+            to: HexString;
+            tokenInId: HexString;
+            amountIn: bigint;
+            amountOut: bigint;
+          }
+        >,
+        "initialFields"
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "swap", params);
+    },
+  };
 }
 
 // Use this object to test and deploy the contract
@@ -220,17 +219,18 @@ export class RouterInstance extends ContractInstance {
     return fetchContractState(Router, this);
   }
 
-  async callAddLiquidityMethod(
-    params: RouterTypes.CallMethodParams<"addLiquidity">
-  ): Promise<RouterTypes.CallMethodResult<"addLiquidity">> {
-    return callMethod(Router, this, "addLiquidity", params);
-  }
-
-  async callRemoveLiquidityMethod(
-    params: RouterTypes.CallMethodParams<"removeLiquidity">
-  ): Promise<RouterTypes.CallMethodResult<"removeLiquidity">> {
-    return callMethod(Router, this, "removeLiquidity", params);
-  }
+  methods = {
+    addLiquidity: async (
+      params: RouterTypes.CallMethodParams<"addLiquidity">
+    ): Promise<RouterTypes.CallMethodResult<"addLiquidity">> => {
+      return callMethod(Router, this, "addLiquidity", params);
+    },
+    removeLiquidity: async (
+      params: RouterTypes.CallMethodParams<"removeLiquidity">
+    ): Promise<RouterTypes.CallMethodResult<"removeLiquidity">> => {
+      return callMethod(Router, this, "removeLiquidity", params);
+    },
+  };
 
   async multicall<Calls extends RouterTypes.MultiCallParams>(
     calls: Calls
