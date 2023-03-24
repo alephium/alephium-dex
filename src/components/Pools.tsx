@@ -1,19 +1,14 @@
-import { Container, Paper, Typography, Button, Card } from "@material-ui/core";
+import { Container, Paper, Typography, Card } from "@material-ui/core";
 import Collapse from "@material-ui/core/Collapse";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { bigIntToString, PairTokenDecimals, TokenPairState } from "../utils/dex";
 import { commonStyles } from "./style";
 import { TokenInfo } from "@alephium/token-list";
 import { useTokenPairState } from "../state/useTokenPairState";
 import TokenSelectDialog from "./TokenSelectDialog";
 import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
-import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { DetailItem } from "./DetailsItem";
 import BigNumber from "bignumber.js";
-
-function shortContractId(id: string): string {
-  return id.slice(0, 6) + '...' + id.slice(-6)
-}
 
 function Pool() {
   const commonClasses = commonStyles()
@@ -115,7 +110,7 @@ function PoolDetailsCard({ state, balance } : { state: TokenPairState | undefine
       />
       <DetailItem
         itemName={'Your pool share:'}
-        itemValue={`${parseFloat(sharePecentage)} %`}
+        itemValue={state.totalSupply === 0n ? '0 %' : `${parseFloat(sharePecentage)} %`}
       />
     </div>
   </Card>
