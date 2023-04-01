@@ -1,22 +1,25 @@
 {
-  "version": "v2.0.1",
+  "version": "v2.1.0",
   "name": "TestToken",
-  "bytecode": "040509121b40244030010000000102ce0002010000000102ce0102010000000102ce0202010000000102ce03020102020200041600b11601ab",
-  "codeHash": "29cd22f98fcfdc50b1bdd499543d2d9cc013980a66191f62ce7e0189dbf957a0",
+  "bytecode": "050509121b40244030010000000102ce0002010000000102ce0102010000000102ce0202010000000102ce03020102020200041600b11601ab",
+  "codeHash": "0831d766037e7873066276e891997881e8787f4fb4bd9d154925d80869efa129",
   "fieldsSig": {
     "names": [
       "symbol",
       "name",
       "decimals",
-      "totalSupply"
+      "totalSupply",
+      "__stdInterfaceId"
     ],
     "types": [
       "ByteVec",
       "ByteVec",
       "U256",
-      "U256"
+      "U256",
+      "ByteVec"
     ],
     "isMutable": [
+      false,
       false,
       false,
       false,
@@ -92,5 +95,6 @@
       ],
       "returnTypes": []
     }
-  ]
+  ],
+  "stdInterfaceId": "0001"
 }

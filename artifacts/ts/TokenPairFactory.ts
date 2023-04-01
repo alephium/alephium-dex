@@ -81,7 +81,7 @@ export const TokenPairFactory = new Factory(
   Contract.fromJson(
     TokenPairFactoryContractJson,
     "",
-    "6e20ca1d1474ca5d61542b180e858beac69c23e5feb6cb5c1a53c68e0e6a5d36"
+    "7224712fedb095eb8955d087c9fadac9fb257a4c52d4e36ef62e199e058a7a13"
   )
 );
 
