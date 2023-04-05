@@ -9,10 +9,7 @@
       "gasAmount": 63167,
       "gasPrice": "100000000000",
       "txId": "8219f2a7a726f5821e9008e1a8725557ee79b13dc2ab7ec0e749ba47e3f9b6f9",
-      "contractAddress": "xYHP8438Pzm1z75PhnhoTTaXwxeEmCdbbBtKL4yQtSSj",
-      "groupIndex": 0,
-      "contractId": "39364efce55faaab482fa78b2acc553a6d8e70e290ead0cb67a83fc231873e00",
-      "instance": {
+      "contractInstance": {
         "address": "xYHP8438Pzm1z75PhnhoTTaXwxeEmCdbbBtKL4yQtSSj",
         "contractId": "39364efce55faaab482fa78b2acc553a6d8e70e290ead0cb67a83fc231873e00",
         "groupIndex": 0
@@ -28,10 +25,7 @@
       "gasAmount": 61891,
       "gasPrice": "100000000000",
       "txId": "2c69a92677ea90a83d223c3578d20472b7fd76abcc00d921e4108c0207878623",
-      "contractAddress": "2AtEJ7jJw6Rm4me4pFL8TVCT1hdacvFYaC2HLnaY7cxi3",
-      "groupIndex": 0,
-      "contractId": "f09ead9b4278b259a80aa45625d6d097e3fdb496533f6b70dc7b6b724e8fe200",
-      "instance": {
+      "contractInstance": {
         "address": "2AtEJ7jJw6Rm4me4pFL8TVCT1hdacvFYaC2HLnaY7cxi3",
         "contractId": "f09ead9b4278b259a80aa45625d6d097e3fdb496533f6b70dc7b6b724e8fe200",
         "groupIndex": 0
@@ -47,10 +41,7 @@
       "gasAmount": 62521,
       "gasPrice": "100000000000",
       "txId": "1442ad417a3a8aad5210f97a7f0d3872964ddbf342e8a6ab5ba58020fc9067d7",
-      "contractAddress": "21QBUAyTUQpxZCNrCTum3e43aUSMX3MPigLBDoPWnZqfu",
-      "groupIndex": 0,
-      "contractId": "63b6097e909b7e24aa6f7ea6bff2c8e2d995cab5b587aaa7c797fc4864c11400",
-      "instance": {
+      "contractInstance": {
         "address": "21QBUAyTUQpxZCNrCTum3e43aUSMX3MPigLBDoPWnZqfu",
         "contractId": "63b6097e909b7e24aa6f7ea6bff2c8e2d995cab5b587aaa7c797fc4864c11400",
         "groupIndex": 0
