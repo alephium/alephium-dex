@@ -1,14 +1,15 @@
 import { groupOfAddress } from '@alephium/web3'
-import { default as devnetDeployment } from '../../artifacts/.deployments.devnet.json'
-import { default as testnetDeployment } from '../../artifacts/.deployments.testnet.json'
+import { RouterInstance, TokenPairFactoryInstance } from '../../artifacts/ts'
+import { loadDeployments } from '../../artifacts/ts/deployments'
 
 export interface NetworkConfig {
   networkId: number
   groupIndex: number
-  factoryId: string
-  routerId: string
+  factory: TokenPairFactoryInstance
+  router: RouterInstance
 }
 
+// TODO: use NetworkId from alephium/web3
 export type NetworkName = 'mainnet' | 'testnet' | 'devnet'
 
 export const networkName: NetworkName = process.env.REACT_APP_NETWORK as NetworkName
@@ -22,14 +23,14 @@ function getNetworkConfig(network: NetworkName): NetworkConfig {
     throw new Error('Not support now')
   }
 
-  const deployment = (network === 'testnet' ? testnetDeployment : devnetDeployment) as any
-  if (deployment.contracts === undefined) {
+  const deployments = loadDeployments(network)
+  if (deployments === undefined) {
     throw new Error(`Please deploy the DEX contract to ${networkName} first`)
   }
   return {
     networkId: network === 'testnet' ? 1 : 4,
-    groupIndex: groupOfAddress(deployment.deployerAddress),
-    factoryId: deployment.contracts.TokenPairFactory.contractId,
-    routerId: deployment.contracts.Router.contractId
+    groupIndex: groupOfAddress(deployments.deployerAddress),
+    factory: deployments.contracts.TokenPairFactory.contractInstance,
+    router: deployments.contracts.Router.contractInstance
   }
 }

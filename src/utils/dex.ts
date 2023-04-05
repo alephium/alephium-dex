@@ -99,7 +99,7 @@ export interface TokenPairState {
 }
 
 export async function getTokenPairState(tokenAInfo: TokenInfo, tokenBInfo: TokenInfo): Promise<TokenPairState> {
-  const factoryId = network.factoryId
+  const factoryId = network.factory.contractId
   const groupIndex = network.groupIndex
   const [token0Id, token1Id] = sortTokens(tokenAInfo.id, tokenBInfo.id)
   const path = token0Id + token1Id
@@ -177,7 +177,7 @@ async function swapMinOut(
   const result = await SwapMinOut.execute(signer, {
     initialFields: {
       sender: sender,
-      router: network.routerId,
+      router: network.router.contractId,
       pair: state.tokenPairId,
       tokenInId: tokenInId,
       amountIn: amountIn,
@@ -204,7 +204,7 @@ async function swapMaxIn(
   const result = await SwapMaxIn.execute(signer, {
     initialFields: {
       sender: sender,
-      router: network.routerId,
+      router: network.router.contractId,
       pair: state.tokenPairId,
       tokenInId: tokenInId,
       amountInMax: amountInMax,
@@ -443,7 +443,7 @@ export async function addLiquidity(
   const result = await AddLiquidity.execute(signer, {
     initialFields: {
       sender: sender,
-      router: network.routerId,
+      router: network.router.contractId,
       pair: tokenPairState.tokenPairId,
       amount0Desired: amount0Desired,
       amount1Desired: amount1Desired,
@@ -513,7 +513,7 @@ export async function removeLiquidity(
   const result = await RemoveLiquidity.execute(signer, {
     initialFields: {
       sender: sender,
-      router: network.routerId,
+      router: network.router.contractId,
       pairId: state.tokenPairId,
       liquidity: liquidity,
       amount0Min: amount0Min,
@@ -528,7 +528,7 @@ export async function removeLiquidity(
 }
 
 export async function tokenPairExist(nodeProvider: NodeProvider, tokenAId: string, tokenBId: string): Promise<boolean> {
-  const factoryId = network.factoryId
+  const factoryId = network.factory.contractId
   const groupIndex = network.groupIndex
   const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId)
   const path = token0Id + token1Id
@@ -563,11 +563,11 @@ export async function createTokenPair(
   const groupIndex = network.groupIndex
   const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId)
   const path = token0Id + token1Id
-  const pairContractId = subContractId(network.factoryId, path, groupIndex)
+  const pairContractId = subContractId(network.factory.contractId, path, groupIndex)
   const result = await CreatePair.execute(signer, {
     initialFields: {
       payer: sender,
-      factory: network.factoryId,
+      factory: network.factory.contractId,
       alphAmount: 10n ** 18n,
       tokenAId: tokenAId,
       tokenBId: tokenBId
