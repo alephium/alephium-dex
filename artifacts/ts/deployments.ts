@@ -4,7 +4,14 @@
 
 import { RunScriptResult, DeployContractExecutionResult } from "@alephium/cli";
 import { NetworkId } from "@alephium/web3";
-import { TokenPairInstance, TokenPairFactoryInstance, RouterInstance } from ".";
+import {
+  TokenPair,
+  TokenPairInstance,
+  TokenPairFactory,
+  TokenPairFactoryInstance,
+  Router,
+  RouterInstance,
+} from ".";
 import { default as testnetDeployments } from "../.deployments.testnet.json";
 import { default as devnetDeployments } from "../.deployments.devnet.json";
 
@@ -16,6 +23,33 @@ export type Deployments = {
     Router: DeployContractExecutionResult<RouterInstance>;
   };
 };
+
+function toDeployments(json: any): Deployments {
+  const contracts = {
+    TokenPair: {
+      ...json.contracts.TokenPair,
+      contractInstance: TokenPair.at(
+        json.contracts.TokenPair.contractInstance.address
+      ),
+    },
+    TokenPairFactory: {
+      ...json.contracts.TokenPairFactory,
+      contractInstance: TokenPairFactory.at(
+        json.contracts.TokenPairFactory.contractInstance.address
+      ),
+    },
+    Router: {
+      ...json.contracts.Router,
+      contractInstance: Router.at(
+        json.contracts.Router.contractInstance.address
+      ),
+    },
+  };
+  return {
+    ...json,
+    contracts: contracts as Deployments["contracts"],
+  };
+}
 
 export function loadDeployments(
   networkId: NetworkId,
@@ -41,7 +75,7 @@ export function loadDeployments(
           ", please specify the deployer address"
       );
     } else {
-      return allDeployments[0];
+      return toDeployments(allDeployments[0]);
     }
   }
   const result = allDeployments.find(
@@ -50,5 +84,5 @@ export function loadDeployments(
   if (result === undefined) {
     throw Error("The contract deployment result does not exist");
   }
-  return result;
+  return toDeployments(result);
 }
