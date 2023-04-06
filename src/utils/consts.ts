@@ -2,7 +2,6 @@ import { NetworkId } from "@alephium/web3"
 import { loadDeployments } from "../../artifacts/ts/deployments"
 
 export interface NetworkConfig {
-  networkId: number
   groupIndex: number
   factoryId: string
   routerId: string
@@ -22,7 +21,6 @@ function getNetworkConfig(networkId: NetworkId): NetworkConfig {
   try {
     const deployments = loadDeployments(networkId)
     return {
-      networkId: networkId === 'testnet' ? 1 : 4,
       groupIndex: deployments.contracts.Router.contractInstance.groupIndex,
       factoryId: deployments.contracts.TokenPairFactory.contractInstance.contractId,
       routerId: deployments.contracts.Router.contractInstance.contractId
