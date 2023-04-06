@@ -13,7 +13,7 @@ const deployTokenPairTemplate: DeployFunction<undefined> = async (deployer: Depl
     totalSupply: 0n
   }
   const result = await deployer.deployContract(TokenPair, { initialFields: initialFields })
-  console.log(`TokenPair template contract address: ${result.contractAddress}, contract id: ${result.contractId}`)
+  console.log(`TokenPair template contract address: ${result.contractInstance.address}, contract id: ${result.contractInstance.contractId}`)
 }
 
 export default deployTokenPairTemplate

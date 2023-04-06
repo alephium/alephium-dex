@@ -9,14 +9,10 @@
       "gasAmount": 148681,
       "gasPrice": "100000000000",
       "txId": "23ebbddb1dffb3a094665cdabeee5c685001b430e6019398025c85cab5b5b54d",
-      "contractAddress": "xtxx1skMUbJzkgtozyKKb7MX5ZXiHyd1JG5W2DHpQW9M",
-      "groupIndex": 0,
-      "contractId": "3e82a9d61f3f68b3fd6578958cd774a5f9c47cd5ffcc72a542c4b634be077700",
-      "instance": {
+      "contractInstance": {
         "address": "xtxx1skMUbJzkgtozyKKb7MX5ZXiHyd1JG5W2DHpQW9M",
         "contractId": "3e82a9d61f3f68b3fd6578958cd774a5f9c47cd5ffcc72a542c4b634be077700",
-        "groupIndex": 0,
-        "methods": {}
+        "groupIndex": 0
       },
       "blockHash": "000000319bebfe922406db6571506c75604e93d60a4633f3780c36a73d12b520",
       "codeHash": "3a0b6fd7a99e63305976cc5eeaeea244d15af9642fe80f8b6c2ee2f1e8f73589"
@@ -29,10 +25,7 @@
       "gasAmount": 147407,
       "gasPrice": "100000000000",
       "txId": "527d0f33edae804ae42bb99e08cf8cdf24c2fbee5a6dfd8242a2882794b72d83",
-      "contractAddress": "vU8MkhwKwhqj2YsUkWphp5nyVUHGfghi9shgeW5KpZbM",
-      "groupIndex": 0,
-      "contractId": "1a6e689082f859fb4c6121950fa39fabbfbf7c283f689ae466fd4361a3e6c400",
-      "instance": {
+      "contractInstance": {
         "address": "vU8MkhwKwhqj2YsUkWphp5nyVUHGfghi9shgeW5KpZbM",
         "contractId": "1a6e689082f859fb4c6121950fa39fabbfbf7c283f689ae466fd4361a3e6c400",
         "groupIndex": 0
@@ -48,14 +41,10 @@
       "gasAmount": 148021,
       "gasPrice": "100000000000",
       "txId": "c6ab0be6fd5f4c48912b0844858758147bb04dc75549489fbc275dba96943bc0",
-      "contractAddress": "21uCwCYtzbqCs76uFMCB65qVKGeNtKZyqVssm6ttwaQmd",
-      "groupIndex": 0,
-      "contractId": "6b2589c3f2db33d51d28dd9f5fba5866581fa84792fcaf849a46e5ceec228300",
-      "instance": {
+      "contractInstance": {
         "address": "21uCwCYtzbqCs76uFMCB65qVKGeNtKZyqVssm6ttwaQmd",
         "contractId": "6b2589c3f2db33d51d28dd9f5fba5866581fa84792fcaf849a46e5ceec228300",
-        "groupIndex": 0,
-        "methods": {}
+        "groupIndex": 0
       },
       "blockHash": "0000000d86e40a29570b4f66681e606cc08766c54ad8756b9a8b1eab46917080",
       "codeHash": "b3a755df4ba1814bc975b5e6294e20213467668fb8ffc15a5a9f59f106616821"
