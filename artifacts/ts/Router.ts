@@ -34,7 +34,7 @@ export namespace RouterTypes {
     addLiquidity: {
       params: CallContractParams<{
         tokenPair: HexString;
-        sender: HexString;
+        sender: Address;
         amount0Desired: bigint;
         amount1Desired: bigint;
         amount0Min: bigint;
@@ -46,7 +46,7 @@ export namespace RouterTypes {
     removeLiquidity: {
       params: CallContractParams<{
         tokenPairId: HexString;
-        sender: HexString;
+        sender: Address;
         liquidity: bigint;
         amount0Min: bigint;
         amount1Min: bigint;
@@ -99,7 +99,7 @@ class Factory extends ContractFactory<RouterInstance, {}> {
           never,
           {
             tokenPair: HexString;
-            sender: HexString;
+            sender: Address;
             amount0Desired: bigint;
             amount1Desired: bigint;
             amount0Min: bigint;
@@ -118,7 +118,7 @@ class Factory extends ContractFactory<RouterInstance, {}> {
           never,
           {
             tokenPairId: HexString;
-            sender: HexString;
+            sender: Address;
             liquidity: bigint;
             amount0Min: bigint;
             amount1Min: bigint;
@@ -147,11 +147,11 @@ class Factory extends ContractFactory<RouterInstance, {}> {
           never,
           {
             tokenPair: HexString;
-            sender: HexString;
+            sender: Address;
             tokenInId: HexString;
             amountIn: bigint;
             amountOutMin: bigint;
-            to: HexString;
+            to: Address;
             deadline: bigint;
           }
         >,
@@ -166,11 +166,11 @@ class Factory extends ContractFactory<RouterInstance, {}> {
           never,
           {
             tokenPair: HexString;
-            sender: HexString;
+            sender: Address;
             tokenInId: HexString;
             amountInMax: bigint;
             amountOut: bigint;
-            to: HexString;
+            to: Address;
             deadline: bigint;
           }
         >,
@@ -185,8 +185,8 @@ class Factory extends ContractFactory<RouterInstance, {}> {
           never,
           {
             tokenPair: HexString;
-            sender: HexString;
-            to: HexString;
+            sender: Address;
+            to: Address;
             tokenInId: HexString;
             amountIn: bigint;
             amountOut: bigint;

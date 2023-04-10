@@ -64,7 +64,7 @@ class Factory extends ContractFactory<
       params: TestContractParams<
         TokenPairFactoryTypes.Fields,
         {
-          payer: HexString;
+          payer: Address;
           alphAmount: bigint;
           tokenAId: HexString;
           tokenBId: HexString;
