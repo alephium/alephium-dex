@@ -14,10 +14,6 @@ export const network: NetworkConfig = getNetworkConfig(networkId)
 export const PollingInterval = networkId === 'devnet' ? 1 : 5 // seconds
 
 function getNetworkConfig(networkId: NetworkId): NetworkConfig {
-  if (networkId === 'mainnet') {
-    throw new Error('Not support now')
-  }
-
   try {
     const deployments = loadDeployments(networkId)
     return {

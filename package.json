@@ -4,18 +4,17 @@
   "license": "GPL",
   "homepage": "https://alephium.github.io/alephium-dex",
   "scripts": {
-    "build:contract": "npm run clean:windows && npm run clean:unix && npx --yes tsc --build .",
-    "clean:unix": "node -e \"if (process.platform !== 'win32') process.exit(1)\" || rm -rf dist",
-    "clean:windows": "node -e \"if (process.platform === 'win32') process.exit(1)\" || , if exist dist rmdir /Q /S dist",
-    "start-devnet": "npx @alephium/cli devnet start",
-    "stop-devnet": "npx @alephium/cli devnet stop",
     "compile": "npx @alephium/cli compile",
-    "deploy": "npx @alephium/cli deploy",
     "test": "npx @alephium/cli test",
+    "deploy:devnet": "npx @alephium/cli deploy -n devnet",
+    "deploy:testnet": "npx @alephium/cli deploy -n testnet",
+    "deploy:mainnet": "npx @alephium/cli deploy -n mainnet",
     "start:devnet": "rm -rf build && REACT_APP_NETWORK=devnet react-app-rewired start",
     "build:devnet": "rm -rf build && REACT_APP_NETWORK=devnet react-app-rewired --max_old_space_size=4096 build",
     "start": "rm -rf build && REACT_APP_NETWORK=testnet react-app-rewired start",
     "build": "rm -rf build && REACT_APP_NETWORK=testnet react-app-rewired --max_old_space_size=4096 build",
+    "start:mainnet": "rm -rf build && REACT_APP_NETWORK=mainnet react-app-rewired start",
+    "build:mainnet": "rm -rf build && REACT_APP_NETWORK=mainnet react-app-rewired --max_old_space_size=4096 build",
     "eject": "react-scripts eject"
   },
   "prettier": {
