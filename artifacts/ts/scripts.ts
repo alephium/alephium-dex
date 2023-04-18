@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import {
+  Address,
   ExecuteScriptParams,
   ExecuteScriptResult,
   Script,
@@ -20,7 +21,7 @@ export namespace AddLiquidity {
   export async function execute(
     signer: SignerProvider,
     params: ExecuteScriptParams<{
-      sender: HexString;
+      sender: Address;
       router: HexString;
       pair: HexString;
       amount0Desired: bigint;
@@ -41,7 +42,7 @@ export namespace CreatePair {
   export async function execute(
     signer: SignerProvider,
     params: ExecuteScriptParams<{
-      payer: HexString;
+      payer: Address;
       factory: HexString;
       alphAmount: bigint;
       tokenAId: HexString;
@@ -59,7 +60,7 @@ export namespace RemoveLiquidity {
   export async function execute(
     signer: SignerProvider,
     params: ExecuteScriptParams<{
-      sender: HexString;
+      sender: Address;
       router: HexString;
       pairId: HexString;
       liquidity: bigint;
@@ -79,7 +80,7 @@ export namespace SwapMaxIn {
   export async function execute(
     signer: SignerProvider,
     params: ExecuteScriptParams<{
-      sender: HexString;
+      sender: Address;
       router: HexString;
       pair: HexString;
       tokenInId: HexString;
@@ -99,7 +100,7 @@ export namespace SwapMinOut {
   export async function execute(
     signer: SignerProvider,
     params: ExecuteScriptParams<{
-      sender: HexString;
+      sender: Address;
       router: HexString;
       pair: HexString;
       tokenInId: HexString;
@@ -120,7 +121,7 @@ export namespace GetToken {
     signer: SignerProvider,
     params: ExecuteScriptParams<{
       token: HexString;
-      sender: HexString;
+      sender: Address;
       amount: bigint;
     }>
   ): Promise<ExecuteScriptResult> {

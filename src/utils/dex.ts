@@ -10,7 +10,7 @@ import {
   ExplorerProvider
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
-import { PollingInterval, network, networkName } from "./consts"
+import { PollingInterval, network, networkId } from "./consts"
 import BigNumber from "bignumber.js"
 import { parseUnits } from "ethers/lib/utils";
 import { SwapMaxIn, SwapMinOut, TokenPair as TokenPairContract, AddLiquidity, RemoveLiquidity, CreatePair } from "../../artifacts/ts"
@@ -82,9 +82,9 @@ export function sortTokens(tokenAId: string, tokenBId: string): [string, string]
 }
 
 export function getExplorerLink(txId: string): string {
-  return networkName === 'mainnet'
+  return networkId === 'mainnet'
     ? `https://explorer.alephium.org/transactions/${txId}`
-    : networkName === 'testnet'
+    : networkId === 'testnet'
     ? `https://explorer.testnet.alephium.org/transactions/${txId}`
     : `http://localhost:3000/${txId}`
 }
@@ -594,10 +594,10 @@ export function getTokenInfo(tokenId: string): TokenInfo | undefined {
 }
 
 export function getTokenInfos(): TokenInfo[] {
-  if (networkName === 'mainnet') {
+  if (networkId === 'mainnet') {
     return [ALPHTokenInfo, ...mainnetTokensMetadata.tokens]
   }
-  if (networkName === 'testnet') {
+  if (networkId === 'testnet') {
     return [ALPHTokenInfo, ...testnetTokensMetadata.tokens]
   }
   return (devnetTokenList as TokenInfo[]).map<TokenInfo>((tokenInfo) => {

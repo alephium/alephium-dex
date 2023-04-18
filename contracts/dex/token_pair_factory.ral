@@ -28,8 +28,8 @@ Contract TokenPairFactory(
     )
     assert!(tokenAId != tokenBId, ErrorCodes.IdenticalTokenIds)
     let (token0Id, token1Id) = sortTokens(tokenAId, tokenBId)
-    let encodedImmutableFields = encodeToByteVec!(token0Id, token1Id)
-    let encodedMutableFields = encodeToByteVec!(
+    let encodedImmutableFields = TokenPair.encodeImmFields!(token0Id, token1Id)
+    let encodedMutableFields = TokenPair.encodeMutFields!(
       0, // reserve0
       0, // reserve1
       0, // blockTimeStampLast

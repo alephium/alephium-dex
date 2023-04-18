@@ -42,24 +42,24 @@ export namespace TokenPairTypes {
   export type State = ContractState<Fields>;
 
   export type MintEvent = ContractEvent<{
-    sender: HexString;
+    sender: Address;
     amount0: bigint;
     amount1: bigint;
     liquidity: bigint;
   }>;
   export type BurnEvent = ContractEvent<{
-    sender: HexString;
+    sender: Address;
     amount0: bigint;
     amount1: bigint;
     liquidity: bigint;
   }>;
   export type SwapEvent = ContractEvent<{
-    sender: HexString;
+    sender: Address;
     amount0In: bigint;
     amount1In: bigint;
     amount0Out: bigint;
     amount1Out: bigint;
-    to: HexString;
+    to: Address;
   }>;
 
   export interface CallMethodTable {
@@ -109,14 +109,14 @@ export namespace TokenPairTypes {
     };
     mint: {
       params: CallContractParams<{
-        sender: HexString;
+        sender: Address;
         amount0: bigint;
         amount1: bigint;
       }>;
       result: CallContractResult<bigint>;
     };
     burn: {
-      params: CallContractParams<{ sender: HexString; liquidity: bigint }>;
+      params: CallContractParams<{ sender: Address; liquidity: bigint }>;
       result: CallContractResult<[bigint, bigint]>;
     };
   }
@@ -212,7 +212,7 @@ class Factory extends ContractFactory<
     mint: async (
       params: TestContractParams<
         TokenPairTypes.Fields,
-        { sender: HexString; amount0: bigint; amount1: bigint }
+        { sender: Address; amount0: bigint; amount1: bigint }
       >
     ): Promise<TestContractResult<bigint>> => {
       return testMethod(this, "mint", params);
@@ -220,7 +220,7 @@ class Factory extends ContractFactory<
     burn: async (
       params: TestContractParams<
         TokenPairTypes.Fields,
-        { sender: HexString; liquidity: bigint }
+        { sender: Address; liquidity: bigint }
       >
     ): Promise<TestContractResult<[bigint, bigint]>> => {
       return testMethod(this, "burn", params);
@@ -229,8 +229,8 @@ class Factory extends ContractFactory<
       params: TestContractParams<
         TokenPairTypes.Fields,
         {
-          sender: HexString;
-          to: HexString;
+          sender: Address;
+          to: Address;
           amount0In: bigint;
           amount1In: bigint;
           amount0Out: bigint;
@@ -248,7 +248,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "2569e7cf13f9cc0870412cf91babccd289e2d909b0a23efbb2ac9549ea4f1659"
+    "dca32d225dc6a4aa43fdb39d08069ddc32ee983be053d7494de0b5f54dc32500"
   )
 );
 

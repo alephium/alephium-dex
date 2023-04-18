@@ -9,14 +9,14 @@ import { theme } from "./muiTheme";
 import { store } from "./state"
 import { Provider } from "react-redux"
 import { AlephiumConnectProvider } from "@alephium/web3-react"
-import { network, networkName } from "./utils/consts";
+import { network, networkId } from "./utils/consts";
 
 ReactDOM.render(
   <ErrorBoundary>
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-          <AlephiumConnectProvider addressGroup={network.groupIndex} network={networkName}>
+          <AlephiumConnectProvider addressGroup={network.groupIndex} network={networkId}>
             <SnackbarProvider maxSnack={3}>
               <HashRouter>
                 <App />

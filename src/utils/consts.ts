@@ -1,35 +1,32 @@
-import { groupOfAddress } from '@alephium/web3'
-import { default as devnetDeployment } from '../../artifacts/.deployments.devnet.json'
-import { default as testnetDeployment } from '../../artifacts/.deployments.testnet.json'
+import { NetworkId } from "@alephium/web3"
+import { loadDeployments } from "../../artifacts/ts/deployments"
 
 export interface NetworkConfig {
-  networkId: number
   groupIndex: number
   factoryId: string
   routerId: string
 }
 
-export type NetworkName = 'mainnet' | 'testnet' | 'devnet'
+export const networkId: NetworkId = process.env.REACT_APP_NETWORK as NetworkId
 
-export const networkName: NetworkName = process.env.REACT_APP_NETWORK as NetworkName
+export const network: NetworkConfig = getNetworkConfig(networkId)
 
-export const network: NetworkConfig = getNetworkConfig(networkName)
+export const PollingInterval = networkId === 'devnet' ? 1 : 5 // seconds
 
-export const PollingInterval = networkName === 'devnet' ? 1 : 5 // seconds
-
-function getNetworkConfig(network: NetworkName): NetworkConfig {
-  if (network === 'mainnet') {
+function getNetworkConfig(networkId: NetworkId): NetworkConfig {
+  if (networkId === 'mainnet') {
     throw new Error('Not support now')
   }
 
-  const deployment = (network === 'testnet' ? testnetDeployment : devnetDeployment) as any
-  if (deployment.contracts === undefined) {
-    throw new Error(`Please deploy the DEX contract to ${networkName} first`)
-  }
-  return {
-    networkId: network === 'testnet' ? 1 : 4,
-    groupIndex: groupOfAddress(deployment.deployerAddress),
-    factoryId: deployment.contracts.TokenPairFactory.contractId,
-    routerId: deployment.contracts.Router.contractId
+  try {
+    const deployments = loadDeployments(networkId)
+    return {
+      groupIndex: deployments.contracts.Router.contractInstance.groupIndex,
+      factoryId: deployments.contracts.TokenPairFactory.contractInstance.contractId,
+      routerId: deployments.contracts.Router.contractInstance.contractId
+    }
+  } catch (error) {
+    console.log(`Failed to load deployments on ${networkId}, error: ${error}`)
+    throw error
   }
 }

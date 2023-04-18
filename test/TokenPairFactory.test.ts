@@ -45,7 +45,8 @@ describe('test token pair factory', () => {
         blockTimeStampLast: 0n,
         price0CumulativeLast: 0n,
         price1CumulativeLast: 0n,
-        totalSupply: 0n
+        totalSupply: 0n,
+        __stdInterfaceId: '414c50480001'
       })
       expect(pairContractState.asset).toEqual({
         alphAmount: oneAlph,
