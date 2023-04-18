@@ -1,7 +1,6 @@
 import { Configuration } from '@alephium/cli'
 
 const configuration: Configuration<undefined> = {
-  defaultNetwork: 'devnet',
   networks: {
     devnet: {
       nodeUrl: 'http://localhost:22973',
