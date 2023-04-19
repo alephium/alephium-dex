@@ -54,6 +54,14 @@ The output contains all created token contract ids, which will be used when crea
 
 Build and run the UI:
 
+### Devnet
+
+```
+npm run build:devnet && npm run start:devnet
+```
+
+### Testnet
+
 ```
 npm run build && npm run start
 ```
@@ -61,3 +69,15 @@ npm run build && npm run start
 Now you can open the `http://localhost:3000/alephium-dex`, you will see something like this: ![](./images/dex-ui.png)
 
 And now you can test the DEX by creating token pool, adding liquidity to the token pool, swapping tokens, and removing liquidity from the token pool.
+
+## Deploy dex contracts to mainnet
+
+```
+NODE_URL=https://wallet-v20.mainnet.alephium.org PRIVATE_KEYS=YOUR_PRIVATE_KEY npm run deploy:mainnet
+```
+
+Build and run the UI:
+
+```
+npm run build:mainnet && npm run start:mainnet
+```
