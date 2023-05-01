@@ -1,5 +1,5 @@
 {
-  "version": "v2.1.2",
+  "version": "v2.2.1",
   "name": "AddLiquidity",
   "bytecodeTemplate": "0101030002001c0c0e{2}010617011700{0}7a1600{3}a31601{4}a3{2}{0}{3}{4}{5}{6}{7}13070f{1}0101181818",
   "fieldsSig": {

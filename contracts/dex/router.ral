@@ -21,7 +21,7 @@ Contract Router() extends Constants() {
     return amount0Optimal, amount1Desired
   }
 
-  @using(preapprovedAssets = true)
+  @using(preapprovedAssets = true, checkExternalCaller = false)
   pub fn addLiquidity(
     tokenPair: TokenPair,
     sender: Address,
@@ -39,7 +39,7 @@ Contract Router() extends Constants() {
     return amount0, amount1, liquidity
   }
 
-  @using(preapprovedAssets = true)
+  @using(preapprovedAssets = true, checkExternalCaller = false)
   pub fn removeLiquidity(
     tokenPairId: ByteVec,
     sender: Address,
@@ -64,7 +64,7 @@ Contract Router() extends Constants() {
     return reserve1, reserve0
   }
 
-  @using(preapprovedAssets = true)
+  @using(preapprovedAssets = true, checkExternalCaller = false)
   pub fn swapExactTokenForToken(
     tokenPair: TokenPair,
     sender: Address,
@@ -82,7 +82,7 @@ Contract Router() extends Constants() {
     swap{sender -> tokenInId: amountIn}(tokenPair, sender, to, tokenInId, amountIn, amountOut)
   }
 
-  @using(preapprovedAssets = true)
+  @using(preapprovedAssets = true, checkExternalCaller = false)
   pub fn swapTokenForExactToken(
     tokenPair: TokenPair,
     sender: Address,

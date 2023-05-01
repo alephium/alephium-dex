@@ -6,7 +6,7 @@ Contract TestToken(
   decimals: U256,
   totalSupply: U256
 ) implements IFungibleToken {
-  @using(assetsInContract = true)
+  @using(assetsInContract = true, checkExternalCaller = false)
   pub fn getToken(sender: Address, amount: U256) -> () {
     transferTokenFromSelf!(sender, selfTokenId!(), amount)
   }
