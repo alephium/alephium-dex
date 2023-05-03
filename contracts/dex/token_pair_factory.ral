@@ -14,7 +14,7 @@ Contract TokenPairFactory(
     return tokenB, tokenA
   }
 
-  @using(preapprovedAssets = true, updateFields = true)
+  @using(preapprovedAssets = true, updateFields = true, checkExternalCaller = false)
   pub fn createPair(
     payer: Address,
     alphAmount: U256,

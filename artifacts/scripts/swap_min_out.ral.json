@@ -1,5 +1,5 @@
 {
-  "version": "v2.1.2",
+  "version": "v2.2.1",
   "name": "SwapMinOut",
   "bytecodeTemplate": "0101030000000f{0}{3}{4}a3{2}{0}{3}{4}{5}{0}{6}13070c{1}0104",
   "fieldsSig": {
