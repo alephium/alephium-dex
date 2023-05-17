@@ -3,6 +3,7 @@ import { TokenPair } from '../artifacts/ts'
 
 const deployTokenPairTemplate: DeployFunction<undefined> = async (deployer: Deployer): Promise<void> => {
   const initialFields = {
+    feeCollectorFactory: '',
     token0Id: '',
     token1Id: '',
     reserve0: 0n,
@@ -10,7 +11,9 @@ const deployTokenPairTemplate: DeployFunction<undefined> = async (deployer: Depl
     blockTimeStampLast: 0n,
     price0CumulativeLast: 0n,
     price1CumulativeLast: 0n,
-    totalSupply: 0n
+    totalSupply: 0n,
+    kLast: 0n,
+    feeCollectorId: ''
   }
   const result = await deployer.deployContract(TokenPair, { initialFields: initialFields })
   console.log(`TokenPair template contract address: ${result.contractInstance.address}, contract id: ${result.contractInstance.contractId}`)
