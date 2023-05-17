@@ -29,6 +29,7 @@ import { default as TokenPairContractJson } from "../dex/token_pair.ral.json";
 // Custom types for the contract
 export namespace TokenPairTypes {
   export type Fields = {
+    feeCollectorFactory: HexString;
     token0Id: HexString;
     token1Id: HexString;
     reserve0: bigint;
@@ -37,6 +38,8 @@ export namespace TokenPairTypes {
     price0CumulativeLast: bigint;
     price1CumulativeLast: bigint;
     totalSupply: bigint;
+    kLast: bigint;
+    feeCollectorId: HexString;
   };
 
   export type State = ContractState<Fields>;
@@ -176,6 +179,16 @@ class Factory extends ContractFactory<
     ): Promise<TestContractResult<bigint>> => {
       return testMethod(this, "sqrt", params);
     },
+    enableFeeCollector: async (
+      params: TestContractParams<TokenPairTypes.Fields, { alphAmount: bigint }>
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "enableFeeCollector", params);
+    },
+    disableFeeCollector: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "disableFeeCollector", params);
+    },
     getTokenPair: async (
       params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
     ): Promise<TestContractResult<[HexString, HexString]>> => {
@@ -208,6 +221,14 @@ class Factory extends ContractFactory<
       >
     ): Promise<TestContractResult<null>> => {
       return testMethod(this, "update", params);
+    },
+    mintFee: async (
+      params: TestContractParams<
+        TokenPairTypes.Fields,
+        { prevReserve0: bigint; prevReserve1: bigint }
+      >
+    ): Promise<TestContractResult<[boolean, bigint]>> => {
+      return testMethod(this, "mintFee", params);
     },
     mint: async (
       params: TestContractParams<
@@ -248,7 +269,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "dca32d225dc6a4aa43fdb39d08069ddc32ee983be053d7494de0b5f54dc32500"
+    "22f676acb5097d8bc91e9a5e36cb72c979123ad48f92f7e609e77336d4ba1e24"
   )
 );
 

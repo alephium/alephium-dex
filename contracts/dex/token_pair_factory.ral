@@ -1,7 +1,7 @@
-// TODO: do we need to support `feeTo`???
 Contract TokenPairFactory(
   pairTemplateId: ByteVec, // the template contract id of `TokenPair`
-  mut pairSize: U256
+  mut pairSize: U256,
+  feeCollectorFactory: FeeCollectorFactory
 ) extends Constants() {
   event PairCreated(token0: ByteVec, token1: ByteVec, pair: ByteVec, currentPairSize: U256)
 
@@ -28,20 +28,24 @@ Contract TokenPairFactory(
     )
     assert!(tokenAId != tokenBId, ErrorCodes.IdenticalTokenIds)
     let (token0Id, token1Id) = sortTokens(tokenAId, tokenBId)
-    let encodedImmutableFields = TokenPair.encodeImmFields!(token0Id, token1Id)
-    let encodedMutableFields = TokenPair.encodeMutFields!(
+    let (encodedImmFields, encodedMutFields) = TokenPair.encodeFields!(
+      feeCollectorFactory,
+      token0Id,
+      token1Id,
       0, // reserve0
       0, // reserve1
       0, // blockTimeStampLast
       0, // price0CumulativeLast
       0, // price1CumulativeLast
-      0  // totalSupply
+      0, // totalSupply
+      0, // kLast
+      #  // feeCollectorId
     )
     let pairId = copyCreateSubContractWithToken!{payer -> ALPH: alphAmount}(
       token0Id ++ token1Id,
       pairTemplateId,
-      encodedImmutableFields,
-      encodedMutableFields,
+      encodedImmFields,
+      encodedMutFields,
       1 << 255
     )
 

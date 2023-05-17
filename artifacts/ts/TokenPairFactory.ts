@@ -31,6 +31,7 @@ export namespace TokenPairFactoryTypes {
   export type Fields = {
     pairTemplateId: HexString;
     pairSize: bigint;
+    feeCollectorFactory: HexString;
   };
 
   export type State = ContractState<Fields>;
@@ -81,7 +82,7 @@ export const TokenPairFactory = new Factory(
   Contract.fromJson(
     TokenPairFactoryContractJson,
     "",
-    "7224712fedb095eb8955d087c9fadac9fb257a4c52d4e36ef62e199e058a7a13"
+    "505544182159dd34eff80a0397b623aa128df8787620aafd820a05f23fb15e9f"
   )
 );
 

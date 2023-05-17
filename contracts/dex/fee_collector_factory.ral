@@ -1,0 +1,6 @@
+Interface FeeCollectorFactory {
+  pub fn getFeeCollectorSetter() -> Address
+
+  @using(preapprovedAssets = true)
+  pub fn createFeeCollector(caller: Address, alphAmount: U256, tokenPairId: ByteVec) -> ByteVec
+}
