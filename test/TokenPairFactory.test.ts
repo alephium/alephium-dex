@@ -38,6 +38,7 @@ describe('test token pair factory', () => {
       const pairContractId = subContractId(fixture.contractId, token0Id + token1Id, 0)
       const pairContractState = getContractState<TokenPairTypes.Fields>(testResult.contracts, pairContractId)
       expect(pairContractState.fields).toEqual({
+        feeCollectorFactory: '',
         token0Id: token0Id,
         token1Id: token1Id,
         reserve0: 0n,
@@ -46,6 +47,8 @@ describe('test token pair factory', () => {
         price0CumulativeLast: 0n,
         price1CumulativeLast: 0n,
         totalSupply: 0n,
+        kLast: 0n,
+        feeCollectorId: '',
         __stdInterfaceId: '414c50480001'
       })
       expect(pairContractState.asset).toEqual({

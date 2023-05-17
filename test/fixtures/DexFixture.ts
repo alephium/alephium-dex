@@ -6,7 +6,6 @@ import {
   contractIdFromAddress,
   ContractState,
   Fields,
-  groupOfAddress,
   number256ToBigint,
   Project,
   Token
@@ -107,10 +106,17 @@ export function bigintToHex(num: bigint): string {
   return num.toString(16).padStart(64, '0')
 }
 
-export function createTokenPair(token0Id: string, token1Id: string, contractId?: string) {
+export function createTokenPair(
+  token0Id: string,
+  token1Id: string,
+  contractId?: string,
+  feeCollectorFactoryId?: string,
+  feeCollectorId?: string
+) {
   const address = contractId ? addressFromContractId(contractId) : randomContractAddress()
   const contractState = TokenPair.stateForTest(
     {
+      feeCollectorFactory: feeCollectorFactoryId ?? '',
       token0Id: token0Id,
       token1Id: token1Id,
       reserve0: 0n,
@@ -118,7 +124,9 @@ export function createTokenPair(token0Id: string, token1Id: string, contractId?:
       blockTimeStampLast: 0n,
       price0CumulativeLast: 0n,
       price1CumulativeLast: 0n,
-      totalSupply: 0n
+      totalSupply: 0n,
+      kLast: 0n,
+      feeCollectorId: feeCollectorId ?? ''
     },
     {
       alphAmount: oneAlph,
@@ -129,11 +137,15 @@ export function createTokenPair(token0Id: string, token1Id: string, contractId?:
   return new ContractFixture(contractState, [], address)
 }
 
-export function createTokenPairFactory() {
+export function createTokenPairFactory(feeCollectorFactoryId?: string) {
   const pairTemplate = createTokenPair(randomTokenId(), randomTokenId())
   const address = randomContractAddress()
   const contractState = TokenPairFactory.stateForTest(
-    { pairTemplateId: pairTemplate.contractId, pairSize: 0n },
+    {
+      feeCollectorFactory: feeCollectorFactoryId ?? '',
+      pairTemplateId: pairTemplate.contractId,
+      pairSize: 0n
+    },
     { alphAmount: oneAlph },
     address
   )
