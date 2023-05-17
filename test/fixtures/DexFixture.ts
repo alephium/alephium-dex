@@ -12,7 +12,7 @@ import {
 } from '@alephium/web3'
 import { randomBytes } from 'crypto'
 import * as base58 from 'bs58'
-import { TokenPairFactory, TokenPair, Router, TokenPairTypes } from '../../artifacts/ts'
+import { TokenPairFactory, TokenPair, Router, TokenPairTypes, FeeCollectorFactoryImplTypes } from '../../artifacts/ts'
 
 export const oneAlph = 10n ** 18n
 export const minimalAlphInContract = oneAlph
@@ -20,6 +20,7 @@ export const maxAlphAmount = 10n ** 18n * 1000000000n
 export const gasPrice = 100000000000n
 export const maxGasPerTx = 625000n
 export const defaultGasFee = gasPrice * maxGasPerTx
+export const minimumLiquidity = 1000n
 
 export enum ErrorCodes {
   ReserveOverflow,
@@ -110,13 +111,12 @@ export function createTokenPair(
   token0Id: string,
   token1Id: string,
   contractId?: string,
-  feeCollectorFactoryId?: string,
-  feeCollectorId?: string
+  feeCollectorFactoryFixture?: ContractFixture<FeeCollectorFactoryImplTypes.Fields>,
 ) {
   const address = contractId ? addressFromContractId(contractId) : randomContractAddress()
   const contractState = TokenPair.stateForTest(
     {
-      feeCollectorFactory: feeCollectorFactoryId ?? '',
+      feeCollectorFactory: feeCollectorFactoryFixture?.contractId ?? '',
       token0Id: token0Id,
       token1Id: token1Id,
       reserve0: 0n,
@@ -126,7 +126,7 @@ export function createTokenPair(
       price1CumulativeLast: 0n,
       totalSupply: 0n,
       kLast: 0n,
-      feeCollectorId: feeCollectorId ?? ''
+      feeCollectorId: ''
     },
     {
       alphAmount: oneAlph,
@@ -134,7 +134,7 @@ export function createTokenPair(
     },
     address
   )
-  return new ContractFixture(contractState, [], address)
+  return new ContractFixture(contractState, feeCollectorFactoryFixture?.states() ?? [], address)
 }
 
 export function createTokenPairFactory(feeCollectorFactoryId?: string) {
