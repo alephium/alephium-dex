@@ -1,4 +1,5 @@
 import {
+  Address,
   addressFromContractId,
   ALPH_TOKEN_ID,
   Asset,
@@ -137,19 +138,23 @@ export function createTokenPair(
   return new ContractFixture(contractState, tokenPairFactoryFixture?.states() ?? [], address)
 }
 
-export function createTokenPairFactory(feeCollectorFactoryFixture?: ContractFixture<FeeCollectorFactoryImplTypes.Fields>) {
+export function createTokenPairFactory(
+  feeSetter: Address,
+  feeCollectorFactoryId?: string
+) {
   const pairTemplate = createTokenPair(randomTokenId(), randomTokenId())
   const address = randomContractAddress()
   const contractState = TokenPairFactory.stateForTest(
     {
-      feeCollectorFactory: feeCollectorFactoryFixture?.contractId ?? '',
       pairTemplateId: pairTemplate.contractId,
-      pairSize: 0n
+      pairSize: 0n,
+      feeSetter: feeSetter,
+      feeCollectorFactory: feeCollectorFactoryId ?? ''
     },
     { alphAmount: oneAlph },
     address
   )
-  return new ContractFixture(contractState, pairTemplate.states().concat(feeCollectorFactoryFixture?.states() ?? []), address)
+  return new ContractFixture(contractState, pairTemplate.states(), address)
 }
 
 export function createRouter() {

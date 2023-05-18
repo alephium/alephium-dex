@@ -1,5 +1,5 @@
 Contract FeeCollectorImpl(
-  feeCollectorFactory: FeeCollectorFactory,
+  tokenPairFactory: TokenPairFactory,
   tokenPairId: ByteVec
 ) extends Constants() implements FeeCollector {
   @using(preapprovedAssets = true, assetsInContract = true)
@@ -10,13 +10,13 @@ Contract FeeCollectorImpl(
 
   @using(assetsInContract = true)
   pub fn withdraw(to: Address, amount: U256) -> () {
-    checkCaller!(callerAddress!() == feeCollectorFactory.getFeeCollectorSetter(), ErrorCodes.InvalidCaller)
+    checkCaller!(callerAddress!() == tokenPairFactory.getFeeSetter(), ErrorCodes.InvalidCaller)
     transferTokenFromSelf!(to, tokenPairId, amount)
   }
 
   @using(assetsInContract = true)
   pub fn destroy(to: Address) -> () {
-    checkCaller!(callerAddress!() == feeCollectorFactory.getFeeCollectorSetter(), ErrorCodes.InvalidCaller)
+    checkCaller!(callerAddress!() == tokenPairFactory.getFeeSetter(), ErrorCodes.InvalidCaller)
     destroySelf!(to)
   }
 }

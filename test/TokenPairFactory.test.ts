@@ -18,8 +18,8 @@ describe('test token pair factory', () => {
   test('create pair', async () => {
     await buildProject()
 
-    const fixture = createTokenPairFactory()
     const payer = randomP2PKHAddress()
+    const fixture = createTokenPairFactory(payer)
 
     async function test(tokenAId: string, tokenBId: string, tokens?: Token[]) {
       const inputAssetTokens = tokens ?? [

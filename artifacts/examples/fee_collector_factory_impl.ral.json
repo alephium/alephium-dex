@@ -1,36 +1,24 @@
 {
   "version": "v2.3.1",
   "name": "FeeCollectorFactoryImpl",
-  "bytecode": "020309403a404b010000000102a0000201030306011b0c0d160201061703b316034113107bb116021302641300641705170416001601a21602ce0016041605c102010001010007b4a0004513107b1600a100",
-  "codeHash": "81412ef3504d8d7cda5c160b71d2cad0f4bdade7db17c327f5388812c955fc23",
+  "bytecode": "0201402a010303050116b3ce014113107bce0116021302641300641704170316001601a21602ce0016031604c102",
+  "codeHash": "966f75cddefe774a87dbf778012f4f3f494b3a860f4c975d0c5262a1be185d49",
   "fieldsSig": {
     "names": [
       "feeCollectorTemplateId",
-      "feeCollectorSetter"
+      "tokenPairFactory"
     ],
     "types": [
       "ByteVec",
-      "Address"
+      "ByteVec"
     ],
     "isMutable": [
       false,
-      true
+      false
     ]
   },
   "eventsSig": [],
   "functions": [
-    {
-      "name": "getFeeCollectorSetter",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
-      "paramNames": [],
-      "paramTypes": [],
-      "paramIsMutable": [],
-      "returnTypes": [
-        "Address"
-      ]
-    },
     {
       "name": "createFeeCollector",
       "usePreapprovedAssets": true,
@@ -54,22 +42,6 @@
       "returnTypes": [
         "ByteVec"
       ]
-    },
-    {
-      "name": "updateSetter",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
-      "paramNames": [
-        "newFeeCollectorSetter"
-      ],
-      "paramTypes": [
-        "Address"
-      ],
-      "paramIsMutable": [
-        false
-      ],
-      "returnTypes": []
     }
   ]
 }

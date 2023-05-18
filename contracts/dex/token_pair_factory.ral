@@ -1,14 +1,31 @@
 Contract TokenPairFactory(
   pairTemplateId: ByteVec, // the template contract id of `TokenPair`
   mut pairSize: U256,
-  feeCollectorFactory: FeeCollectorFactory
+  mut feeSetter: Address,
+  mut feeCollectorFactory: FeeCollectorFactory
 ) extends Constants() {
   event PairCreated(token0: ByteVec, token1: ByteVec, pair: ByteVec, currentPairSize: U256)
+
+  @using(updateFields = true)
+  pub fn setFeeCollectorFactory(factory: FeeCollectorFactory) -> () {
+    checkCaller!(callerAddress!() == feeSetter, ErrorCodes.InvalidCaller)
+    feeCollectorFactory = factory
+  }
+
+  @using(updateFields = true)
+  pub fn updateFeeSetter(newFeeSetter: Address) -> () {
+    checkCaller!(callerAddress!() == feeSetter, ErrorCodes.InvalidCaller)
+    feeSetter = newFeeSetter
+  }
+
+  pub fn getFeeSetter() -> Address {
+    return feeSetter
+  }
 
   @using(preapprovedAssets = true)
   pub fn enableFeeCollector(tokenPair: TokenPair, alphAmount: U256) -> () {
     let caller = callerAddress!()
-    checkCaller!(caller == feeCollectorFactory.getFeeCollectorSetter(), ErrorCodes.InvalidCaller)
+    checkCaller!(caller == feeSetter, ErrorCodes.InvalidCaller)
     let feeCollectorId = feeCollectorFactory.createFeeCollector{caller -> ALPH: alphAmount}(
       caller,
       alphAmount,
@@ -18,12 +35,12 @@ Contract TokenPairFactory(
   }
 
   pub fn disableFeeCollector(tokenPair: TokenPair) -> () {
-    checkCaller!(callerAddress!() == feeCollectorFactory.getFeeCollectorSetter(), ErrorCodes.InvalidCaller)
+    checkCaller!(callerAddress!() == feeSetter, ErrorCodes.InvalidCaller)
     tokenPair.setFeeCollectorId(#)
   }
 
   pub fn updateFeeCollector(tokenPair: TokenPair, newFeeCollectorId: ByteVec) -> () {
-    checkCaller!(callerAddress!() == feeCollectorFactory.getFeeCollectorSetter(), ErrorCodes.InvalidCaller)
+    checkCaller!(callerAddress!() == feeSetter, ErrorCodes.InvalidCaller)
     tokenPair.setFeeCollectorId(newFeeCollectorId)
   }
 

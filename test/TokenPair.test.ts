@@ -475,7 +475,7 @@ describe('test token pair', () => {
       }]
     })
 
-    expect(swapResult.gasUsed).toEqual(23400)
+    expect(swapResult.gasUsed).toEqual(23399)
   })
 
   test('burn', async () => {

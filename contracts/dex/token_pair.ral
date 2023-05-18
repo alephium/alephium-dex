@@ -20,10 +20,6 @@ Contract TokenPair(
 
   const MINIMUM_LIQUIDITY = 1000
 
-  pub fn getTokenPairFactory() -> TokenPairFactory {
-    return tokenPairFactory
-  }
-
   @using(updateFields = true)
   pub fn setFeeCollectorId(id: ByteVec) -> () {
     checkCaller!(callerContractId!() == tokenId!(tokenPairFactory), ErrorCodes.InvalidCaller)

@@ -30,16 +30,12 @@ import { default as FeeCollectorFactoryImplContractJson } from "../examples/fee_
 export namespace FeeCollectorFactoryImplTypes {
   export type Fields = {
     feeCollectorTemplateId: HexString;
-    feeCollectorSetter: Address;
+    tokenPairFactory: HexString;
   };
 
   export type State = ContractState<Fields>;
 
   export interface CallMethodTable {
-    getFeeCollectorSetter: {
-      params: Omit<CallContractParams<{}>, "args">;
-      result: CallContractResult<Address>;
-    };
     createFeeCollector: {
       params: CallContractParams<{
         caller: Address;
@@ -72,14 +68,6 @@ class Factory extends ContractFactory<
   }
 
   tests = {
-    getFeeCollectorSetter: async (
-      params: Omit<
-        TestContractParams<FeeCollectorFactoryImplTypes.Fields, never>,
-        "testArgs"
-      >
-    ): Promise<TestContractResult<Address>> => {
-      return testMethod(this, "getFeeCollectorSetter", params);
-    },
     createFeeCollector: async (
       params: TestContractParams<
         FeeCollectorFactoryImplTypes.Fields,
@@ -87,14 +75,6 @@ class Factory extends ContractFactory<
       >
     ): Promise<TestContractResult<HexString>> => {
       return testMethod(this, "createFeeCollector", params);
-    },
-    updateSetter: async (
-      params: TestContractParams<
-        FeeCollectorFactoryImplTypes.Fields,
-        { newFeeCollectorSetter: Address }
-      >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "updateSetter", params);
     },
   };
 }
@@ -104,7 +84,7 @@ export const FeeCollectorFactoryImpl = new Factory(
   Contract.fromJson(
     FeeCollectorFactoryImplContractJson,
     "",
-    "81412ef3504d8d7cda5c160b71d2cad0f4bdade7db17c327f5388812c955fc23"
+    "966f75cddefe774a87dbf778012f4f3f494b3a860f4c975d0c5262a1be185d49"
   )
 );
 
@@ -119,18 +99,6 @@ export class FeeCollectorFactoryImplInstance extends ContractInstance {
   }
 
   methods = {
-    getFeeCollectorSetter: async (
-      params?: FeeCollectorFactoryImplTypes.CallMethodParams<"getFeeCollectorSetter">
-    ): Promise<
-      FeeCollectorFactoryImplTypes.CallMethodResult<"getFeeCollectorSetter">
-    > => {
-      return callMethod(
-        FeeCollectorFactoryImpl,
-        this,
-        "getFeeCollectorSetter",
-        params === undefined ? {} : params
-      );
-    },
     createFeeCollector: async (
       params: FeeCollectorFactoryImplTypes.CallMethodParams<"createFeeCollector">
     ): Promise<

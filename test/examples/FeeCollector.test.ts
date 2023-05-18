@@ -1,4 +1,4 @@
-import { Address, ContractState, ONE_ALPH, subContractId, web3 } from '@alephium/web3'
+import { Address, addressFromContractId, ContractState, ONE_ALPH, subContractId, web3 } from '@alephium/web3'
 import {
   FeeCollectorImpl,
   FeeCollectorFactoryImpl,
@@ -22,13 +22,13 @@ import {
   randomP2PKHAddress,
   randomTokenPair
 } from '../fixtures/DexFixture'
-import { randomContractAddress } from '@alephium/web3-test'
+import { randomContractAddress, randomContractId } from '@alephium/web3-test'
 
 function createFeeCollectorTemplate() {
   const address = randomContractAddress()
   const contractState = FeeCollectorImpl.stateForTest(
     {
-      feeCollectorFactory: '',
+      tokenPairFactory: '',
       tokenPairId: ''
     },
     { alphAmount: ONE_ALPH },
@@ -37,13 +37,13 @@ function createFeeCollectorTemplate() {
   return new ContractFixture(contractState, [], address)
 }
 
-function createFeeCollectorFactory(feeCollectorSetter: Address) {
+function createFeeCollectorFactory(tokenPairFactoryId: string, contractId: string) {
   const feeCollectorTemplate = createFeeCollectorTemplate()
-  const address = randomContractAddress()
+  const address = addressFromContractId(contractId)
   const contractState = FeeCollectorFactoryImpl.stateForTest(
     {
       feeCollectorTemplateId: feeCollectorTemplate.contractId,
-      feeCollectorSetter: feeCollectorSetter
+      tokenPairFactory: tokenPairFactoryId
     },
     { alphAmount: ONE_ALPH },
     address
@@ -57,8 +57,8 @@ describe('test fee collector', () => {
   let sender: string
   let token0Id: string
   let token1Id: string
-  let feeCollectorFactoryFixture: ContractFixture<FeeCollectorFactoryImplTypes.Fields>
   let tokenPairFactoryFixture: ContractFixture<TokenPairFactoryTypes.Fields>
+  let feeCollectorFactoryFixture: ContractFixture<FeeCollectorFactoryImplTypes.Fields>
   let tokenPairFixture: ContractFixture<TokenPairTypes.Fields>
   beforeEach(async () => {
     await buildProject()
@@ -67,8 +67,10 @@ describe('test fee collector', () => {
     const tokenPair = randomTokenPair()
     token0Id = tokenPair[0]
     token1Id = tokenPair[1]
-    feeCollectorFactoryFixture = createFeeCollectorFactory(sender)
-    tokenPairFactoryFixture = createTokenPairFactory(feeCollectorFactoryFixture)
+    const feeCollectorFactoryId = randomContractId()
+    tokenPairFactoryFixture = createTokenPairFactory(sender, feeCollectorFactoryId)
+    feeCollectorFactoryFixture = createFeeCollectorFactory(tokenPairFactoryFixture.contractId, feeCollectorFactoryId)
+    tokenPairFactoryFixture.dependencies.push(...feeCollectorFactoryFixture.states())
     tokenPairFixture = createTokenPair(token0Id, token1Id, undefined, tokenPairFactoryFixture)
   })
 

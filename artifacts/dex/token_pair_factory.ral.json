@@ -1,23 +1,26 @@
 {
   "version": "v2.3.1",
   "name": "TokenPairFactory",
-  "bytecode": "0305403040494062408340f601030204001ab4170216020c0dce0101004513107b16021601a21602160116000f0dce010101170316030d0c1600010701000101000db40c0dce0101004513107b14000d0c1600010701000202000db40c0dce0101004513107b16010d0c160001070000020402101600711702160171170316021603314c03160016010216011600020103040900404116001602a50c3316001603a50c331a130f7b1602160342130b7b16021603000317051704b1160416051406414c504800011304640c0c0c0c0c0c0c14001308641707170616001601a21604160544ce00160616070d1340ff3bc2170805160416051608a00061a0000d2aa100",
-  "codeHash": "2b6f4b8cc519aa0fbf31ca8c4e03096b5ac39c99499532486e9a72ad8d28f871",
+  "bytecode": "0408114022402b4057406c408140a24115010001010007b4a0014513107b1600a102010001010007b4a0014513107b1600a101010000000102a00102010302040017b417021602a0014513107b16021601a21602160116000f0da0020100170316030d0c1600010601000101000ab4a0014513107b14000d0c1600010601000202000ab4a0014513107b16010d0c160001060000020402101600711702160171170316021603314c03160016010216011600020103040900404116001602a50c3316001603a50c331a130f7b1602160342130b7b16021603000617051704b1160416051406414c504800011304640c0c0c0c0c0c0c14001308641707170616001601a21604160544ce00160616070d1340ff3bc2170805160416051608a00061a0000d2aa100",
+  "codeHash": "29b02cd3e4e8549552a0acf84cc6c19f43fc1da748123897e1a053c26f38aec0",
   "fieldsSig": {
     "names": [
       "pairTemplateId",
       "pairSize",
+      "feeSetter",
       "feeCollectorFactory"
     ],
     "types": [
       "ByteVec",
       "U256",
+      "Address",
       "ByteVec"
     ],
     "isMutable": [
       false,
       true,
-      false
+      true,
+      true
     ]
   },
   "eventsSig": [
@@ -38,6 +41,50 @@
     }
   ],
   "functions": [
+    {
+      "name": "setFeeCollectorFactory",
+      "usePreapprovedAssets": false,
+      "useAssetsInContract": false,
+      "isPublic": true,
+      "paramNames": [
+        "factory"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "updateFeeSetter",
+      "usePreapprovedAssets": false,
+      "useAssetsInContract": false,
+      "isPublic": true,
+      "paramNames": [
+        "newFeeSetter"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "getFeeSetter",
+      "usePreapprovedAssets": false,
+      "useAssetsInContract": false,
+      "isPublic": true,
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "Address"
+      ]
+    },
     {
       "name": "enableFeeCollector",
       "usePreapprovedAssets": true,

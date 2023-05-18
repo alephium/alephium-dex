@@ -31,6 +31,7 @@ export namespace TokenPairFactoryTypes {
   export type Fields = {
     pairTemplateId: HexString;
     pairSize: bigint;
+    feeSetter: Address;
     feeCollectorFactory: HexString;
   };
 
@@ -42,6 +43,25 @@ export namespace TokenPairFactoryTypes {
     pair: HexString;
     currentPairSize: bigint;
   }>;
+
+  export interface CallMethodTable {
+    getFeeSetter: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<Address>;
+    };
+  }
+  export type CallMethodParams<T extends keyof CallMethodTable> =
+    CallMethodTable[T]["params"];
+  export type CallMethodResult<T extends keyof CallMethodTable> =
+    CallMethodTable[T]["result"];
+  export type MultiCallParams = Partial<{
+    [Name in keyof CallMethodTable]: CallMethodTable[Name]["params"];
+  }>;
+  export type MultiCallResults<T extends MultiCallParams> = {
+    [MaybeName in keyof T]: MaybeName extends keyof CallMethodTable
+      ? CallMethodTable[MaybeName]["result"]
+      : undefined;
+  };
 }
 
 class Factory extends ContractFactory<
@@ -53,6 +73,30 @@ class Factory extends ContractFactory<
   }
 
   tests = {
+    setFeeCollectorFactory: async (
+      params: TestContractParams<
+        TokenPairFactoryTypes.Fields,
+        { factory: HexString }
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "setFeeCollectorFactory", params);
+    },
+    updateFeeSetter: async (
+      params: TestContractParams<
+        TokenPairFactoryTypes.Fields,
+        { newFeeSetter: Address }
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "updateFeeSetter", params);
+    },
+    getFeeSetter: async (
+      params: Omit<
+        TestContractParams<TokenPairFactoryTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResult<Address>> => {
+      return testMethod(this, "getFeeSetter", params);
+    },
     enableFeeCollector: async (
       params: TestContractParams<
         TokenPairFactoryTypes.Fields,
@@ -106,7 +150,7 @@ export const TokenPairFactory = new Factory(
   Contract.fromJson(
     TokenPairFactoryContractJson,
     "",
-    "2b6f4b8cc519aa0fbf31ca8c4e03096b5ac39c99499532486e9a72ad8d28f871"
+    "29b02cd3e4e8549552a0acf84cc6c19f43fc1da748123897e1a053c26f38aec0"
   )
 );
 
@@ -135,5 +179,28 @@ export class TokenPairFactoryInstance extends ContractInstance {
       "PairCreated",
       fromCount
     );
+  }
+
+  methods = {
+    getFeeSetter: async (
+      params?: TokenPairFactoryTypes.CallMethodParams<"getFeeSetter">
+    ): Promise<TokenPairFactoryTypes.CallMethodResult<"getFeeSetter">> => {
+      return callMethod(
+        TokenPairFactory,
+        this,
+        "getFeeSetter",
+        params === undefined ? {} : params
+      );
+    },
+  };
+
+  async multicall<Calls extends TokenPairFactoryTypes.MultiCallParams>(
+    calls: Calls
+  ): Promise<TokenPairFactoryTypes.MultiCallResults<Calls>> {
+    return (await multicallMethods(
+      TokenPairFactory,
+      this,
+      calls
+    )) as TokenPairFactoryTypes.MultiCallResults<Calls>;
   }
 }

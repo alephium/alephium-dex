@@ -29,7 +29,7 @@ import { default as FeeCollectorImplContractJson } from "../examples/fee_collect
 // Custom types for the contract
 export namespace FeeCollectorImplTypes {
   export type Fields = {
-    feeCollectorFactory: HexString;
+    tokenPairFactory: HexString;
     tokenPairId: HexString;
   };
 
@@ -74,7 +74,7 @@ export const FeeCollectorImpl = new Factory(
   Contract.fromJson(
     FeeCollectorImplContractJson,
     "",
-    "df433bf096917d36590d86ad4f2d2ec2ecad364bfe60a283a43f046dd938fc83"
+    "832af1cf2c49ce74e0c4c4108e8a0e94d05c9fa574b52b646e7eb27d96d827ab"
   )
 );
 
