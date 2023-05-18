@@ -1,7 +1,8 @@
 import { Deployer, DeployFunction } from '@alephium/cli'
+import { Settings } from '../alephium.config'
 import { TokenPair } from '../artifacts/ts'
 
-const deployTokenPairTemplate: DeployFunction<undefined> = async (deployer: Deployer): Promise<void> => {
+const deployTokenPairTemplate: DeployFunction<Settings> = async (deployer: Deployer): Promise<void> => {
   const initialFields = {
     tokenPairFactory: '',
     token0Id: '',

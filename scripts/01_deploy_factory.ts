@@ -1,12 +1,16 @@
-import { Deployer, DeployFunction } from '@alephium/cli'
+import { Deployer, DeployFunction, Network } from '@alephium/cli'
+import { Settings } from '../alephium.config'
 import { TokenPairFactory } from '../artifacts/ts'
 
-const deployFactory: DeployFunction<undefined> = async (deployer: Deployer): Promise<void> => {
+const deployFactory: DeployFunction<Settings> = async (deployer: Deployer, network: Network<Settings>): Promise<void> => {
+  if (network.settings.feeSetter === undefined) {
+    throw new Error('Please specify the `feeSetter` in alephium.config.ts')
+  }
   const tokenPairTemplate = deployer.getDeployContractResult('TokenPair')
   const initialFields = {
     pairTemplateId: tokenPairTemplate.contractInstance.contractId,
     pairSize: 0n,
-    feeSetter: deployer.account.address,
+    feeSetter: network.settings.feeSetter,
     feeCollectorFactory: '',
   }
   const result = await deployer.deployContract(TokenPairFactory, { initialFields: initialFields })
