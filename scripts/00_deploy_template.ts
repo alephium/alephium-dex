@@ -3,7 +3,7 @@ import { TokenPair } from '../artifacts/ts'
 
 const deployTokenPairTemplate: DeployFunction<undefined> = async (deployer: Deployer): Promise<void> => {
   const initialFields = {
-    feeCollectorFactory: '',
+    tokenPairFactory: '',
     token0Id: '',
     token1Id: '',
     reserve0: 0n,

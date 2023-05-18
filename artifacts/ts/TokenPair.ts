@@ -29,7 +29,7 @@ import { default as TokenPairContractJson } from "../dex/token_pair.ral.json";
 // Custom types for the contract
 export namespace TokenPairTypes {
   export type Fields = {
-    feeCollectorFactory: HexString;
+    tokenPairFactory: HexString;
     token0Id: HexString;
     token1Id: HexString;
     reserve0: bigint;
@@ -89,6 +89,10 @@ export namespace TokenPairTypes {
     sqrt: {
       params: CallContractParams<{ y: bigint }>;
       result: CallContractResult<bigint>;
+    };
+    getTokenPairFactory: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<HexString>;
     };
     getTokenPair: {
       params: Omit<CallContractParams<{}>, "args">;
@@ -179,15 +183,15 @@ class Factory extends ContractFactory<
     ): Promise<TestContractResult<bigint>> => {
       return testMethod(this, "sqrt", params);
     },
-    enableFeeCollector: async (
-      params: TestContractParams<TokenPairTypes.Fields, { alphAmount: bigint }>
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "enableFeeCollector", params);
-    },
-    disableFeeCollector: async (
+    getTokenPairFactory: async (
       params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<HexString>> => {
+      return testMethod(this, "getTokenPairFactory", params);
+    },
+    setFeeCollectorId: async (
+      params: TestContractParams<TokenPairTypes.Fields, { id: HexString }>
     ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "disableFeeCollector", params);
+      return testMethod(this, "setFeeCollectorId", params);
     },
     getTokenPair: async (
       params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
@@ -269,7 +273,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "22f676acb5097d8bc91e9a5e36cb72c979123ad48f92f7e609e77336d4ba1e24"
+    "255ad7cbc0a8445f44b0bceadc0f53e23b2d68ce2b32dbab772f5a0b3e6e604c"
   )
 );
 
@@ -392,6 +396,16 @@ export class TokenPairInstance extends ContractInstance {
       params: TokenPairTypes.CallMethodParams<"sqrt">
     ): Promise<TokenPairTypes.CallMethodResult<"sqrt">> => {
       return callMethod(TokenPair, this, "sqrt", params);
+    },
+    getTokenPairFactory: async (
+      params?: TokenPairTypes.CallMethodParams<"getTokenPairFactory">
+    ): Promise<TokenPairTypes.CallMethodResult<"getTokenPairFactory">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "getTokenPairFactory",
+        params === undefined ? {} : params
+      );
     },
     getTokenPair: async (
       params?: TokenPairTypes.CallMethodParams<"getTokenPair">

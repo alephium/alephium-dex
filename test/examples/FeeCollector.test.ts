@@ -1,10 +1,20 @@
 import { Address, ContractState, ONE_ALPH, subContractId, web3 } from '@alephium/web3'
-import { FeeCollectorImpl, FeeCollectorFactoryImpl, TokenPairTypes, TokenPair, FeeCollectorFactoryImplTypes, FeeCollectorImplTypes } from '../../artifacts/ts'
+import {
+  FeeCollectorImpl,
+  FeeCollectorFactoryImpl,
+  TokenPairTypes,
+  TokenPair,
+  FeeCollectorFactoryImplTypes,
+  FeeCollectorImplTypes,
+  TokenPairFactoryTypes,
+  TokenPairFactory
+} from '../../artifacts/ts'
 import {
   buildProject,
   contractBalanceOf,
   ContractFixture,
   createTokenPair,
+  createTokenPairFactory,
   expandTo18Decimals,
   getContractState,
   minimumLiquidity,
@@ -47,8 +57,9 @@ describe('test fee collector', () => {
   let sender: string
   let token0Id: string
   let token1Id: string
-  let tokenPairFixture: ContractFixture<TokenPairTypes.Fields>
   let feeCollectorFactoryFixture: ContractFixture<FeeCollectorFactoryImplTypes.Fields>
+  let tokenPairFactoryFixture: ContractFixture<TokenPairFactoryTypes.Fields>
+  let tokenPairFixture: ContractFixture<TokenPairTypes.Fields>
   beforeEach(async () => {
     await buildProject()
 
@@ -57,7 +68,8 @@ describe('test fee collector', () => {
     token0Id = tokenPair[0]
     token1Id = tokenPair[1]
     feeCollectorFactoryFixture = createFeeCollectorFactory(sender)
-    tokenPairFixture = createTokenPair(token0Id, token1Id, undefined, feeCollectorFactoryFixture)
+    tokenPairFactoryFixture = createTokenPairFactory(feeCollectorFactoryFixture)
+    tokenPairFixture = createTokenPair(token0Id, token1Id, undefined, tokenPairFactoryFixture)
   })
 
   async function mintAndSwap(tokenPairState: ContractState<TokenPairTypes.Fields>) {
@@ -117,12 +129,12 @@ describe('test fee collector', () => {
   })
 
   test("feeTo:on", async () => {
-    const enableFeeCollectorResult = await TokenPair.tests.enableFeeCollector({
-      initialFields: tokenPairFixture.selfState.fields,
-      initialAsset: tokenPairFixture.selfState.asset,
-      address: tokenPairFixture.address,
-      existingContracts: tokenPairFixture.dependencies,
-      testArgs: { alphAmount: ONE_ALPH },
+    const enableFeeCollectorResult = await TokenPairFactory.tests.enableFeeCollector({
+      initialFields: tokenPairFactoryFixture.selfState.fields,
+      initialAsset: tokenPairFactoryFixture.selfState.asset,
+      address: tokenPairFactoryFixture.address,
+      existingContracts: tokenPairFactoryFixture.dependencies.concat(tokenPairFixture.selfState),
+      testArgs: { tokenPair: tokenPairFixture.contractId, alphAmount: ONE_ALPH },
       inputAssets: [{
         address: sender,
         asset: { alphAmount: ONE_ALPH * 2n }

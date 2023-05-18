@@ -5,6 +5,28 @@ Contract TokenPairFactory(
 ) extends Constants() {
   event PairCreated(token0: ByteVec, token1: ByteVec, pair: ByteVec, currentPairSize: U256)
 
+  @using(preapprovedAssets = true)
+  pub fn enableFeeCollector(tokenPair: TokenPair, alphAmount: U256) -> () {
+    let caller = callerAddress!()
+    checkCaller!(caller == feeCollectorFactory.getFeeCollectorSetter(), ErrorCodes.InvalidCaller)
+    let feeCollectorId = feeCollectorFactory.createFeeCollector{caller -> ALPH: alphAmount}(
+      caller,
+      alphAmount,
+      tokenId!(tokenPair)
+    )
+    tokenPair.setFeeCollectorId(feeCollectorId)
+  }
+
+  pub fn disableFeeCollector(tokenPair: TokenPair) -> () {
+    checkCaller!(callerAddress!() == feeCollectorFactory.getFeeCollectorSetter(), ErrorCodes.InvalidCaller)
+    tokenPair.setFeeCollectorId(#)
+  }
+
+  pub fn updateFeeCollector(tokenPair: TokenPair, newFeeCollectorId: ByteVec) -> () {
+    checkCaller!(callerAddress!() == feeCollectorFactory.getFeeCollectorSetter(), ErrorCodes.InvalidCaller)
+    tokenPair.setFeeCollectorId(newFeeCollectorId)
+  }
+
   fn sortTokens(tokenA: ByteVec, tokenB: ByteVec) -> (ByteVec, ByteVec) {
     let left = u256From32Byte!(tokenA)
     let right = u256From32Byte!(tokenB)
@@ -29,7 +51,7 @@ Contract TokenPairFactory(
     assert!(tokenAId != tokenBId, ErrorCodes.IdenticalTokenIds)
     let (token0Id, token1Id) = sortTokens(tokenAId, tokenBId)
     let (encodedImmFields, encodedMutFields) = TokenPair.encodeFields!(
-      feeCollectorFactory,
+      TokenPairFactory(selfContractId!()),
       token0Id,
       token1Id,
       0, // reserve0

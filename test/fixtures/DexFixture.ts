@@ -12,7 +12,7 @@ import {
 } from '@alephium/web3'
 import { randomBytes } from 'crypto'
 import * as base58 from 'bs58'
-import { TokenPairFactory, TokenPair, Router, TokenPairTypes, FeeCollectorFactoryImplTypes } from '../../artifacts/ts'
+import { TokenPairFactory, TokenPair, Router, TokenPairTypes, TokenPairFactoryTypes, FeeCollectorFactoryImplTypes } from '../../artifacts/ts'
 
 export const oneAlph = 10n ** 18n
 export const minimalAlphInContract = oneAlph
@@ -111,12 +111,12 @@ export function createTokenPair(
   token0Id: string,
   token1Id: string,
   contractId?: string,
-  feeCollectorFactoryFixture?: ContractFixture<FeeCollectorFactoryImplTypes.Fields>,
+  tokenPairFactoryFixture?: ContractFixture<TokenPairFactoryTypes.Fields>,
 ) {
   const address = contractId ? addressFromContractId(contractId) : randomContractAddress()
   const contractState = TokenPair.stateForTest(
     {
-      feeCollectorFactory: feeCollectorFactoryFixture?.contractId ?? '',
+      tokenPairFactory: tokenPairFactoryFixture?.contractId ?? '',
       token0Id: token0Id,
       token1Id: token1Id,
       reserve0: 0n,
@@ -134,22 +134,22 @@ export function createTokenPair(
     },
     address
   )
-  return new ContractFixture(contractState, feeCollectorFactoryFixture?.states() ?? [], address)
+  return new ContractFixture(contractState, tokenPairFactoryFixture?.states() ?? [], address)
 }
 
-export function createTokenPairFactory(feeCollectorFactoryId?: string) {
+export function createTokenPairFactory(feeCollectorFactoryFixture?: ContractFixture<FeeCollectorFactoryImplTypes.Fields>) {
   const pairTemplate = createTokenPair(randomTokenId(), randomTokenId())
   const address = randomContractAddress()
   const contractState = TokenPairFactory.stateForTest(
     {
-      feeCollectorFactory: feeCollectorFactoryId ?? '',
+      feeCollectorFactory: feeCollectorFactoryFixture?.contractId ?? '',
       pairTemplateId: pairTemplate.contractId,
       pairSize: 0n
     },
     { alphAmount: oneAlph },
     address
   )
-  return new ContractFixture(contractState, pairTemplate.states(), address)
+  return new ContractFixture(contractState, pairTemplate.states().concat(feeCollectorFactoryFixture?.states() ?? []), address)
 }
 
 export function createRouter() {

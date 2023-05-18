@@ -1,7 +1,7 @@
 import "std/fungible_token_interface"
 
 Contract TokenPair(
-  feeCollectorFactory: FeeCollectorFactory,
+  tokenPairFactory: TokenPairFactory,
   token0Id: ByteVec,
   token1Id: ByteVec,
   mut reserve0: U256,
@@ -20,17 +20,14 @@ Contract TokenPair(
 
   const MINIMUM_LIQUIDITY = 1000
 
-  @using(preapprovedAssets = true, updateFields = true)
-  pub fn enableFeeCollector(alphAmount: U256) -> () {
-    let caller = callerAddress!()
-    checkCaller!(caller == feeCollectorFactory.getFeeCollectorSetter(), ErrorCodes.InvalidCaller)
-    feeCollectorId = feeCollectorFactory.createFeeCollector{caller -> ALPH: alphAmount}(caller, alphAmount, selfContractId!())
+  pub fn getTokenPairFactory() -> TokenPairFactory {
+    return tokenPairFactory
   }
 
   @using(updateFields = true)
-  pub fn disableFeeCollector() -> () {
-    checkCaller!(callerAddress!() == feeCollectorFactory.getFeeCollectorSetter(), ErrorCodes.InvalidCaller)
-    feeCollectorId = #
+  pub fn setFeeCollectorId(id: ByteVec) -> () {
+    checkCaller!(callerContractId!() == tokenId!(tokenPairFactory), ErrorCodes.InvalidCaller)
+    feeCollectorId = id
   }
 
   pub fn getTokenPair() -> (ByteVec, ByteVec) {

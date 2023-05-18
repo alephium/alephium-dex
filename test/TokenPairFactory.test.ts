@@ -38,7 +38,7 @@ describe('test token pair factory', () => {
       const pairContractId = subContractId(fixture.contractId, token0Id + token1Id, 0)
       const pairContractState = getContractState<TokenPairTypes.Fields>(testResult.contracts, pairContractId)
       expect(pairContractState.fields).toEqual({
-        feeCollectorFactory: '',
+        tokenPairFactory: fixture.contractId,
         token0Id: token0Id,
         token1Id: token1Id,
         reserve0: 0n,

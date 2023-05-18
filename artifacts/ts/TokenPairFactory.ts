@@ -53,6 +53,30 @@ class Factory extends ContractFactory<
   }
 
   tests = {
+    enableFeeCollector: async (
+      params: TestContractParams<
+        TokenPairFactoryTypes.Fields,
+        { tokenPair: HexString; alphAmount: bigint }
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "enableFeeCollector", params);
+    },
+    disableFeeCollector: async (
+      params: TestContractParams<
+        TokenPairFactoryTypes.Fields,
+        { tokenPair: HexString }
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "disableFeeCollector", params);
+    },
+    updateFeeCollector: async (
+      params: TestContractParams<
+        TokenPairFactoryTypes.Fields,
+        { tokenPair: HexString; newFeeCollectorId: HexString }
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "updateFeeCollector", params);
+    },
     sortTokens: async (
       params: TestContractParams<
         TokenPairFactoryTypes.Fields,
@@ -82,7 +106,7 @@ export const TokenPairFactory = new Factory(
   Contract.fromJson(
     TokenPairFactoryContractJson,
     "",
-    "505544182159dd34eff80a0397b623aa128df8787620aafd820a05f23fb15e9f"
+    "2b6f4b8cc519aa0fbf31ca8c4e03096b5ac39c99499532486e9a72ad8d28f871"
   )
 );
 

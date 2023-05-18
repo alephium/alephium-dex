@@ -104,7 +104,7 @@ export const FeeCollectorFactoryImpl = new Factory(
   Contract.fromJson(
     FeeCollectorFactoryImplContractJson,
     "",
-    "def3cf586dfaa3a563206323056d6c1e8ec06e3630ff2b2370002e387c9f884f"
+    "81412ef3504d8d7cda5c160b71d2cad0f4bdade7db17c327f5388812c955fc23"
   )
 );
 

@@ -14,7 +14,8 @@ Contract FeeCollectorFactoryImpl(
 
   @using(preapprovedAssets = true)
   pub fn createFeeCollector(caller: Address, alphAmount: U256, tokenPairId: ByteVec) -> ByteVec {
-    checkCaller!(callerContractId!() == tokenPairId, ErrorCodes.InvalidCaller)
+    let tokenPairFactoryId = tokenId!(TokenPair(tokenPairId).getTokenPairFactory())
+    checkCaller!(callerContractId!() == tokenPairFactoryId, ErrorCodes.InvalidCaller)
     let (encodedImmFields, encodedMutFields) = FeeCollectorImpl.encodeFields!(FeeCollectorFactory(selfContractId!()), tokenPairId)
     return copyCreateSubContract!{caller -> ALPH: alphAmount}(
       tokenPairId,
