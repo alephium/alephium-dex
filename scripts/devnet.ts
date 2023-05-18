@@ -4,7 +4,6 @@ import {
   ALPH_TOKEN_ID,
   binToHex,
   contractIdFromAddress,
-  node,
   NodeProvider,
   SignerProvider,
   web3
@@ -17,6 +16,7 @@ import { AddLiquidity, CreatePair, GetToken, TestToken } from '../artifacts/ts'
 import { TokenInfo } from '@alephium/token-list'
 import * as fs from 'fs'
 import * as path from 'path'
+import { waitTxConfirmed } from './utils'
 
 const oneAlph = 10n ** 18n
 
@@ -38,7 +38,7 @@ async function createTokens(signer: SignerProvider, num: number): Promise<TokenI
     })
     await waitTxConfirmed(nodeProvider, deployResult.txId, 1)
     tokenInfos.push({
-      id: deployResult.contractId,
+      id: deployResult.contractInstance.contractId,
       symbol: symbol,
       name: name,
       decimals: 18
@@ -46,7 +46,7 @@ async function createTokens(signer: SignerProvider, num: number): Promise<TokenI
 
     const scriptResult = await GetToken.execute(signer, {
       initialFields: {
-        token: deployResult.contractId,
+        token: deployResult.contractInstance.contractId,
         sender: account.address,
         amount: 1n << 100n
       },
@@ -54,7 +54,7 @@ async function createTokens(signer: SignerProvider, num: number): Promise<TokenI
     })
     await waitTxConfirmed(nodeProvider, scriptResult.txId, 1)
     console.log(
-      `Create test token succeed, name: ${name}, symbol: ${symbol}, token id: ${deployResult.contractId}, token address: ${deployResult.contractAddress}`
+      `Create test token succeed, name: ${name}, symbol: ${symbol}, token id: ${deployResult.contractInstance.contractId}, token address: ${deployResult.contractInstance.address}`
     )
   }
   return tokenInfos
@@ -128,7 +128,7 @@ async function addInitialLiquidity(
 ): Promise<void> {
   const account = await signer.getSelectedAccount()
   const nodeProvider = signer.nodeProvider ?? web3.getCurrentNodeProvider()
-  const routerId = devnetDeployment.contracts.Router.contractId
+  const routerId = devnetDeployment.contracts.Router.contractInstance.contractId
   for (let index = 0; index < tokenPairs.length; index++) {
     const tokenPair = tokenPairs[index]
     const ratio = ratios.get(tokenPair.token0Id + tokenPair.token1Id) as bigint
@@ -156,23 +156,6 @@ async function addInitialLiquidity(
       `Add liquidity for token pair ${tokenPair.tokenPairId} succeed, token0Id: ${tokenPair.token0Id}, token1Id: ${tokenPair.token1Id}, token0Amount: ${token0Amount}, token1Amount: ${token1Amount}`
     )
   }
-}
-
-function isConfirmed(txStatus: node.TxStatus): txStatus is node.Confirmed {
-  return txStatus.type === 'Confirmed'
-}
-
-export async function waitTxConfirmed(
-  provider: NodeProvider,
-  txId: string,
-  confirmations: number
-): Promise<node.Confirmed> {
-  const status = await provider.transactions.getTransactionsStatus({ txId: txId })
-  if (isConfirmed(status) && status.chainConfirmations >= confirmations) {
-    return status
-  }
-  await new Promise((r) => setTimeout(r, 1000))
-  return waitTxConfirmed(provider, txId, confirmations)
 }
 
 export async function getCreatedContractId(provider: NodeProvider, txId: string, outputIndex = 0): Promise<string> {
@@ -203,7 +186,7 @@ program
       const tokenNumber = opts.num as number
       const env = await getEnv()
       const signer = getSigner(env.network.privateKeys, opts.keyIndex === undefined ? 0 : (opts.keyIndex as number))
-      const factoryId = devnetDeployment.contracts.TokenPairFactory.contractId
+      const factoryId = devnetDeployment.contracts.TokenPairFactory.contractInstance.contractId
       console.log(`ALPH token id: ${ALPH_TOKEN_ID}, address: ${addressFromContractId(ALPH_TOKEN_ID)}`)
       const tokenInfos = await createTokens(signer, tokenNumber)
       const content = JSON.stringify(tokenInfos, null, 2)
