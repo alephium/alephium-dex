@@ -24,7 +24,7 @@ import {
   ContractInstance,
   getContractEventsCurrentCount,
 } from "@alephium/web3";
-import { default as MathTestContractJson } from "../test/math_test.ral.json";
+import { default as MathTestContractJson } from "../test/MathTest.ral.json";
 
 // Custom types for the contract
 export namespace MathTestTypes {

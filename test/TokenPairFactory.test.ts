@@ -3,7 +3,6 @@ import { expectAssertionError } from '@alephium/web3-test'
 import {
   buildProject,
   createTokenPairFactory,
-  ErrorCodes,
   getContractState,
   oneAlph,
   randomP2PKHAddress,
@@ -61,7 +60,7 @@ describe('test token pair factory', () => {
     await expectAssertionError(
       test(token0Id, token0Id, [{ id: token0Id, amount: 1n }]),
       fixture.address,
-      ErrorCodes.IdenticalTokenIds
+      Number(TokenPairFactory.consts.ErrorCodes.IdenticalTokenIds)
     )
 
     await test(token0Id, token1Id)
@@ -75,7 +74,7 @@ describe('test token pair factory', () => {
         { id: token1Id, amount: 0n }
       ]),
       fixture.address,
-      ErrorCodes.TokenNotExist
+      Number(TokenPairFactory.consts.ErrorCodes.TokenNotExist)
     )
   }, 10000)
 })

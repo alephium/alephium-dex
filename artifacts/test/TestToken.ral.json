@@ -96,5 +96,7 @@
       "returnTypes": []
     }
   ],
+  "constants": [],
+  "enums": [],
   "stdInterfaceId": "0001"
 }

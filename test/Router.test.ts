@@ -6,7 +6,6 @@ import {
   createRouter,
   createTokenPair,
   defaultGasFee,
-  ErrorCodes,
   expectAssetsEqual,
   getContractState,
   mint,
@@ -50,14 +49,14 @@ describe('test router', () => {
     await expectAssertionError(
       test(1000n, 3000n, 500n, 3000n, 500n, 2000n),
       routerFixture.address,
-      ErrorCodes.InsufficientToken1Amount
+      Number(Router.consts.ErrorCodes.InsufficientToken1Amount)
     )
     expect(await test(1000n, 3000n, 500n, 3000n, 500n, 1500n)).toEqual([500n, 1500n])
     expect(await test(1000n, 3000n, 500n, 3000n, 500n, 1000n)).toEqual([500n, 1500n])
     await expectAssertionError(
       test(1000n, 3000n, 1000n, 2000n, 800n, 2000n),
       routerFixture.address,
-      ErrorCodes.InsufficientToken0Amount
+      Number(Router.consts.ErrorCodes.InsufficientToken0Amount)
     )
     expect(await test(1000n, 3000n, 1000n, 2000n, 500n, 2000n)).toEqual([666n, 2000n])
     expect(await test(1000n, 3000n, 1000n, 2000n, 500n, 1000n)).toEqual([666n, 2000n])
@@ -112,7 +111,7 @@ describe('test router', () => {
     await expectAssertionError(
       testAddLiquidity(contractState, 500n, 15000n, 500n, 15000n, BigInt(now - 60000)),
       routerFixture.address,
-      ErrorCodes.Expired
+      Number(Router.consts.ErrorCodes.Expired)
     )
     const result = await testAddLiquidity(contractState, 500n, 15000n, 500n, 15000n, BigInt(now + 60000))
     const tokenPairState = getContractState<TokenPairTypes.Fields>(result.contracts, tokenPairFixture.contractId)
@@ -171,7 +170,7 @@ describe('test router', () => {
     await expectAssertionError(
       testRemoveLiquidity(contractState, 2738n, 0n, 0n, BigInt(now - 60000)),
       routerFixture.address,
-      ErrorCodes.Expired
+      Number(Router.consts.ErrorCodes.Expired)
     )
     const result = await testRemoveLiquidity(contractState, 2738n, 499n, 14997n, BigInt(now + 60000))
     const tokenPairState = getContractState<TokenPairTypes.Fields>(result.contracts, tokenPairFixture.contractId)
@@ -189,12 +188,12 @@ describe('test router', () => {
     await expectAssertionError(
       testRemoveLiquidity(contractState, 2738n, 500n, 14997n, BigInt(now + 60000)),
       routerFixture.address,
-      ErrorCodes.InsufficientToken0Amount
+      Number(Router.consts.ErrorCodes.InsufficientToken0Amount)
     )
     await expectAssertionError(
       testRemoveLiquidity(contractState, 2738n, 499n, 14998n, BigInt(now + 60000)),
       routerFixture.address,
-      ErrorCodes.InsufficientToken1Amount
+      Number(Router.consts.ErrorCodes.InsufficientToken1Amount)
     )
   })
 
@@ -266,7 +265,7 @@ describe('test router', () => {
     await expectAssertionError(
       testSwapExactTokenForToken(contractState, token1Id, 15000n, 332n, BigInt(now - 60000)),
       routerFixture.address,
-      ErrorCodes.Expired
+      Number(Router.consts.ErrorCodes.Expired)
     )
     const result = await testSwapExactTokenForToken(contractState, token1Id, 15000n, 332n, BigInt(now + 60000))
     const tokenPairState = getContractState<TokenPairTypes.Fields>(result.contracts, tokenPairFixture.contractId)
@@ -282,7 +281,7 @@ describe('test router', () => {
     await expectAssertionError(
       testSwapExactTokenForToken(contractState, token1Id, 15000n, 333n, BigInt(now + 60000)),
       routerFixture.address,
-      ErrorCodes.InsufficientOutputAmount
+      Number(Router.consts.ErrorCodes.InsufficientOutputAmount)
     )
   })
 
@@ -331,7 +330,7 @@ describe('test router', () => {
     await expectAssertionError(
       testSwapTokenForExactToken(contractState, token0Id, 1004n, 15000n, BigInt(now - 60000)),
       routerFixture.address,
-      ErrorCodes.Expired
+      Number(Router.consts.ErrorCodes.Expired)
     )
     const result = await testSwapTokenForExactToken(contractState, token0Id, 1004n, 15000n, BigInt(now + 60000))
     const tokenPairState = getContractState<TokenPairTypes.Fields>(result.contracts, tokenPairFixture.contractId)
@@ -347,7 +346,7 @@ describe('test router', () => {
     await expectAssertionError(
       testSwapTokenForExactToken(contractState, token0Id, 1003n, 15000n, BigInt(now + 60000)),
       routerFixture.address,
-      ErrorCodes.InsufficientInputAmount
+      Number(Router.consts.ErrorCodes.InsufficientInputAmount)
     )
   })
 })
