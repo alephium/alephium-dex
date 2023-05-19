@@ -1,4 +1,5 @@
 import {
+  Address,
   addressFromContractId,
   ALPH_TOKEN_ID,
   Asset,
@@ -6,14 +7,13 @@ import {
   contractIdFromAddress,
   ContractState,
   Fields,
-  groupOfAddress,
   number256ToBigint,
   Project,
   Token
 } from '@alephium/web3'
 import { randomBytes } from 'crypto'
 import * as base58 from 'bs58'
-import { TokenPairFactory, TokenPair, Router, TokenPairTypes } from '../../artifacts/ts'
+import { TokenPairFactory, TokenPair, Router, TokenPairTypes, TokenPairFactoryTypes, FeeCollectorFactoryImplTypes } from '../../artifacts/ts'
 
 export const oneAlph = 10n ** 18n
 export const minimalAlphInContract = oneAlph
@@ -21,6 +21,7 @@ export const maxAlphAmount = 10n ** 18n * 1000000000n
 export const gasPrice = 100000000000n
 export const maxGasPerTx = 625000n
 export const defaultGasFee = gasPrice * maxGasPerTx
+export const minimumLiquidity = 1000n
 
 export enum ErrorCodes {
   ReserveOverflow,
@@ -107,10 +108,16 @@ export function bigintToHex(num: bigint): string {
   return num.toString(16).padStart(64, '0')
 }
 
-export function createTokenPair(token0Id: string, token1Id: string, contractId?: string) {
+export function createTokenPair(
+  token0Id: string,
+  token1Id: string,
+  contractId?: string,
+  tokenPairFactoryFixture?: ContractFixture<TokenPairFactoryTypes.Fields>,
+) {
   const address = contractId ? addressFromContractId(contractId) : randomContractAddress()
   const contractState = TokenPair.stateForTest(
     {
+      tokenPairFactory: tokenPairFactoryFixture?.contractId ?? '',
       token0Id: token0Id,
       token1Id: token1Id,
       reserve0: 0n,
@@ -118,7 +125,9 @@ export function createTokenPair(token0Id: string, token1Id: string, contractId?:
       blockTimeStampLast: 0n,
       price0CumulativeLast: 0n,
       price1CumulativeLast: 0n,
-      totalSupply: 0n
+      totalSupply: 0n,
+      kLast: 0n,
+      feeCollectorId: ''
     },
     {
       alphAmount: oneAlph,
@@ -126,14 +135,22 @@ export function createTokenPair(token0Id: string, token1Id: string, contractId?:
     },
     address
   )
-  return new ContractFixture(contractState, [], address)
+  return new ContractFixture(contractState, tokenPairFactoryFixture?.states() ?? [], address)
 }
 
-export function createTokenPairFactory() {
+export function createTokenPairFactory(
+  feeSetter: Address,
+  feeCollectorFactoryId?: string
+) {
   const pairTemplate = createTokenPair(randomTokenId(), randomTokenId())
   const address = randomContractAddress()
   const contractState = TokenPairFactory.stateForTest(
-    { pairTemplateId: pairTemplate.contractId, pairSize: 0n },
+    {
+      pairTemplateId: pairTemplate.contractId,
+      pairSize: 0n,
+      feeSetter: feeSetter,
+      feeCollectorFactory: feeCollectorFactoryId ?? ''
+    },
     { alphAmount: oneAlph },
     address
   )

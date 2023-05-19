@@ -1,9 +1,43 @@
-// TODO: do we need to support `feeTo`???
 Contract TokenPairFactory(
   pairTemplateId: ByteVec, // the template contract id of `TokenPair`
-  mut pairSize: U256
+  mut pairSize: U256,
+  mut feeSetter: Address,
+  mut feeCollectorFactory: FeeCollectorFactory
 ) extends Constants() {
   event PairCreated(token0: ByteVec, token1: ByteVec, pair: ByteVec, currentPairSize: U256)
+
+  @using(updateFields = true)
+  pub fn setFeeCollectorFactory(factory: FeeCollectorFactory) -> () {
+    checkCaller!(callerAddress!() == feeSetter, ErrorCodes.InvalidCaller)
+    feeCollectorFactory = factory
+  }
+
+  @using(updateFields = true)
+  pub fn updateFeeSetter(newFeeSetter: Address) -> () {
+    checkCaller!(callerAddress!() == feeSetter, ErrorCodes.InvalidCaller)
+    feeSetter = newFeeSetter
+  }
+
+  pub fn getFeeSetter() -> Address {
+    return feeSetter
+  }
+
+  @using(preapprovedAssets = true)
+  pub fn enableFeeCollector(tokenPair: TokenPair, alphAmount: U256) -> () {
+    let caller = callerAddress!()
+    checkCaller!(caller == feeSetter, ErrorCodes.InvalidCaller)
+    let feeCollectorId = feeCollectorFactory.createFeeCollector{caller -> ALPH: alphAmount}(
+      caller,
+      alphAmount,
+      contractId!(tokenPair)
+    )
+    tokenPair.setFeeCollectorId(feeCollectorId)
+  }
+
+  pub fn updateFeeCollector(tokenPair: TokenPair, newFeeCollectorId: ByteVec) -> () {
+    checkCaller!(callerAddress!() == feeSetter, ErrorCodes.InvalidCaller)
+    tokenPair.setFeeCollectorId(newFeeCollectorId)
+  }
 
   fn sortTokens(tokenA: ByteVec, tokenB: ByteVec) -> (ByteVec, ByteVec) {
     let left = u256From32Byte!(tokenA)
@@ -28,20 +62,24 @@ Contract TokenPairFactory(
     )
     assert!(tokenAId != tokenBId, ErrorCodes.IdenticalTokenIds)
     let (token0Id, token1Id) = sortTokens(tokenAId, tokenBId)
-    let encodedImmutableFields = TokenPair.encodeImmFields!(token0Id, token1Id)
-    let encodedMutableFields = TokenPair.encodeMutFields!(
+    let (encodedImmFields, encodedMutFields) = TokenPair.encodeFields!(
+      TokenPairFactory(selfContractId!()),
+      token0Id,
+      token1Id,
       0, // reserve0
       0, // reserve1
       0, // blockTimeStampLast
       0, // price0CumulativeLast
       0, // price1CumulativeLast
-      0  // totalSupply
+      0, // totalSupply
+      0, // kLast
+      #  // feeCollectorId
     )
     let pairId = copyCreateSubContractWithToken!{payer -> ALPH: alphAmount}(
       token0Id ++ token1Id,
       pairTemplateId,
-      encodedImmutableFields,
-      encodedMutableFields,
+      encodedImmFields,
+      encodedMutFields,
       1 << 255
     )
 

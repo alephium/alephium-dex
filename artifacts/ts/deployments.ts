@@ -11,8 +11,11 @@ import {
   TokenPairFactoryInstance,
   Router,
   RouterInstance,
+  FeeCollectorPerTokenPairImpl,
+  FeeCollectorPerTokenPairImplInstance,
+  FeeCollectorFactoryImpl,
+  FeeCollectorFactoryImplInstance,
 } from ".";
-import { default as testnetDeployments } from "../.deployments.testnet.json";
 import { default as devnetDeployments } from "../.deployments.devnet.json";
 
 export type Deployments = {
@@ -21,6 +24,8 @@ export type Deployments = {
     TokenPair: DeployContractExecutionResult<TokenPairInstance>;
     TokenPairFactory: DeployContractExecutionResult<TokenPairFactoryInstance>;
     Router: DeployContractExecutionResult<RouterInstance>;
+    FeeCollectorPerTokenPairImpl: DeployContractExecutionResult<FeeCollectorPerTokenPairImplInstance>;
+    FeeCollectorFactoryImpl: DeployContractExecutionResult<FeeCollectorFactoryImplInstance>;
   };
 };
 
@@ -44,6 +49,18 @@ function toDeployments(json: any): Deployments {
         json.contracts.Router.contractInstance.address
       ),
     },
+    FeeCollectorPerTokenPairImpl: {
+      ...json.contracts.FeeCollectorPerTokenPairImpl,
+      contractInstance: FeeCollectorPerTokenPairImpl.at(
+        json.contracts.FeeCollectorPerTokenPairImpl.contractInstance.address
+      ),
+    },
+    FeeCollectorFactoryImpl: {
+      ...json.contracts.FeeCollectorFactoryImpl,
+      contractInstance: FeeCollectorFactoryImpl.at(
+        json.contracts.FeeCollectorFactoryImpl.contractInstance.address
+      ),
+    },
   };
   return {
     ...json,
@@ -55,12 +72,7 @@ export function loadDeployments(
   networkId: NetworkId,
   deployerAddress?: string
 ): Deployments {
-  const deployments =
-    networkId === "testnet"
-      ? testnetDeployments
-      : networkId === "devnet"
-      ? devnetDeployments
-      : undefined;
+  const deployments = networkId === "devnet" ? devnetDeployments : undefined;
   if (deployments === undefined) {
     throw Error("The contract has not been deployed to the " + networkId);
   }

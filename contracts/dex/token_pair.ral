@@ -1,6 +1,7 @@
 import "std/fungible_token_interface"
 
 Contract TokenPair(
+  tokenPairFactory: TokenPairFactory,
   token0Id: ByteVec,
   token1Id: ByteVec,
   mut reserve0: U256,
@@ -8,7 +9,9 @@ Contract TokenPair(
   mut blockTimeStampLast: U256,
   mut price0CumulativeLast: U256,
   mut price1CumulativeLast: U256,
-  mut totalSupply: U256
+  mut totalSupply: U256,
+  mut kLast: U256,
+  mut feeCollectorId: ByteVec
 ) extends Math(), Constants() implements IFungibleToken {
 
   event Mint(sender: Address, amount0: U256, amount1: U256, liquidity: U256)
@@ -16,6 +19,12 @@ Contract TokenPair(
   event Swap(sender: Address, amount0In: U256, amount1In: U256, amount0Out: U256, amount1Out: U256, to: Address)
 
   const MINIMUM_LIQUIDITY = 1000
+
+  @using(updateFields = true)
+  pub fn setFeeCollectorId(id: ByteVec) -> () {
+    checkCaller!(callerContractId!() == contractId!(tokenPairFactory), ErrorCodes.InvalidCaller)
+    feeCollectorId = id
+  }
 
   pub fn getTokenPair() -> (ByteVec, ByteVec) {
     return token0Id, token1Id
@@ -71,8 +80,31 @@ Contract TokenPair(
     blockTimeStampLast = blockTimeStampSecond
   }
 
+  @using(updateFields = true)
+  fn mintFee(prevReserve0: U256, prevReserve1: U256) -> (Bool, U256) {
+    let mut fee = 0
+    let feeOn = feeCollectorId != #
+    if (feeOn) {
+      if (kLast != 0) {
+        let rootK = sqrt(prevReserve0 * prevReserve1)
+        let rootKLast = sqrt(kLast)
+        if (rootK > rootKLast) {
+          let numerator = totalSupply * (rootK - rootKLast)
+          let denominator = rootK * 5 + rootKLast
+          fee = numerator / denominator
+          totalSupply = totalSupply + fee
+        }
+      }
+    } else {
+      kLast = 0
+    }
+    return feeOn, fee
+  }
+
   @using(preapprovedAssets = true, assetsInContract = true, updateFields = true, checkExternalCaller = false)
   pub fn mint(sender: Address, amount0: U256, amount1: U256) -> U256 {
+    let (feeOn, feeAmount) = mintFee(reserve0, reserve1)
+
     let mut liquidity = 0
     if (totalSupply == 0) {
       let initLiquidity = sqrt(amount0 * amount1)
@@ -94,12 +126,20 @@ Contract TokenPair(
     totalSupply = totalSupply + liquidity
     update(reserve0 + amount0, reserve1 + amount1)
 
+    if (feeOn) {
+      kLast = reserve0 * reserve1
+      if (feeAmount > 0) {
+        FeeCollectorPerTokenPair(feeCollectorId).collectFee{selfAddress!() -> selfTokenId!(): feeAmount}(selfAddress!(), feeAmount)
+      }
+    }
     emit Mint(sender, amount0, amount1, liquidity)
     return liquidity
   }
 
   @using(preapprovedAssets = true, assetsInContract = true, updateFields = true, checkExternalCaller = false)
   pub fn burn(sender: Address, liquidity: U256) -> (U256, U256) {
+    let (feeOn, feeAmount) = mintFee(reserve0, reserve1)
+
     let amount0 = (liquidity * reserve0) / totalSupply
     let amount1 = (liquidity * reserve1) / totalSupply
     assert!(amount0 > 0 && amount1 > 0, ErrorCodes.InsufficientLiquidityBurned)
@@ -111,6 +151,12 @@ Contract TokenPair(
     totalSupply = totalSupply - liquidity
     update(reserve0 - amount0, reserve1 - amount1)
 
+    if (feeOn) {
+      kLast = reserve0 * reserve1
+      if (feeAmount > 0) {
+        FeeCollectorPerTokenPair(feeCollectorId).collectFee{selfAddress!() -> selfTokenId!(): feeAmount}(selfAddress!(), feeAmount)
+      }
+    }
     emit Burn(sender, amount0, amount1, liquidity)
     return amount0, amount1
   }

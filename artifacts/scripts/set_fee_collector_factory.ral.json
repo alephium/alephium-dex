@@ -1,26 +1,17 @@
 {
   "version": "v2.3.2",
-  "name": "CreatePair",
-  "bytecodeTemplate": "01010300000013{0}7a7a{2}a2{3}0da3{4}0da3{0}{2}{3}{4}100c{1}0106",
+  "name": "SetFeeCollectorFactory",
+  "bytecodeTemplate": "01010300000005{1}0d0c{0}0100",
   "fieldsSig": {
     "names": [
-      "payer",
-      "factory",
-      "alphAmount",
-      "tokenAId",
-      "tokenBId"
+      "tokenPairFactory",
+      "feeCollectorFactory"
     ],
     "types": [
-      "Address",
-      "ByteVec",
-      "U256",
       "ByteVec",
       "ByteVec"
     ],
     "isMutable": [
-      false,
-      false,
-      false,
       false,
       false
     ]

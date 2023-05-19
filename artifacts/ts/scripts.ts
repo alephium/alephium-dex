@@ -12,7 +12,9 @@ import {
 } from "@alephium/web3";
 import { default as AddLiquidityScriptJson } from "../scripts/add_liquidity.ral.json";
 import { default as CreatePairScriptJson } from "../scripts/create_pair.ral.json";
+import { default as EnableFeeCollectorScriptJson } from "../scripts/enable_fee_collector.ral.json";
 import { default as RemoveLiquidityScriptJson } from "../scripts/remove_liquidity.ral.json";
+import { default as SetFeeCollectorFactoryScriptJson } from "../scripts/set_fee_collector_factory.ral.json";
 import { default as SwapMaxInScriptJson } from "../scripts/swap_max_in.ral.json";
 import { default as SwapMinOutScriptJson } from "../scripts/swap_min_out.ral.json";
 import { default as GetTokenScriptJson } from "../test/get_token.ral.json";
@@ -56,6 +58,21 @@ export namespace CreatePair {
   export const script = Script.fromJson(CreatePairScriptJson);
 }
 
+export namespace EnableFeeCollector {
+  export async function execute(
+    signer: SignerProvider,
+    params: ExecuteScriptParams<{
+      tokenPairFactory: HexString;
+      tokenPair: HexString;
+    }>
+  ): Promise<ExecuteScriptResult> {
+    const signerParams = await script.txParamsForExecution(signer, params);
+    return await signer.signAndSubmitExecuteScriptTx(signerParams);
+  }
+
+  export const script = Script.fromJson(EnableFeeCollectorScriptJson);
+}
+
 export namespace RemoveLiquidity {
   export async function execute(
     signer: SignerProvider,
@@ -74,6 +91,21 @@ export namespace RemoveLiquidity {
   }
 
   export const script = Script.fromJson(RemoveLiquidityScriptJson);
+}
+
+export namespace SetFeeCollectorFactory {
+  export async function execute(
+    signer: SignerProvider,
+    params: ExecuteScriptParams<{
+      tokenPairFactory: HexString;
+      feeCollectorFactory: HexString;
+    }>
+  ): Promise<ExecuteScriptResult> {
+    const signerParams = await script.txParamsForExecution(signer, params);
+    return await signer.signAndSubmitExecuteScriptTx(signerParams);
+  }
+
+  export const script = Script.fromJson(SetFeeCollectorFactoryScriptJson);
 }
 
 export namespace SwapMaxIn {

@@ -13,12 +13,11 @@ import {
   defaultGasFee,
   expandTo18Decimals,
   mint,
-  encodePrice
+  encodePrice,
+  minimumLiquidity
 } from './fixtures/DexFixture'
 import { expectAssertionError } from '@alephium/web3-test'
 import { TokenPair, TokenPairTypes } from '../artifacts/ts'
-
-const MinimumLiquidity = 1000n
 
 describe('test token pair', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
@@ -62,7 +61,7 @@ describe('test token pair', () => {
       sender: sender,
       amount0: token0Amount,
       amount1: token1Amount,
-      liquidity: expectedLiquidity - MinimumLiquidity
+      liquidity: expectedLiquidity - minimumLiquidity
     })
 
     const tokenPairState = getContractState<TokenPairTypes.Fields>(mintResult.contracts, fixture.contractId)
@@ -73,7 +72,7 @@ describe('test token pair', () => {
     expect(contractBalanceOf(tokenPairState, token1Id)).toEqual(token1Amount)
 
     const senderOutput = mintResult.txOutputs.find((o) => o.address === sender && o.tokens !== undefined && o.tokens.length > 0)!
-    expect(senderOutput.tokens!).toEqual([{ id: fixture.contractId, amount: expectedLiquidity - MinimumLiquidity }])
+    expect(senderOutput.tokens!).toEqual([{ id: fixture.contractId, amount: expectedLiquidity - minimumLiquidity }])
   })
 
   test('mint', async () => {
@@ -476,7 +475,7 @@ describe('test token pair', () => {
       }]
     })
 
-    expect(swapResult.gasUsed).toEqual(23339)
+    expect(swapResult.gasUsed).toEqual(23399)
   })
 
   test('burn', async () => {
@@ -485,7 +484,7 @@ describe('test token pair', () => {
     const { contractState } = await mint(fixture, sender, token0Amount, token1Amount)
 
     const expectedLiquidity = expandTo18Decimals(3)
-    const liquidity = expectedLiquidity - MinimumLiquidity
+    const liquidity = expectedLiquidity - minimumLiquidity
     const burnResult = await TokenPair.tests.burn({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
@@ -505,24 +504,24 @@ describe('test token pair', () => {
     const event = burnResult.events[0] as TokenPairTypes.BurnEvent
     expect(event.fields).toEqual({
       sender: sender,
-      amount0: token0Amount - MinimumLiquidity,
-      amount1: token1Amount - MinimumLiquidity,
+      amount0: token0Amount - minimumLiquidity,
+      amount1: token1Amount - minimumLiquidity,
       liquidity: liquidity
     })
 
     const tokenPairState = getContractState<TokenPairTypes.Fields>(burnResult.contracts, fixture.contractId)
-    expect(tokenPairState.fields.totalSupply).toEqual(MinimumLiquidity)
-    expect(tokenPairState.fields.reserve0).toEqual(MinimumLiquidity)
-    expect(tokenPairState.fields.reserve1).toEqual(MinimumLiquidity)
-    expect(contractBalanceOf(tokenPairState, token0Id)).toEqual(MinimumLiquidity)
-    expect(contractBalanceOf(tokenPairState, token1Id)).toEqual(MinimumLiquidity)
+    expect(tokenPairState.fields.totalSupply).toEqual(minimumLiquidity)
+    expect(tokenPairState.fields.reserve0).toEqual(minimumLiquidity)
+    expect(tokenPairState.fields.reserve1).toEqual(minimumLiquidity)
+    expect(contractBalanceOf(tokenPairState, token0Id)).toEqual(minimumLiquidity)
+    expect(contractBalanceOf(tokenPairState, token1Id)).toEqual(minimumLiquidity)
 
     const senderOutputs = burnResult.txOutputs.filter((o) => o.address === sender && o.tokens !== undefined && o.tokens.length > 0)
     expect(senderOutputs.length).toEqual(2)
     const senderTokens = [...senderOutputs[0].tokens!, ...senderOutputs[1].tokens!]
     expectTokensEqual(senderTokens, [
-      { id: token0Id, amount: token0Amount - MinimumLiquidity },
-      { id: token1Id, amount: token1Amount - MinimumLiquidity },
+      { id: token0Id, amount: token0Amount - minimumLiquidity },
+      { id: token1Id, amount: token1Amount - minimumLiquidity },
     ])
   })
 

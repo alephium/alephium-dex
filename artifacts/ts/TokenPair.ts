@@ -29,6 +29,7 @@ import { default as TokenPairContractJson } from "../dex/token_pair.ral.json";
 // Custom types for the contract
 export namespace TokenPairTypes {
   export type Fields = {
+    tokenPairFactory: HexString;
     token0Id: HexString;
     token1Id: HexString;
     reserve0: bigint;
@@ -37,6 +38,8 @@ export namespace TokenPairTypes {
     price0CumulativeLast: bigint;
     price1CumulativeLast: bigint;
     totalSupply: bigint;
+    kLast: bigint;
+    feeCollectorId: HexString;
   };
 
   export type State = ContractState<Fields>;
@@ -176,6 +179,11 @@ class Factory extends ContractFactory<
     ): Promise<TestContractResult<bigint>> => {
       return testMethod(this, "sqrt", params);
     },
+    setFeeCollectorId: async (
+      params: TestContractParams<TokenPairTypes.Fields, { id: HexString }>
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "setFeeCollectorId", params);
+    },
     getTokenPair: async (
       params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
     ): Promise<TestContractResult<[HexString, HexString]>> => {
@@ -208,6 +216,14 @@ class Factory extends ContractFactory<
       >
     ): Promise<TestContractResult<null>> => {
       return testMethod(this, "update", params);
+    },
+    mintFee: async (
+      params: TestContractParams<
+        TokenPairTypes.Fields,
+        { prevReserve0: bigint; prevReserve1: bigint }
+      >
+    ): Promise<TestContractResult<[boolean, bigint]>> => {
+      return testMethod(this, "mintFee", params);
     },
     mint: async (
       params: TestContractParams<
@@ -248,7 +264,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "dca32d225dc6a4aa43fdb39d08069ddc32ee983be053d7494de0b5f54dc32500"
+    "366023ec1b8b80fe3a1c48bca7533c487dd2c044df659b6f1ea0f2c441d7b540"
   )
 );
 
