@@ -129,7 +129,7 @@ Contract TokenPair(
     if (feeOn) {
       kLast = reserve0 * reserve1
       if (feeAmount > 0) {
-        FeeCollector(feeCollectorId).collectFee{selfAddress!() -> selfTokenId!(): feeAmount}(selfAddress!(), feeAmount)
+        FeeCollectorPerTokenPair(feeCollectorId).collectFee{selfAddress!() -> selfTokenId!(): feeAmount}(selfAddress!(), feeAmount)
       }
     }
     emit Mint(sender, amount0, amount1, liquidity)
@@ -154,7 +154,7 @@ Contract TokenPair(
     if (feeOn) {
       kLast = reserve0 * reserve1
       if (feeAmount > 0) {
-        FeeCollector(feeCollectorId).collectFee{selfAddress!() -> selfTokenId!(): feeAmount}(selfAddress!(), feeAmount)
+        FeeCollectorPerTokenPair(feeCollectorId).collectFee{selfAddress!() -> selfTokenId!(): feeAmount}(selfAddress!(), feeAmount)
       }
     }
     emit Burn(sender, amount0, amount1, liquidity)

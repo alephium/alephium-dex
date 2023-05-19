@@ -1,7 +1,7 @@
-Contract FeeCollectorImpl(
+Contract FeeCollectorPerTokenPairImpl(
   tokenPairFactory: TokenPairFactory,
   tokenPairId: ByteVec
-) extends Constants() implements FeeCollector {
+) extends Constants() implements FeeCollectorPerTokenPair {
   @using(preapprovedAssets = true, assetsInContract = true)
   pub fn collectFee(from: Address, amount: U256) -> () {
     checkCaller!(callerContractId!() == tokenPairId, ErrorCodes.InvalidCaller)

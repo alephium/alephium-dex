@@ -5,7 +5,7 @@
   "codeHash": "966f75cddefe774a87dbf778012f4f3f494b3a860f4c975d0c5262a1be185d49",
   "fieldsSig": {
     "names": [
-      "feeCollectorTemplateId",
+      "feeCollectorPerTokenPairTemplateId",
       "tokenPairFactory"
     ],
     "types": [

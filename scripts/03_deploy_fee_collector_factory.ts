@@ -1,16 +1,16 @@
 import { Deployer, DeployFunction, Network } from '@alephium/cli'
 import { Settings } from '../alephium.config'
-import { FeeCollectorFactoryImpl, FeeCollectorImpl } from '../artifacts/ts'
+import { FeeCollectorFactoryImpl, FeeCollectorPerTokenPairImpl } from '../artifacts/ts'
 
 const deployFeeCollectorFactory: DeployFunction<Settings> = async (deployer: Deployer): Promise<void> => {
-  const feeCollectorTemplateInitialFields = {
+  const feeCollectorPerTokenPairTemplateInitialFields = {
     tokenPairFactory: '',
     tokenPairId: ''
   }
-  const feeCollectorTemplateResult = await deployer.deployContract(FeeCollectorImpl, { initialFields: feeCollectorTemplateInitialFields })
+  const feeCollectorPerTokenPairTemplateResult = await deployer.deployContract(FeeCollectorPerTokenPairImpl, { initialFields: feeCollectorPerTokenPairTemplateInitialFields })
   const tokenPairFactoryId = deployer.getDeployContractResult('TokenPairFactory').contractInstance.contractId
   const feeCollectorFactoryInitialFields = {
-    feeCollectorTemplateId: feeCollectorTemplateResult.contractInstance.contractId,
+    feeCollectorPerTokenPairTemplateId: feeCollectorPerTokenPairTemplateResult.contractInstance.contractId,
     tokenPairFactory: tokenPairFactoryId
   }
   const feeCollectorFactoryResult = await deployer.deployContract(FeeCollectorFactoryImpl, { initialFields: feeCollectorFactoryInitialFields })

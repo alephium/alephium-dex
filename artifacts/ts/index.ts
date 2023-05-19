@@ -7,7 +7,7 @@ export * from "./TokenPair";
 export * from "./TokenPairFactory";
 export * from "./ExampleOracleSimple";
 export * from "./FeeCollectorFactoryImpl";
-export * from "./FeeCollectorImpl";
+export * from "./FeeCollectorPerTokenPairImpl";
 export * from "./FullMathTest";
 export * from "./MathTest";
 export * from "./TestToken";

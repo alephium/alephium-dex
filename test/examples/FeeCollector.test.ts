@@ -1,11 +1,11 @@
-import { Address, addressFromContractId, ContractState, ONE_ALPH, subContractId, web3 } from '@alephium/web3'
+import { addressFromContractId, ContractState, ONE_ALPH, subContractId, web3 } from '@alephium/web3'
 import {
-  FeeCollectorImpl,
+  FeeCollectorPerTokenPairImpl,
   FeeCollectorFactoryImpl,
   TokenPairTypes,
   TokenPair,
   FeeCollectorFactoryImplTypes,
-  FeeCollectorImplTypes,
+  FeeCollectorPerTokenPairImplTypes,
   TokenPairFactoryTypes,
   TokenPairFactory
 } from '../../artifacts/ts'
@@ -24,9 +24,9 @@ import {
 } from '../fixtures/DexFixture'
 import { randomContractAddress, randomContractId } from '@alephium/web3-test'
 
-function createFeeCollectorTemplate() {
+function createFeeCollectorPerTokenPairTemplate() {
   const address = randomContractAddress()
-  const contractState = FeeCollectorImpl.stateForTest(
+  const contractState = FeeCollectorPerTokenPairImpl.stateForTest(
     {
       tokenPairFactory: '',
       tokenPairId: ''
@@ -38,17 +38,17 @@ function createFeeCollectorTemplate() {
 }
 
 function createFeeCollectorFactory(tokenPairFactoryId: string, contractId: string) {
-  const feeCollectorTemplate = createFeeCollectorTemplate()
+  const feeCollectorPerTokenPairTemplate = createFeeCollectorPerTokenPairTemplate()
   const address = addressFromContractId(contractId)
   const contractState = FeeCollectorFactoryImpl.stateForTest(
     {
-      feeCollectorTemplateId: feeCollectorTemplate.contractId,
+      feeCollectorPerTokenPairTemplateId: feeCollectorPerTokenPairTemplate.contractId,
       tokenPairFactory: tokenPairFactoryId
     },
     { alphAmount: ONE_ALPH },
     address
   )
-  return new ContractFixture(contractState, feeCollectorTemplate.states(), address)
+  return new ContractFixture(contractState, feeCollectorPerTokenPairTemplate.states(), address)
 }
 
 describe('test fee collector', () => {
@@ -144,7 +144,7 @@ describe('test fee collector', () => {
     })
     const contractState0 = getContractState<TokenPairTypes.Fields>(enableFeeCollectorResult.contracts, tokenPairFixture.contractId)
     const feeCollectorId = subContractId(feeCollectorFactoryFixture.contractId, tokenPairFixture.contractId, 0)
-    const feeCollectorState = getContractState<FeeCollectorImplTypes.Fields>(enableFeeCollectorResult.contracts, feeCollectorId)
+    const feeCollectorState = getContractState<FeeCollectorPerTokenPairImplTypes.Fields>(enableFeeCollectorResult.contracts, feeCollectorId)
     tokenPairFixture.dependencies.push(feeCollectorState)
 
     const contractState1 = await mintAndSwap(contractState0)
@@ -170,7 +170,7 @@ describe('test fee collector', () => {
     expect(contractBalanceOf(contractState2, token0Id)).toEqual(1000n + 249501683697445n)
     expect(contractBalanceOf(contractState2, token1Id)).toEqual(1000n + 250000187312969n)
 
-    const newFeeCollectorState = getContractState<FeeCollectorImplTypes.Fields>(burnResult.contracts, feeCollectorId)
+    const newFeeCollectorState = getContractState<FeeCollectorPerTokenPairImplTypes.Fields>(burnResult.contracts, feeCollectorId)
     expect(contractBalanceOf(newFeeCollectorState, tokenPairFixture.contractId)).toEqual(249750499251388n)
   })
 })
