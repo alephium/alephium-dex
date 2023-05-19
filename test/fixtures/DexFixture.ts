@@ -23,25 +23,6 @@ export const maxGasPerTx = 625000n
 export const defaultGasFee = gasPrice * maxGasPerTx
 export const minimumLiquidity = 1000n
 
-export enum ErrorCodes {
-  ReserveOverflow,
-  InsufficientInitLiquidity,
-  InsufficientLiquidityMinted,
-  InsufficientLiquidityBurned,
-  InvalidToAddress,
-  InsufficientLiquidity,
-  InvalidTokenInId,
-  InvalidCalleeId,
-  InvalidK,
-  InsufficientOutputAmount,
-  InsufficientInputAmount,
-  IdenticalTokenIds,
-  Expired,
-  InsufficientToken0Amount,
-  InsufficientToken1Amount,
-  TokenNotExist
-}
-
 export class ContractFixture<F extends Fields> {
   selfState: ContractState<F>
   dependencies: ContractState[]

@@ -148,5 +148,63 @@
         "U256"
       ]
     }
+  ],
+  "constants": [
+    {
+      "name": "Resolution",
+      "value": {
+        "type": "U256",
+        "value": "112"
+      }
+    },
+    {
+      "name": "Period",
+      "value": {
+        "type": "U256",
+        "value": "86400"
+      }
+    }
+  ],
+  "enums": [
+    {
+      "name": "ErrorCodes",
+      "fields": [
+        {
+          "name": "FullDivOverflow",
+          "value": {
+            "type": "U256",
+            "value": "0"
+          }
+        },
+        {
+          "name": "DivByZero",
+          "value": {
+            "type": "U256",
+            "value": "1"
+          }
+        },
+        {
+          "name": "FractionOverflow",
+          "value": {
+            "type": "U256",
+            "value": "2"
+          }
+        },
+        {
+          "name": "PeriodNotElapsed",
+          "value": {
+            "type": "U256",
+            "value": "3"
+          }
+        },
+        {
+          "name": "InvalidToken",
+          "value": {
+            "type": "U256",
+            "value": "4"
+          }
+        }
+      ]
+    }
   ]
 }

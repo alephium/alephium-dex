@@ -10,14 +10,14 @@ import {
   SignerProvider,
   HexString,
 } from "@alephium/web3";
-import { default as AddLiquidityScriptJson } from "../scripts/add_liquidity.ral.json";
-import { default as CreatePairScriptJson } from "../scripts/create_pair.ral.json";
-import { default as EnableFeeCollectorScriptJson } from "../scripts/enable_fee_collector.ral.json";
-import { default as RemoveLiquidityScriptJson } from "../scripts/remove_liquidity.ral.json";
-import { default as SetFeeCollectorFactoryScriptJson } from "../scripts/set_fee_collector_factory.ral.json";
-import { default as SwapMaxInScriptJson } from "../scripts/swap_max_in.ral.json";
-import { default as SwapMinOutScriptJson } from "../scripts/swap_min_out.ral.json";
-import { default as GetTokenScriptJson } from "../test/get_token.ral.json";
+import { default as AddLiquidityScriptJson } from "../scripts/AddLiquidity.ral.json";
+import { default as CreatePairScriptJson } from "../scripts/CreatePair.ral.json";
+import { default as EnableFeeCollectorScriptJson } from "../scripts/EnableFeeCollector.ral.json";
+import { default as RemoveLiquidityScriptJson } from "../scripts/RemoveLiquidity.ral.json";
+import { default as SetFeeCollectorFactoryScriptJson } from "../scripts/SetFeeCollectorFactory.ral.json";
+import { default as SwapMaxInScriptJson } from "../scripts/SwapMaxIn.ral.json";
+import { default as SwapMinOutScriptJson } from "../scripts/SwapMinOut.ral.json";
+import { default as GetTokenScriptJson } from "../test/GetToken.ral.json";
 
 export namespace AddLiquidity {
   export async function execute(

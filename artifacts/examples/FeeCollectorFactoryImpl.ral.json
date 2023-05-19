@@ -1,0 +1,174 @@
+{
+  "version": "v2.3.2",
+  "name": "FeeCollectorFactoryImpl",
+  "bytecode": "0201402a010303050116b3ce014113107bce0116021302641300641704170316001601a21602ce0016031604c102",
+  "codeHash": "966f75cddefe774a87dbf778012f4f3f494b3a860f4c975d0c5262a1be185d49",
+  "fieldsSig": {
+    "names": [
+      "feeCollectorPerTokenPairTemplateId",
+      "tokenPairFactory"
+    ],
+    "types": [
+      "ByteVec",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "createFeeCollector",
+      "usePreapprovedAssets": true,
+      "useAssetsInContract": false,
+      "isPublic": true,
+      "paramNames": [
+        "caller",
+        "alphAmount",
+        "tokenPairId"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "ErrorCodes",
+      "fields": [
+        {
+          "name": "ReserveOverflow",
+          "value": {
+            "type": "U256",
+            "value": "0"
+          }
+        },
+        {
+          "name": "InsufficientInitLiquidity",
+          "value": {
+            "type": "U256",
+            "value": "1"
+          }
+        },
+        {
+          "name": "InsufficientLiquidityMinted",
+          "value": {
+            "type": "U256",
+            "value": "2"
+          }
+        },
+        {
+          "name": "InsufficientLiquidityBurned",
+          "value": {
+            "type": "U256",
+            "value": "3"
+          }
+        },
+        {
+          "name": "InvalidToAddress",
+          "value": {
+            "type": "U256",
+            "value": "4"
+          }
+        },
+        {
+          "name": "InsufficientLiquidity",
+          "value": {
+            "type": "U256",
+            "value": "5"
+          }
+        },
+        {
+          "name": "InvalidTokenInId",
+          "value": {
+            "type": "U256",
+            "value": "6"
+          }
+        },
+        {
+          "name": "InvalidCalleeId",
+          "value": {
+            "type": "U256",
+            "value": "7"
+          }
+        },
+        {
+          "name": "InvalidK",
+          "value": {
+            "type": "U256",
+            "value": "8"
+          }
+        },
+        {
+          "name": "InsufficientOutputAmount",
+          "value": {
+            "type": "U256",
+            "value": "9"
+          }
+        },
+        {
+          "name": "InsufficientInputAmount",
+          "value": {
+            "type": "U256",
+            "value": "10"
+          }
+        },
+        {
+          "name": "IdenticalTokenIds",
+          "value": {
+            "type": "U256",
+            "value": "11"
+          }
+        },
+        {
+          "name": "Expired",
+          "value": {
+            "type": "U256",
+            "value": "12"
+          }
+        },
+        {
+          "name": "InsufficientToken0Amount",
+          "value": {
+            "type": "U256",
+            "value": "13"
+          }
+        },
+        {
+          "name": "InsufficientToken1Amount",
+          "value": {
+            "type": "U256",
+            "value": "14"
+          }
+        },
+        {
+          "name": "TokenNotExist",
+          "value": {
+            "type": "U256",
+            "value": "15"
+          }
+        },
+        {
+          "name": "InvalidCaller",
+          "value": {
+            "type": "U256",
+            "value": "16"
+          }
+        }
+      ]
+    }
+  ]
+}

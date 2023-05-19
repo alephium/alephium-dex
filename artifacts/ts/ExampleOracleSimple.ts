@@ -24,7 +24,7 @@ import {
   ContractInstance,
   getContractEventsCurrentCount,
 } from "@alephium/web3";
-import { default as ExampleOracleSimpleContractJson } from "../examples/example_oracle_simple.ral.json";
+import { default as ExampleOracleSimpleContractJson } from "../examples/ExampleOracleSimple.ral.json";
 
 // Custom types for the contract
 export namespace ExampleOracleSimpleTypes {
@@ -75,6 +75,18 @@ class Factory extends ContractFactory<
   ExampleOracleSimpleInstance,
   ExampleOracleSimpleTypes.Fields
 > {
+  consts = {
+    Resolution: BigInt(112),
+    Period: BigInt(86400),
+    ErrorCodes: {
+      FullDivOverflow: BigInt(0),
+      DivByZero: BigInt(1),
+      FractionOverflow: BigInt(2),
+      PeriodNotElapsed: BigInt(3),
+      InvalidToken: BigInt(4),
+    },
+  };
+
   at(address: string): ExampleOracleSimpleInstance {
     return new ExampleOracleSimpleInstance(address);
   }

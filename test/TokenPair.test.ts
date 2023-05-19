@@ -4,7 +4,6 @@ import {
   contractBalanceOf,
   ContractFixture,
   createTokenPair,
-  ErrorCodes,
   expectTokensEqual,
   getContractState,
   randomP2PKHAddress,
@@ -121,9 +120,9 @@ describe('test token pair', () => {
     }
 
     const maxReserve = (1n << 112n) - 1n
-    await expectAssertionError(test(maxReserve + 1n, maxReserve), fixture.address, ErrorCodes.ReserveOverflow)
-    await expectAssertionError(test(maxReserve, maxReserve + 1n), fixture.address, ErrorCodes.ReserveOverflow)
-    await expectAssertionError(test(maxReserve + 1n, maxReserve + 1n), fixture.address, ErrorCodes.ReserveOverflow)
+    await expectAssertionError(test(maxReserve + 1n, maxReserve), fixture.address, Number(TokenPair.consts.ErrorCodes.ReserveOverflow))
+    await expectAssertionError(test(maxReserve, maxReserve + 1n), fixture.address, Number(TokenPair.consts.ErrorCodes.ReserveOverflow))
+    await expectAssertionError(test(maxReserve + 1n, maxReserve + 1n), fixture.address, Number(TokenPair.consts.ErrorCodes.ReserveOverflow))
     await test(maxReserve, maxReserve)
   }, 10000)
 
@@ -166,7 +165,7 @@ describe('test token pair', () => {
           }]
         })
       }
-      await expectAssertionError(func(expectedOutputAmount + 1n), fixture.address, ErrorCodes.InvalidK)
+      await expectAssertionError(func(expectedOutputAmount + 1n), fixture.address, Number(TokenPair.consts.ErrorCodes.InvalidK))
       await func(expectedOutputAmount)
     })
   })

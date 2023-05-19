@@ -16,7 +16,7 @@ const configuration: Configuration<Settings> = {
     testnet: {
       nodeUrl: process.env.NODE_URL as string,
       privateKeys: process.env.PRIVATE_KEYS === undefined ? [] : process.env.PRIVATE_KEYS.split(','),
-      settings: {}
+      settings: { feeSetter: '19ymyoDKsqgYtEZoJva1BQr14oeYzaCHve9nnQXSuqLiH' }
     },
 
     mainnet: {
