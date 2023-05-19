@@ -105,14 +105,6 @@ class Factory extends ContractFactory<
     ): Promise<TestContractResult<null>> => {
       return testMethod(this, "enableFeeCollector", params);
     },
-    disableFeeCollector: async (
-      params: TestContractParams<
-        TokenPairFactoryTypes.Fields,
-        { tokenPair: HexString }
-      >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "disableFeeCollector", params);
-    },
     updateFeeCollector: async (
       params: TestContractParams<
         TokenPairFactoryTypes.Fields,
@@ -150,7 +142,7 @@ export const TokenPairFactory = new Factory(
   Contract.fromJson(
     TokenPairFactoryContractJson,
     "",
-    "29b02cd3e4e8549552a0acf84cc6c19f43fc1da748123897e1a053c26f38aec0"
+    "44144899a2b71465a80654889afa8a2bf4a8f3cd0f30ad1880d2ffc7c12ad18b"
   )
 );
 

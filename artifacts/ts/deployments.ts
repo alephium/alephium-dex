@@ -11,8 +11,8 @@ import {
   TokenPairFactoryInstance,
   Router,
   RouterInstance,
-  FeeCollectorImpl,
-  FeeCollectorImplInstance,
+  FeeCollectorPerTokenPairImpl,
+  FeeCollectorPerTokenPairImplInstance,
   FeeCollectorFactoryImpl,
   FeeCollectorFactoryImplInstance,
 } from ".";
@@ -24,7 +24,7 @@ export type Deployments = {
     TokenPair: DeployContractExecutionResult<TokenPairInstance>;
     TokenPairFactory: DeployContractExecutionResult<TokenPairFactoryInstance>;
     Router: DeployContractExecutionResult<RouterInstance>;
-    FeeCollectorImpl: DeployContractExecutionResult<FeeCollectorImplInstance>;
+    FeeCollectorPerTokenPairImpl: DeployContractExecutionResult<FeeCollectorPerTokenPairImplInstance>;
     FeeCollectorFactoryImpl: DeployContractExecutionResult<FeeCollectorFactoryImplInstance>;
   };
 };
@@ -49,10 +49,10 @@ function toDeployments(json: any): Deployments {
         json.contracts.Router.contractInstance.address
       ),
     },
-    FeeCollectorImpl: {
-      ...json.contracts.FeeCollectorImpl,
-      contractInstance: FeeCollectorImpl.at(
-        json.contracts.FeeCollectorImpl.contractInstance.address
+    FeeCollectorPerTokenPairImpl: {
+      ...json.contracts.FeeCollectorPerTokenPairImpl,
+      contractInstance: FeeCollectorPerTokenPairImpl.at(
+        json.contracts.FeeCollectorPerTokenPairImpl.contractInstance.address
       ),
     },
     FeeCollectorFactoryImpl: {
