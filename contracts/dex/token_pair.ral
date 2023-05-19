@@ -81,12 +81,12 @@ Contract TokenPair(
   }
 
   @using(updateFields = true)
-  fn mintFee(prevReserve0: U256, prevReserve1: U256) -> (Bool, U256) {
+  fn mintFee(reserve0_: U256, reserve1_: U256) -> (Bool, U256) {
     let mut fee = 0
     let feeOn = feeCollectorId != #
     if (feeOn) {
       if (kLast != 0) {
-        let rootK = sqrt(prevReserve0 * prevReserve1)
+        let rootK = sqrt(reserve0_ * reserve1_)
         let rootKLast = sqrt(kLast)
         if (rootK > rootKLast) {
           let numerator = totalSupply * (rootK - rootKLast)
