@@ -34,11 +34,6 @@ Contract TokenPairFactory(
     tokenPair.setFeeCollectorId(feeCollectorId)
   }
 
-  pub fn disableFeeCollector(tokenPair: TokenPair) -> () {
-    checkCaller!(callerAddress!() == feeSetter, ErrorCodes.InvalidCaller)
-    tokenPair.setFeeCollectorId(#)
-  }
-
   pub fn updateFeeCollector(tokenPair: TokenPair, newFeeCollectorId: ByteVec) -> () {
     checkCaller!(callerAddress!() == feeSetter, ErrorCodes.InvalidCaller)
     tokenPair.setFeeCollectorId(newFeeCollectorId)
