@@ -22,7 +22,7 @@ Contract TokenPair(
 
   @using(updateFields = true)
   pub fn setFeeCollectorId(id: ByteVec) -> () {
-    checkCaller!(callerContractId!() == tokenId!(tokenPairFactory), ErrorCodes.InvalidCaller)
+    checkCaller!(callerContractId!() == contractId!(tokenPairFactory), ErrorCodes.InvalidCaller)
     feeCollectorId = id
   }
 
