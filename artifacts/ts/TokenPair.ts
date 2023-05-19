@@ -243,7 +243,7 @@ class Factory extends ContractFactory<
     mintFee: async (
       params: TestContractParams<
         TokenPairTypes.Fields,
-        { prevReserve0: bigint; prevReserve1: bigint }
+        { reserve0_: bigint; reserve1_: bigint }
       >
     ): Promise<TestContractResult<[boolean, bigint]>> => {
       return testMethod(this, "mintFee", params);

@@ -289,8 +289,8 @@
       "useAssetsInContract": false,
       "isPublic": false,
       "paramNames": [
-        "prevReserve0",
-        "prevReserve1"
+        "reserve0_",
+        "reserve1_"
       ],
       "paramTypes": [
         "U256",
