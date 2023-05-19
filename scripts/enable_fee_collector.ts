@@ -40,7 +40,7 @@ program
       const tokenPairId = opts.tokenPairId as string
       await enableFeeCollector(publicKey, networkId, tokenPairId)
     } catch (error) {
-      console.log(`Failed to build unsgined tx, error: ${error}`)
+      console.error(`Failed to build unsgined tx, error: ${error}`)
     }
   })
 

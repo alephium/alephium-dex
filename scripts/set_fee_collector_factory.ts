@@ -39,7 +39,7 @@ program
       const feeCollectorFactoryId = opts.feeCollectorFactoryId as string
       await setFeeCollectorFactory(publicKey, networkId, feeCollectorFactoryId)
     } catch (error) {
-      console.log(`Failed to build unsigned tx, error: ${error}`)
+      console.error(`Failed to build unsigned tx, error: ${error}`)
     }
   })
 

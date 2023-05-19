@@ -26,7 +26,7 @@ program
       const tokenPairId = opts.tokenPairId as string
       await getFeeCollectorId(networkId, tokenPairId)
     } catch (error) {
-      console.log(`Failed to get fee collector id, error: ${error}`)
+      console.error(`Failed to get fee collector id, error: ${error}`)
     }
   })
 

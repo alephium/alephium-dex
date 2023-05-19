@@ -204,7 +204,7 @@ program
         await createPairs(signer, factoryId, tokenIds)
       }
     } catch (error) {
-      console.log(`Failed to creat tokens, error: ${error}`)
+      console.error(`Failed to creat tokens, error: ${error}`)
     }
   })
 
@@ -233,7 +233,7 @@ program
       await waitTxConfirmed(web3.getCurrentNodeProvider(), result.txId, 1)
       console.log(`transfer succeed, tx id: ${result.txId}`)
     } catch (error) {
-      console.log(`Failed to transfer tokens, error: ${error}`)
+      console.error(`Failed to transfer tokens, error: ${error}`)
     }
   })
 

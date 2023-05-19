@@ -29,7 +29,7 @@ program
       const tokenBId = opts.tokenBId as string
       await getTokenPairId(networkId, tokenAId, tokenBId)
     } catch (error) {
-      console.log(`Failed to get token pair id, error: ${error}`)
+      console.error(`Failed to get token pair id, error: ${error}`)
     }
   })
 
