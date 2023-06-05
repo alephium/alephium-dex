@@ -1,5 +1,5 @@
 {
-  "version": "v2.3.2",
+  "version": "v2.3.3",
   "name": "EnableFeeCollector",
   "bytecodeTemplate": "01010300000009b413c40de0b6b3a7640000a2{1}13c40de0b6b3a76400000e0c{0}0103",
   "fieldsSig": {

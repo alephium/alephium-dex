@@ -25,6 +25,7 @@ import {
   getContractEventsCurrentCount,
 } from "@alephium/web3";
 import { default as RouterContractJson } from "../dex/Router.ral.json";
+import { getContractByCodeHash } from "./contracts";
 
 // Custom types for the contract
 export namespace RouterTypes {
@@ -245,12 +246,24 @@ export class RouterInstance extends ContractInstance {
     addLiquidity: async (
       params: RouterTypes.CallMethodParams<"addLiquidity">
     ): Promise<RouterTypes.CallMethodResult<"addLiquidity">> => {
-      return callMethod(Router, this, "addLiquidity", params);
+      return callMethod(
+        Router,
+        this,
+        "addLiquidity",
+        params,
+        getContractByCodeHash
+      );
     },
     removeLiquidity: async (
       params: RouterTypes.CallMethodParams<"removeLiquidity">
     ): Promise<RouterTypes.CallMethodResult<"removeLiquidity">> => {
-      return callMethod(Router, this, "removeLiquidity", params);
+      return callMethod(
+        Router,
+        this,
+        "removeLiquidity",
+        params,
+        getContractByCodeHash
+      );
     },
   };
 
@@ -260,7 +273,8 @@ export class RouterInstance extends ContractInstance {
     return (await multicallMethods(
       Router,
       this,
-      calls
+      calls,
+      getContractByCodeHash
     )) as RouterTypes.MultiCallResults<Calls>;
   }
 }

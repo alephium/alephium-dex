@@ -4,6 +4,7 @@
 
 import {
   Address,
+  ExecutableScript,
   ExecuteScriptParams,
   ExecuteScriptResult,
   Script,
@@ -19,147 +20,60 @@ import { default as SwapMaxInScriptJson } from "../scripts/SwapMaxIn.ral.json";
 import { default as SwapMinOutScriptJson } from "../scripts/SwapMinOut.ral.json";
 import { default as GetTokenScriptJson } from "../test/GetToken.ral.json";
 
-export namespace AddLiquidity {
-  export async function execute(
-    signer: SignerProvider,
-    params: ExecuteScriptParams<{
-      sender: Address;
-      router: HexString;
-      pair: HexString;
-      amount0Desired: bigint;
-      amount1Desired: bigint;
-      amount0Min: bigint;
-      amount1Min: bigint;
-      deadline: bigint;
-    }>
-  ): Promise<ExecuteScriptResult> {
-    const signerParams = await script.txParamsForExecution(signer, params);
-    return await signer.signAndSubmitExecuteScriptTx(signerParams);
-  }
-
-  export const script = Script.fromJson(AddLiquidityScriptJson);
-}
-
-export namespace CreatePair {
-  export async function execute(
-    signer: SignerProvider,
-    params: ExecuteScriptParams<{
-      payer: Address;
-      factory: HexString;
-      alphAmount: bigint;
-      tokenAId: HexString;
-      tokenBId: HexString;
-    }>
-  ): Promise<ExecuteScriptResult> {
-    const signerParams = await script.txParamsForExecution(signer, params);
-    return await signer.signAndSubmitExecuteScriptTx(signerParams);
-  }
-
-  export const script = Script.fromJson(CreatePairScriptJson);
-}
-
-export namespace EnableFeeCollector {
-  export async function execute(
-    signer: SignerProvider,
-    params: ExecuteScriptParams<{
-      tokenPairFactory: HexString;
-      tokenPair: HexString;
-    }>
-  ): Promise<ExecuteScriptResult> {
-    const signerParams = await script.txParamsForExecution(signer, params);
-    return await signer.signAndSubmitExecuteScriptTx(signerParams);
-  }
-
-  export const script = Script.fromJson(EnableFeeCollectorScriptJson);
-}
-
-export namespace RemoveLiquidity {
-  export async function execute(
-    signer: SignerProvider,
-    params: ExecuteScriptParams<{
-      sender: Address;
-      router: HexString;
-      pairId: HexString;
-      liquidity: bigint;
-      amount0Min: bigint;
-      amount1Min: bigint;
-      deadline: bigint;
-    }>
-  ): Promise<ExecuteScriptResult> {
-    const signerParams = await script.txParamsForExecution(signer, params);
-    return await signer.signAndSubmitExecuteScriptTx(signerParams);
-  }
-
-  export const script = Script.fromJson(RemoveLiquidityScriptJson);
-}
-
-export namespace SetFeeCollectorFactory {
-  export async function execute(
-    signer: SignerProvider,
-    params: ExecuteScriptParams<{
-      tokenPairFactory: HexString;
-      feeCollectorFactory: HexString;
-    }>
-  ): Promise<ExecuteScriptResult> {
-    const signerParams = await script.txParamsForExecution(signer, params);
-    return await signer.signAndSubmitExecuteScriptTx(signerParams);
-  }
-
-  export const script = Script.fromJson(SetFeeCollectorFactoryScriptJson);
-}
-
-export namespace SwapMaxIn {
-  export async function execute(
-    signer: SignerProvider,
-    params: ExecuteScriptParams<{
-      sender: Address;
-      router: HexString;
-      pair: HexString;
-      tokenInId: HexString;
-      amountInMax: bigint;
-      amountOut: bigint;
-      deadline: bigint;
-    }>
-  ): Promise<ExecuteScriptResult> {
-    const signerParams = await script.txParamsForExecution(signer, params);
-    return await signer.signAndSubmitExecuteScriptTx(signerParams);
-  }
-
-  export const script = Script.fromJson(SwapMaxInScriptJson);
-}
-
-export namespace SwapMinOut {
-  export async function execute(
-    signer: SignerProvider,
-    params: ExecuteScriptParams<{
-      sender: Address;
-      router: HexString;
-      pair: HexString;
-      tokenInId: HexString;
-      amountIn: bigint;
-      amountOutMin: bigint;
-      deadline: bigint;
-    }>
-  ): Promise<ExecuteScriptResult> {
-    const signerParams = await script.txParamsForExecution(signer, params);
-    return await signer.signAndSubmitExecuteScriptTx(signerParams);
-  }
-
-  export const script = Script.fromJson(SwapMinOutScriptJson);
-}
-
-export namespace GetToken {
-  export async function execute(
-    signer: SignerProvider,
-    params: ExecuteScriptParams<{
-      token: HexString;
-      sender: Address;
-      amount: bigint;
-    }>
-  ): Promise<ExecuteScriptResult> {
-    const signerParams = await script.txParamsForExecution(signer, params);
-    return await signer.signAndSubmitExecuteScriptTx(signerParams);
-  }
-
-  export const script = Script.fromJson(GetTokenScriptJson);
-}
+export const AddLiquidity = new ExecutableScript<{
+  sender: Address;
+  router: HexString;
+  pair: HexString;
+  amount0Desired: bigint;
+  amount1Desired: bigint;
+  amount0Min: bigint;
+  amount1Min: bigint;
+  deadline: bigint;
+}>(Script.fromJson(AddLiquidityScriptJson));
+export const CreatePair = new ExecutableScript<{
+  payer: Address;
+  factory: HexString;
+  alphAmount: bigint;
+  tokenAId: HexString;
+  tokenBId: HexString;
+}>(Script.fromJson(CreatePairScriptJson));
+export const EnableFeeCollector = new ExecutableScript<{
+  tokenPairFactory: HexString;
+  tokenPair: HexString;
+}>(Script.fromJson(EnableFeeCollectorScriptJson));
+export const RemoveLiquidity = new ExecutableScript<{
+  sender: Address;
+  router: HexString;
+  pairId: HexString;
+  liquidity: bigint;
+  amount0Min: bigint;
+  amount1Min: bigint;
+  deadline: bigint;
+}>(Script.fromJson(RemoveLiquidityScriptJson));
+export const SetFeeCollectorFactory = new ExecutableScript<{
+  tokenPairFactory: HexString;
+  feeCollectorFactory: HexString;
+}>(Script.fromJson(SetFeeCollectorFactoryScriptJson));
+export const SwapMaxIn = new ExecutableScript<{
+  sender: Address;
+  router: HexString;
+  pair: HexString;
+  tokenInId: HexString;
+  amountInMax: bigint;
+  amountOut: bigint;
+  deadline: bigint;
+}>(Script.fromJson(SwapMaxInScriptJson));
+export const SwapMinOut = new ExecutableScript<{
+  sender: Address;
+  router: HexString;
+  pair: HexString;
+  tokenInId: HexString;
+  amountIn: bigint;
+  amountOutMin: bigint;
+  deadline: bigint;
+}>(Script.fromJson(SwapMinOutScriptJson));
+export const GetToken = new ExecutableScript<{
+  token: HexString;
+  sender: Address;
+  amount: bigint;
+}>(Script.fromJson(GetTokenScriptJson));

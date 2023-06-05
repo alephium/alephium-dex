@@ -25,6 +25,7 @@ import {
   getContractEventsCurrentCount,
 } from "@alephium/web3";
 import { default as FeeCollectorFactoryImplContractJson } from "../examples/FeeCollectorFactoryImpl.ral.json";
+import { getContractByCodeHash } from "./contracts";
 
 // Custom types for the contract
 export namespace FeeCollectorFactoryImplTypes {
@@ -130,7 +131,8 @@ export class FeeCollectorFactoryImplInstance extends ContractInstance {
         FeeCollectorFactoryImpl,
         this,
         "createFeeCollector",
-        params
+        params,
+        getContractByCodeHash
       );
     },
   };
@@ -141,7 +143,8 @@ export class FeeCollectorFactoryImplInstance extends ContractInstance {
     return (await multicallMethods(
       FeeCollectorFactoryImpl,
       this,
-      calls
+      calls,
+      getContractByCodeHash
     )) as FeeCollectorFactoryImplTypes.MultiCallResults<Calls>;
   }
 }
