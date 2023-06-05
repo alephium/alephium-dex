@@ -1,5 +1,5 @@
 import { ContractState } from '@alephium/web3'
-import { ExampleOracleSimple, TokenPairTypes } from '../../artifacts/ts'
+import { ExampleOracleSimple, TokenPairTypes } from '../../../artifacts/ts'
 import { ContractFixture, randomContractAddress } from './DexFixture'
 
 export enum OracleErrorCodes {

@@ -8,7 +8,7 @@ import {
   FeeCollectorPerTokenPairImplTypes,
   TokenPairFactoryTypes,
   TokenPairFactory
-} from '../../artifacts/ts'
+} from '../../../artifacts/ts'
 import {
   buildProject,
   contractBalanceOf,

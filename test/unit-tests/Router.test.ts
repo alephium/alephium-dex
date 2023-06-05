@@ -1,6 +1,6 @@
 import { ContractState, DUST_AMOUNT, web3 } from '@alephium/web3'
 import { expectAssertionError } from '@alephium/web3-test'
-import { Router, TokenPairTypes } from '../artifacts/ts'
+import { Router, TokenPairTypes } from '../../artifacts/ts'
 import {
   buildProject,
   createRouter,

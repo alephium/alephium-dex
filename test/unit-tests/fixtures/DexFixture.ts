@@ -13,7 +13,7 @@ import {
 } from '@alephium/web3'
 import { randomBytes } from 'crypto'
 import * as base58 from 'bs58'
-import { TokenPairFactory, TokenPair, Router, TokenPairTypes, TokenPairFactoryTypes, FeeCollectorFactoryImplTypes } from '../../artifacts/ts'
+import { TokenPairFactory, TokenPair, Router, TokenPairTypes, TokenPairFactoryTypes, FeeCollectorFactoryImplTypes } from '../../../artifacts/ts'
 
 export const oneAlph = 10n ** 18n
 export const minimalAlphInContract = oneAlph

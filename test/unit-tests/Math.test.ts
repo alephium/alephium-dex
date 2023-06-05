@@ -1,7 +1,7 @@
 import { web3 } from '@alephium/web3'
 import { buildProject, randomBigInt } from './fixtures/DexFixture'
 import BigNumber from 'bignumber.js'
-import { MathTest } from '../artifacts/ts'
+import { MathTest } from '../../artifacts/ts'
 
 describe('test math', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
