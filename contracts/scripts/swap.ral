@@ -1,0 +1,13 @@
+TxScript Swap(tokenPair: TokenPair, sender: Address, to: Address, amount0In: U256, amount1In: U256, amount0Out: U256, amount1Out: U256) {
+  let (token0Id, token1Id) = tokenPair.getTokenPair()
+  if (sender != to) {
+    transferToken!(sender, to, ALPH, dustAmount!())
+  }
+  if (amount0In == 0) {
+    tokenPair.swap{sender -> token1Id: amount1In}(sender, to, amount0In, amount1In, amount0Out, amount1Out)
+  } else if (amount1In == 0) {
+    tokenPair.swap{sender -> token0Id: amount0In}(sender, to, amount0In, amount1In, amount0Out, amount1Out)
+  } else {
+    tokenPair.swap{sender -> token0Id: amount0In, token1Id: amount1In}(sender, to, amount0In, amount1In, amount0Out, amount1Out)
+  }
+}

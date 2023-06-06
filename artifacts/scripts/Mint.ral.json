@@ -1,0 +1,37 @@
+{
+  "version": "v2.3.3",
+  "name": "Mint",
+  "bytecodeTemplate": "010103000200160c0e{0}010717011700{1}7a1600{2}a31601{3}a3{1}{2}{3}0f0d{0}010e18",
+  "fieldsSig": {
+    "names": [
+      "tokenPair",
+      "sender",
+      "amount0",
+      "amount1"
+    ],
+    "types": [
+      "ByteVec",
+      "Address",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "usePreapprovedAssets": true,
+      "useAssetsInContract": false,
+      "isPublic": true,
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

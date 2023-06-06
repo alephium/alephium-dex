@@ -280,6 +280,11 @@ class Factory extends ContractFactory<
     ): Promise<TestContractResult<null>> => {
       return testMethod(this, "swap", params);
     },
+    sync: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "sync", params);
+    },
   };
 }
 
@@ -288,7 +293,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "366023ec1b8b80fe3a1c48bca7533c487dd2c044df659b6f1ea0f2c441d7b540"
+    "24ef75d8aa374151d55bbd5b579c667af835ede4dc07bdc8db6b7ebbaa7a60ad"
   )
 );
 

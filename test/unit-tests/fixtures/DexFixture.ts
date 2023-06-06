@@ -7,6 +7,7 @@ import {
   contractIdFromAddress,
   ContractState,
   Fields,
+  groupOfAddress,
   number256ToBigint,
   Project,
   Token
@@ -65,10 +66,14 @@ export function randomContractAddress(): string {
   return base58.encode(bytes)
 }
 
-export function randomP2PKHAddress(): string {
+export function randomP2PKHAddress(groupIndex = 0): string {
   const prefix = Buffer.from([0x00])
   const bytes = Buffer.concat([prefix, randomBytes(32)])
-  return base58.encode(bytes)
+  const address = base58.encode(bytes)
+  if (groupOfAddress(address) === groupIndex) {
+    return address
+  }
+  return randomP2PKHAddress(groupIndex)
 }
 
 export function randomTokenId(): string {

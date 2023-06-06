@@ -1,0 +1,4 @@
+TxScript Mint(tokenPair: TokenPair, sender: Address, amount0: U256, amount1: U256) {
+  let (token0Id, token1Id) = tokenPair.getTokenPair()
+  tokenPair.mint{sender -> token0Id: amount0, token1Id: amount1}(sender, amount0, amount1)
+}
