@@ -7,13 +7,14 @@ import {
   contractIdFromAddress,
   ContractState,
   Fields,
+  groupOfAddress,
   number256ToBigint,
   Project,
   Token
 } from '@alephium/web3'
 import { randomBytes } from 'crypto'
 import * as base58 from 'bs58'
-import { TokenPairFactory, TokenPair, Router, TokenPairTypes, TokenPairFactoryTypes, FeeCollectorFactoryImplTypes } from '../../artifacts/ts'
+import { TokenPairFactory, TokenPair, Router, TokenPairTypes, TokenPairFactoryTypes, FeeCollectorFactoryImplTypes } from '../../../artifacts/ts'
 
 export const oneAlph = 10n ** 18n
 export const minimalAlphInContract = oneAlph
@@ -65,10 +66,14 @@ export function randomContractAddress(): string {
   return base58.encode(bytes)
 }
 
-export function randomP2PKHAddress(): string {
+export function randomP2PKHAddress(groupIndex = 0): string {
   const prefix = Buffer.from([0x00])
   const bytes = Buffer.concat([prefix, randomBytes(32)])
-  return base58.encode(bytes)
+  const address = base58.encode(bytes)
+  if (groupOfAddress(address) === groupIndex) {
+    return address
+  }
+  return randomP2PKHAddress(groupIndex)
 }
 
 export function randomTokenId(): string {

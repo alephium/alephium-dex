@@ -25,6 +25,7 @@ import {
   getContractEventsCurrentCount,
 } from "@alephium/web3";
 import { default as ExampleOracleSimpleContractJson } from "../examples/ExampleOracleSimple.ral.json";
+import { getContractByCodeHash } from "./contracts";
 
 // Custom types for the contract
 export namespace ExampleOracleSimpleTypes {
@@ -166,22 +167,46 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
     fullMul: async (
       params: ExampleOracleSimpleTypes.CallMethodParams<"fullMul">
     ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"fullMul">> => {
-      return callMethod(ExampleOracleSimple, this, "fullMul", params);
+      return callMethod(
+        ExampleOracleSimple,
+        this,
+        "fullMul",
+        params,
+        getContractByCodeHash
+      );
     },
     mulDiv: async (
       params: ExampleOracleSimpleTypes.CallMethodParams<"mulDiv">
     ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"mulDiv">> => {
-      return callMethod(ExampleOracleSimple, this, "mulDiv", params);
+      return callMethod(
+        ExampleOracleSimple,
+        this,
+        "mulDiv",
+        params,
+        getContractByCodeHash
+      );
     },
     fraction: async (
       params: ExampleOracleSimpleTypes.CallMethodParams<"fraction">
     ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"fraction">> => {
-      return callMethod(ExampleOracleSimple, this, "fraction", params);
+      return callMethod(
+        ExampleOracleSimple,
+        this,
+        "fraction",
+        params,
+        getContractByCodeHash
+      );
     },
     consult: async (
       params: ExampleOracleSimpleTypes.CallMethodParams<"consult">
     ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"consult">> => {
-      return callMethod(ExampleOracleSimple, this, "consult", params);
+      return callMethod(
+        ExampleOracleSimple,
+        this,
+        "consult",
+        params,
+        getContractByCodeHash
+      );
     },
   };
 
@@ -191,7 +216,8 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
     return (await multicallMethods(
       ExampleOracleSimple,
       this,
-      calls
+      calls,
+      getContractByCodeHash
     )) as ExampleOracleSimpleTypes.MultiCallResults<Calls>;
   }
 }

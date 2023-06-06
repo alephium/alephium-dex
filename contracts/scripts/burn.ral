@@ -1,0 +1,3 @@
+TxScript Burn(tokenPair: TokenPair, sender: Address, liquidity: U256) {
+  tokenPair.burn{sender -> tokenId!(tokenPair): liquidity}(sender, liquidity)
+}

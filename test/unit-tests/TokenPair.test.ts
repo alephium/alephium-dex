@@ -16,7 +16,7 @@ import {
   minimumLiquidity
 } from './fixtures/DexFixture'
 import { expectAssertionError } from '@alephium/web3-test'
-import { TokenPair, TokenPairTypes } from '../artifacts/ts'
+import { TokenPair, TokenPairTypes } from '../../artifacts/ts'
 
 describe('test token pair', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')

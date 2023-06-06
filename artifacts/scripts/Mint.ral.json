@@ -1,30 +1,21 @@
 {
   "version": "v2.3.3",
-  "name": "SwapMinOut",
-  "bytecodeTemplate": "0101030000000f{0}{3}{4}a3{2}{0}{3}{4}{5}{0}{6}13070c{1}0104",
+  "name": "Mint",
+  "bytecodeTemplate": "010103000200160c0e{0}010717011700{1}7a1600{2}a31601{3}a3{1}{2}{3}0f0d{0}010e18",
   "fieldsSig": {
     "names": [
+      "tokenPair",
       "sender",
-      "router",
-      "pair",
-      "tokenInId",
-      "amountIn",
-      "amountOutMin",
-      "deadline"
+      "amount0",
+      "amount1"
     ],
     "types": [
+      "ByteVec",
       "Address",
-      "ByteVec",
-      "ByteVec",
-      "ByteVec",
-      "U256",
       "U256",
       "U256"
     ],
     "isMutable": [
-      false,
-      false,
-      false,
       false,
       false,
       false,

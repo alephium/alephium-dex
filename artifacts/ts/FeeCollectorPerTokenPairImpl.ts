@@ -25,6 +25,7 @@ import {
   getContractEventsCurrentCount,
 } from "@alephium/web3";
 import { default as FeeCollectorPerTokenPairImplContractJson } from "../examples/FeeCollectorPerTokenPairImpl.ral.json";
+import { getContractByCodeHash } from "./contracts";
 
 // Custom types for the contract
 export namespace FeeCollectorPerTokenPairImplTypes {

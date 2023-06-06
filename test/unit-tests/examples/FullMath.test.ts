@@ -1,5 +1,5 @@
 import { web3 } from '@alephium/web3'
-import { FullMathTest } from '../../artifacts/ts'
+import { FullMathTest } from '../../../artifacts/ts'
 import { buildProject, randomBigInt } from '../fixtures/DexFixture'
 import { expectAssertionError, randomContractAddress } from '@alephium/web3-test'
 import { OracleErrorCodes } from '../fixtures/ExampleOracleFixture'

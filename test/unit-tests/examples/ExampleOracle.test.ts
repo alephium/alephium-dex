@@ -1,6 +1,6 @@
 import { web3 } from "@alephium/web3"
 import { expectAssertionError } from "@alephium/web3-test"
-import { ExampleOracleSimple, ExampleOracleSimpleTypes } from "../../artifacts/ts"
+import { ExampleOracleSimple, ExampleOracleSimpleTypes } from "../../../artifacts/ts"
 import {
   buildProject,
   ContractFixture,

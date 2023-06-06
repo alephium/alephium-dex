@@ -1,31 +1,19 @@
 {
   "version": "v2.3.3",
-  "name": "SwapMinOut",
-  "bytecodeTemplate": "0101030000000f{0}{3}{4}a3{2}{0}{3}{4}{5}{0}{6}13070c{1}0104",
+  "name": "Burn",
+  "bytecodeTemplate": "0101030000000c{1}{0}{2}a3{1}{2}0e0e{0}010f1818",
   "fieldsSig": {
     "names": [
+      "tokenPair",
       "sender",
-      "router",
-      "pair",
-      "tokenInId",
-      "amountIn",
-      "amountOutMin",
-      "deadline"
+      "liquidity"
     ],
     "types": [
+      "ByteVec",
       "Address",
-      "ByteVec",
-      "ByteVec",
-      "ByteVec",
-      "U256",
-      "U256",
       "U256"
     ],
     "isMutable": [
-      false,
-      false,
-      false,
-      false,
       false,
       false,
       false

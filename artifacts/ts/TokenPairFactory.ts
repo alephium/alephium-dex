@@ -25,6 +25,7 @@ import {
   getContractEventsCurrentCount,
 } from "@alephium/web3";
 import { default as TokenPairFactoryContractJson } from "../dex/TokenPairFactory.ral.json";
+import { getContractByCodeHash } from "./contracts";
 
 // Custom types for the contract
 export namespace TokenPairFactoryTypes {
@@ -203,7 +204,8 @@ export class TokenPairFactoryInstance extends ContractInstance {
         TokenPairFactory,
         this,
         "getFeeSetter",
-        params === undefined ? {} : params
+        params === undefined ? {} : params,
+        getContractByCodeHash
       );
     },
   };
@@ -214,7 +216,8 @@ export class TokenPairFactoryInstance extends ContractInstance {
     return (await multicallMethods(
       TokenPairFactory,
       this,
-      calls
+      calls,
+      getContractByCodeHash
     )) as TokenPairFactoryTypes.MultiCallResults<Calls>;
   }
 }
