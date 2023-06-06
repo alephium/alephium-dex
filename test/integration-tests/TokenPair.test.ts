@@ -25,7 +25,6 @@ import {
   GetToken,
   Mint,
   Swap,
-  Sync,
   TestToken,
   TokenPair,
   TokenPairFactory,
@@ -191,10 +190,6 @@ class Fixture {
       attoAlphAmount: DUST_AMOUNT * 3n,
       tokens: [{ id: this.tokenPair.contractId, amount: liquidity }]
     }))
-  }
-
-  async sync() {
-    return waitTxConfirmed(Sync.execute(signer, { initialFields: { tokenPair: this.tokenPair.contractId } }))
   }
 
   async getEventByTxId<T extends ContractEvent>(txId: string) {
@@ -416,7 +411,7 @@ describe('test token pair', () => {
     // sleep 1 second to make sure the time elapsed large than 0
     await sleep(1000)
     const swapResult = await fixture.swap(0n, swapAmount, expectedOutputAmount, 0n, sender.address, sender)
-    expect(swapResult.gasAmount).toEqual(44588)
+    expect(swapResult.gasAmount).toEqual(44586)
   })
 
   test('burn', async () => {
@@ -458,34 +453,38 @@ describe('test token pair', () => {
 
     const blockTimeStamp0 = (await tokenPair.fetchState()).fields.blockTimeStampLast
     await sleep(1000)
-    await fixture.sync()
+    const swapAmount = expandTo18Decimals(3)
+    await fixture.swap(swapAmount, 0n, 0n, expandTo18Decimals(1))
+
     const tokenPairState0 = await tokenPair.fetchState()
     const initialPrice = encodePrice(token0Amount, token1Amount)
     const blockTimeStamp1 = (await tokenPair.fetchState()).fields.blockTimeStampLast
     const timeElapsed0 = blockTimeStamp1 - blockTimeStamp0
     expect(tokenPairState0.fields.price0CumulativeLast).toEqual(initialPrice[0] * timeElapsed0)
     expect(tokenPairState0.fields.price1CumulativeLast).toEqual(initialPrice[1] * timeElapsed0)
+    expect(tokenPairState0.fields.reserve0).toEqual(expandTo18Decimals(6))
+    expect(tokenPairState0.fields.reserve1).toEqual(expandTo18Decimals(2))
 
     await sleep(5000)
-    const swapAmount = expandTo18Decimals(3)
-    await fixture.swap(swapAmount, 0n, 0n, expandTo18Decimals(1))
+    await fixture.swap(swapAmount * 3n, 0n, 0n, expandTo18Decimals(1))
+    const newPrice0 = encodePrice(expandTo18Decimals(6), expandTo18Decimals(2))
 
     const tokenPairState1 = await tokenPair.fetchState()
     const blockTimeStamp2 = tokenPairState1.fields.blockTimeStampLast
     const timeElapsed1 = blockTimeStamp2 - blockTimeStamp1
-    expect(tokenPairState1.fields.price0CumulativeLast).toEqual(initialPrice[0] * (timeElapsed0 + timeElapsed1))
-    expect(tokenPairState1.fields.price1CumulativeLast).toEqual(initialPrice[1] * (timeElapsed0 + timeElapsed1))
-    expect(tokenPairState1.fields.reserve0).toEqual(expandTo18Decimals(6))
-    expect(tokenPairState1.fields.reserve1).toEqual(expandTo18Decimals(2))
+    expect(tokenPairState1.fields.price0CumulativeLast).toEqual(initialPrice[0] * timeElapsed0 + newPrice0[0] * timeElapsed1)
+    expect(tokenPairState1.fields.price1CumulativeLast).toEqual(initialPrice[1] * timeElapsed0 + newPrice0[1] * timeElapsed1)
+    expect(tokenPairState1.fields.reserve0).toEqual(expandTo18Decimals(15))
+    expect(tokenPairState1.fields.reserve1).toEqual(expandTo18Decimals(1))
 
-    const newPrice = encodePrice(expandTo18Decimals(6), expandTo18Decimals(2))
+    const newPrice1 = encodePrice(expandTo18Decimals(15), expandTo18Decimals(1))
     await sleep(5000)
-    await fixture.sync()
+    await fixture.mint(expandTo18Decimals(15), expandTo18Decimals(1))
 
     const tokenPairState2 = await tokenPair.fetchState()
     const blockTimeStamp3 = tokenPairState2.fields.blockTimeStampLast
     const timeElapsed2 = blockTimeStamp3 - blockTimeStamp2
-    expect(tokenPairState2.fields.price0CumulativeLast).toEqual(initialPrice[0] * (timeElapsed0 + timeElapsed1) + newPrice[0] * timeElapsed2)
-    expect(tokenPairState2.fields.price1CumulativeLast).toEqual(initialPrice[1] * (timeElapsed0 + timeElapsed1) + newPrice[1] * timeElapsed2)
+    expect(tokenPairState2.fields.price0CumulativeLast).toEqual(initialPrice[0] * timeElapsed0 + newPrice0[0] * timeElapsed1 + newPrice1[0] * timeElapsed2)
+    expect(tokenPairState2.fields.price1CumulativeLast).toEqual(initialPrice[1] * timeElapsed0 + newPrice0[1] * timeElapsed1 + newPrice1[1] * timeElapsed2)
   }, 20000)
 })

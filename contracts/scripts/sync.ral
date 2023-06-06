@@ -1,3 +1,0 @@
-TxScript Sync(tokenPair: TokenPair) {
-  tokenPair.sync()
-}

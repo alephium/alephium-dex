@@ -183,9 +183,4 @@ Contract TokenPair(
     update(newReserve0, newReserve1)
     emit Swap(sender, amount0In, amount1In, amount0Out, amount1Out, to)
   }
-
-  @using(checkExternalCaller = false)
-  pub fn sync() -> () {
-    update(reserve0, reserve1)
-  }
 }

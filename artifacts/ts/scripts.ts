@@ -21,7 +21,6 @@ import { default as SetFeeCollectorFactoryScriptJson } from "../scripts/SetFeeCo
 import { default as SwapScriptJson } from "../scripts/Swap.ral.json";
 import { default as SwapMaxInScriptJson } from "../scripts/SwapMaxIn.ral.json";
 import { default as SwapMinOutScriptJson } from "../scripts/SwapMinOut.ral.json";
-import { default as SyncScriptJson } from "../scripts/Sync.ral.json";
 import { default as GetTokenScriptJson } from "../test/GetToken.ral.json";
 
 export const AddLiquidity = new ExecutableScript<{
@@ -96,9 +95,6 @@ export const SwapMinOut = new ExecutableScript<{
   amountOutMin: bigint;
   deadline: bigint;
 }>(Script.fromJson(SwapMinOutScriptJson));
-export const Sync = new ExecutableScript<{ tokenPair: HexString }>(
-  Script.fromJson(SyncScriptJson)
-);
 export const GetToken = new ExecutableScript<{
   token: HexString;
   sender: Address;
