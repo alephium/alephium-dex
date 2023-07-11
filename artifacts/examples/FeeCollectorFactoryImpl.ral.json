@@ -27,7 +27,7 @@
       "paramNames": [
         "caller",
         "alphAmount",
-        "tokenPairId"
+        "tokenPair"
       ],
       "paramTypes": [
         "Address",
@@ -166,6 +166,13 @@
           "value": {
             "type": "U256",
             "value": "16"
+          }
+        },
+        {
+          "name": "FeeCollectorNotEnabled",
+          "value": {
+            "type": "U256",
+            "value": "17"
           }
         }
       ]

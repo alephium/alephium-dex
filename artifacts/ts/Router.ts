@@ -90,6 +90,7 @@ class Factory extends ContractFactory<RouterInstance, {}> {
       InsufficientToken1Amount: BigInt(14),
       TokenNotExist: BigInt(15),
       InvalidCaller: BigInt(16),
+      FeeCollectorNotEnabled: BigInt(17),
     },
   };
 

@@ -183,4 +183,15 @@ Contract TokenPair(
     update(newReserve0, newReserve1)
     emit Swap(sender, amount0In, amount1In, amount0Out, amount1Out, to)
   }
+
+  @using(updateFields = true, assetsInContract = true)
+  pub fn collectFeeManually() -> () {
+    assert!(feeCollectorId != #, ErrorCodes.FeeCollectorNotEnabled)
+    checkCaller!(callerContractId!() == feeCollectorId, ErrorCodes.InvalidCaller)
+    let (_, feeAmount) = mintFee(reserve0, reserve1)
+    if (feeAmount > 0) {
+      FeeCollectorPerTokenPair(feeCollectorId).collectFee{selfAddress!() -> selfTokenId!(): feeAmount}(selfAddress!(), feeAmount)
+    }
+    kLast = reserve0 * reserve1
+  }
 }

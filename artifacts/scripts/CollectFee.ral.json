@@ -1,0 +1,28 @@
+{
+  "version": "v2.3.5",
+  "name": "CollectFee",
+  "bytecodeTemplate": "010100000000040c0c{0}0103",
+  "fieldsSig": {
+    "names": [
+      "feeCollector"
+    ],
+    "types": [
+      "ByteVec"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "usePreapprovedAssets": false,
+      "useAssetsInContract": false,
+      "isPublic": true,
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

@@ -1,12 +1,12 @@
 {
   "version": "v2.3.5",
   "name": "FeeCollectorPerTokenPairImpl",
-  "bytecode": "020315402d404101010202000ab3ce014113107b1600b2ce011601aa01020202000cb40c0dce0001024513107b1600ce011601ab01020101000ab40c0dce0001024513107b1600b0",
-  "codeHash": "832af1cf2c49ce74e0c4c4108e8a0e94d05c9fa574b52b646e7eb27d96d827ab",
+  "bytecode": "020415402d4041405801010202000ab3ce014113107b1600b2ce011601aa01020202000cb40c0dce0001024513107b1600ce011601ab01020101000ab40c0dce0001024513107b1600b001000000000cb40c0dce0001024513107b0c0cce010111",
+  "codeHash": "393eee49cd23c00d61848a8b2272e848f5278cc17f8c0b2333e2ed744edf5b79",
   "fieldsSig": {
     "names": [
       "tokenPairFactory",
-      "tokenPairId"
+      "tokenPair"
     ],
     "types": [
       "ByteVec",
@@ -71,6 +71,16 @@
       "paramIsMutable": [
         false
       ],
+      "returnTypes": []
+    },
+    {
+      "name": "collectFeeManually",
+      "usePreapprovedAssets": false,
+      "useAssetsInContract": false,
+      "isPublic": true,
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
       "returnTypes": []
     }
   ],
@@ -196,6 +206,13 @@
           "value": {
             "type": "U256",
             "value": "16"
+          }
+        },
+        {
+          "name": "FeeCollectorNotEnabled",
+          "value": {
+            "type": "U256",
+            "value": "17"
           }
         }
       ]

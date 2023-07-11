@@ -41,7 +41,7 @@ export namespace FeeCollectorFactoryImplTypes {
       params: CallContractParams<{
         caller: Address;
         alphAmount: bigint;
-        tokenPairId: HexString;
+        tokenPair: HexString;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -83,6 +83,7 @@ class Factory extends ContractFactory<
       InsufficientToken1Amount: BigInt(14),
       TokenNotExist: BigInt(15),
       InvalidCaller: BigInt(16),
+      FeeCollectorNotEnabled: BigInt(17),
     },
   };
 
@@ -94,7 +95,7 @@ class Factory extends ContractFactory<
     createFeeCollector: async (
       params: TestContractParams<
         FeeCollectorFactoryImplTypes.Fields,
-        { caller: Address; alphAmount: bigint; tokenPairId: HexString }
+        { caller: Address; alphAmount: bigint; tokenPair: HexString }
       >
     ): Promise<TestContractResult<HexString>> => {
       return testMethod(this, "createFeeCollector", params);

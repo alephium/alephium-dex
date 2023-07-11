@@ -1,22 +1,27 @@
 Contract FeeCollectorPerTokenPairImpl(
   tokenPairFactory: TokenPairFactory,
-  tokenPairId: ByteVec
+  tokenPair: TokenPair
 ) extends Constants() implements FeeCollectorPerTokenPair {
   @using(preapprovedAssets = true, assetsInContract = true)
   pub fn collectFee(from: Address, amount: U256) -> () {
-    checkCaller!(callerContractId!() == tokenPairId, ErrorCodes.InvalidCaller)
-    transferToken!(from, selfAddress!(), tokenPairId, amount)
+    checkCaller!(callerContractId!() == contractId!(tokenPair), ErrorCodes.InvalidCaller)
+    transferToken!(from, selfAddress!(), tokenId!(tokenPair), amount)
   }
 
   @using(assetsInContract = true)
   pub fn withdraw(to: Address, amount: U256) -> () {
     checkCaller!(callerAddress!() == tokenPairFactory.getFeeSetter(), ErrorCodes.InvalidCaller)
-    transferTokenFromSelf!(to, tokenPairId, amount)
+    transferTokenFromSelf!(to, tokenId!(tokenPair), amount)
   }
 
   @using(assetsInContract = true)
   pub fn destroy(to: Address) -> () {
     checkCaller!(callerAddress!() == tokenPairFactory.getFeeSetter(), ErrorCodes.InvalidCaller)
     destroySelf!(to)
+  }
+
+  pub fn collectFeeManually() -> () {
+    checkCaller!(callerAddress!() == tokenPairFactory.getFeeSetter(), ErrorCodes.InvalidCaller)
+    tokenPair.collectFeeManually()
   }
 }

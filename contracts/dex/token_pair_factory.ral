@@ -29,7 +29,7 @@ Contract TokenPairFactory(
     let feeCollectorId = feeCollectorFactory.createFeeCollector{caller -> ALPH: alphAmount}(
       caller,
       alphAmount,
-      contractId!(tokenPair)
+      tokenPair
     )
     tokenPair.setFeeCollectorId(feeCollectorId)
   }

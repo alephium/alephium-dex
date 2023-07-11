@@ -13,6 +13,7 @@ import {
 } from "@alephium/web3";
 import { default as AddLiquidityScriptJson } from "../scripts/AddLiquidity.ral.json";
 import { default as BurnScriptJson } from "../scripts/Burn.ral.json";
+import { default as CollectFeeScriptJson } from "../scripts/CollectFee.ral.json";
 import { default as CreatePairScriptJson } from "../scripts/CreatePair.ral.json";
 import { default as EnableFeeCollectorScriptJson } from "../scripts/EnableFeeCollector.ral.json";
 import { default as MintScriptJson } from "../scripts/Mint.ral.json";
@@ -38,6 +39,9 @@ export const Burn = new ExecutableScript<{
   sender: Address;
   liquidity: bigint;
 }>(Script.fromJson(BurnScriptJson));
+export const CollectFee = new ExecutableScript<{ feeCollector: HexString }>(
+  Script.fromJson(CollectFeeScriptJson)
+);
 export const CreatePair = new ExecutableScript<{
   payer: Address;
   factory: HexString;

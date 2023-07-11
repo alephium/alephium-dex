@@ -31,7 +31,7 @@ import { getContractByCodeHash } from "./contracts";
 export namespace FeeCollectorPerTokenPairImplTypes {
   export type Fields = {
     tokenPairFactory: HexString;
-    tokenPairId: HexString;
+    tokenPair: HexString;
   };
 
   export type State = ContractState<Fields>;
@@ -60,6 +60,7 @@ class Factory extends ContractFactory<
       InsufficientToken1Amount: BigInt(14),
       TokenNotExist: BigInt(15),
       InvalidCaller: BigInt(16),
+      FeeCollectorNotEnabled: BigInt(17),
     },
   };
 
@@ -92,6 +93,14 @@ class Factory extends ContractFactory<
     ): Promise<TestContractResult<null>> => {
       return testMethod(this, "destroy", params);
     },
+    collectFeeManually: async (
+      params: Omit<
+        TestContractParams<FeeCollectorPerTokenPairImplTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "collectFeeManually", params);
+    },
   };
 }
 
@@ -100,7 +109,7 @@ export const FeeCollectorPerTokenPairImpl = new Factory(
   Contract.fromJson(
     FeeCollectorPerTokenPairImplContractJson,
     "",
-    "832af1cf2c49ce74e0c4c4108e8a0e94d05c9fa574b52b646e7eb27d96d827ab"
+    "393eee49cd23c00d61848a8b2272e848f5278cc17f8c0b2333e2ed744edf5b79"
   )
 );
 
