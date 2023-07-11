@@ -29,7 +29,7 @@ function createFeeCollectorPerTokenPairTemplate() {
   const contractState = FeeCollectorPerTokenPairImpl.stateForTest(
     {
       tokenPairFactory: '',
-      tokenPairId: ''
+      tokenPair: ''
     },
     { alphAmount: ONE_ALPH },
     address
