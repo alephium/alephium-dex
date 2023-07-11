@@ -3,11 +3,11 @@ Contract FeeCollectorFactoryImpl(
   tokenPairFactory: TokenPairFactory
 ) extends Constants() implements FeeCollectorFactory {
   @using(preapprovedAssets = true)
-  pub fn createFeeCollector(caller: Address, alphAmount: U256, tokenPairId: ByteVec) -> ByteVec {
+  pub fn createFeeCollector(caller: Address, alphAmount: U256, tokenPair: TokenPair) -> ByteVec {
     checkCaller!(callerContractId!() == contractId!(tokenPairFactory), ErrorCodes.InvalidCaller)
-    let (encodedImmFields, encodedMutFields) = FeeCollectorPerTokenPairImpl.encodeFields!(tokenPairFactory, tokenPairId)
+    let (encodedImmFields, encodedMutFields) = FeeCollectorPerTokenPairImpl.encodeFields!(tokenPairFactory, tokenPair)
     return copyCreateSubContract!{caller -> ALPH: alphAmount}(
-      tokenPairId,
+      contractId!(tokenPair),
       feeCollectorPerTokenPairTemplateId,
       encodedImmFields,
       encodedMutFields

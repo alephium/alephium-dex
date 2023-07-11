@@ -1,5 +1,5 @@
 {
-  "version": "v2.3.3",
+  "version": "v2.3.5",
   "name": "Mint",
   "bytecodeTemplate": "010103000200160c0e{0}010717011700{1}7a1600{2}a31601{3}a3{1}{2}{3}0f0d{0}010e18",
   "fieldsSig": {

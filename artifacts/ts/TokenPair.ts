@@ -162,6 +162,7 @@ class Factory extends ContractFactory<
       InsufficientToken1Amount: BigInt(14),
       TokenNotExist: BigInt(15),
       InvalidCaller: BigInt(16),
+      FeeCollectorNotEnabled: BigInt(17),
     },
   };
 
@@ -280,6 +281,16 @@ class Factory extends ContractFactory<
     ): Promise<TestContractResult<null>> => {
       return testMethod(this, "swap", params);
     },
+    collectFeeManually: async (
+      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "collectFeeManually", params);
+    },
+    collectFeeAndUpdateKLast: async (
+      params: TestContractParams<TokenPairTypes.Fields, { feeAmount: bigint }>
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "collectFeeAndUpdateKLast", params);
+    },
   };
 }
 
@@ -288,7 +299,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "366023ec1b8b80fe3a1c48bca7533c487dd2c044df659b6f1ea0f2c441d7b540"
+    "4a98763809adb6e899e3e7864e6d5dcb60c6fd0806f1264c3596b482021035f2"
   )
 );
 

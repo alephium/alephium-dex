@@ -1,0 +1,4 @@
+@using(preapprovedAssets = false)
+TxScript CollectFee(feeCollector: FeeCollectorPerTokenPairImpl) {
+  feeCollector.collectFeeManually()
+}

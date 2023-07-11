@@ -1,28 +1,22 @@
 {
   "version": "v2.3.5",
-  "name": "Burn",
-  "bytecodeTemplate": "0101030000000c{1}{0}{2}a3{1}{2}0e0e{0}010f1818",
+  "name": "CollectFee",
+  "bytecodeTemplate": "010100000000040c0c{0}0103",
   "fieldsSig": {
     "names": [
-      "tokenPair",
-      "sender",
-      "liquidity"
+      "feeCollector"
     ],
     "types": [
-      "ByteVec",
-      "Address",
-      "U256"
+      "ByteVec"
     ],
     "isMutable": [
-      false,
-      false,
       false
     ]
   },
   "functions": [
     {
       "name": "main",
-      "usePreapprovedAssets": true,
+      "usePreapprovedAssets": false,
       "useAssetsInContract": false,
       "isPublic": true,
       "paramNames": [],

@@ -1,5 +1,5 @@
 {
-  "version": "v2.3.3",
+  "version": "v2.3.5",
   "name": "FeeCollectorFactoryImpl",
   "bytecode": "0201402a010303050116b3ce014113107bce0116021302641300641704170316001601a21602ce0016031604c102",
   "codeHash": "966f75cddefe774a87dbf778012f4f3f494b3a860f4c975d0c5262a1be185d49",
@@ -27,7 +27,7 @@
       "paramNames": [
         "caller",
         "alphAmount",
-        "tokenPairId"
+        "tokenPair"
       ],
       "paramTypes": [
         "Address",
@@ -166,6 +166,13 @@
           "value": {
             "type": "U256",
             "value": "16"
+          }
+        },
+        {
+          "name": "FeeCollectorNotEnabled",
+          "value": {
+            "type": "U256",
+            "value": "17"
           }
         }
       ]
