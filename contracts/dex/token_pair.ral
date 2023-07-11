@@ -127,10 +127,7 @@ Contract TokenPair(
     update(reserve0 + amount0, reserve1 + amount1)
 
     if (feeOn) {
-      kLast = reserve0 * reserve1
-      if (feeAmount > 0) {
-        FeeCollectorPerTokenPair(feeCollectorId).collectFee{selfAddress!() -> selfTokenId!(): feeAmount}(selfAddress!(), feeAmount)
-      }
+      collectFeeAndUpdateKLast{selfAddress!() -> selfTokenId!(): feeAmount}(feeAmount)
     }
     emit Mint(sender, amount0, amount1, liquidity)
     return liquidity
@@ -152,10 +149,7 @@ Contract TokenPair(
     update(reserve0 - amount0, reserve1 - amount1)
 
     if (feeOn) {
-      kLast = reserve0 * reserve1
-      if (feeAmount > 0) {
-        FeeCollectorPerTokenPair(feeCollectorId).collectFee{selfAddress!() -> selfTokenId!(): feeAmount}(selfAddress!(), feeAmount)
-      }
+      collectFeeAndUpdateKLast{selfAddress!() -> selfTokenId!(): feeAmount}(feeAmount)
     }
     emit Burn(sender, amount0, amount1, liquidity)
     return amount0, amount1
@@ -184,11 +178,16 @@ Contract TokenPair(
     emit Swap(sender, amount0In, amount1In, amount0Out, amount1Out, to)
   }
 
-  @using(updateFields = true, assetsInContract = true)
+  @using(assetsInContract = true)
   pub fn collectFeeManually() -> () {
     assert!(feeCollectorId != #, ErrorCodes.FeeCollectorNotEnabled)
     checkCaller!(callerContractId!() == feeCollectorId, ErrorCodes.InvalidCaller)
     let (_, feeAmount) = mintFee(reserve0, reserve1)
+    collectFeeAndUpdateKLast{selfAddress!() -> selfTokenId!(): feeAmount}(feeAmount)
+  }
+
+  @using(updateFields = true, preapprovedAssets = true)
+  fn collectFeeAndUpdateKLast(feeAmount: U256) -> () {
     if (feeAmount > 0) {
       FeeCollectorPerTokenPair(feeCollectorId).collectFee{selfAddress!() -> selfTokenId!(): feeAmount}(selfAddress!(), feeAmount)
     }

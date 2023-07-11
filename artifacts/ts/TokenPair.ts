@@ -286,6 +286,11 @@ class Factory extends ContractFactory<
     ): Promise<TestContractResult<null>> => {
       return testMethod(this, "collectFeeManually", params);
     },
+    collectFeeAndUpdateKLast: async (
+      params: TestContractParams<TokenPairTypes.Fields, { feeAmount: bigint }>
+    ): Promise<TestContractResult<null>> => {
+      return testMethod(this, "collectFeeAndUpdateKLast", params);
+    },
   };
 }
 
@@ -294,7 +299,7 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "458bc2fecd616226349fc05cde3d2317f91b579d82256aa3b5d3f341febbe56f"
+    "6253f67304bea40982bf520be1de54cb1f9a59ed8beeee855d907f494ef9abd0"
   )
 );
 
