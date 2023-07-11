@@ -7,7 +7,9 @@ import {
   web3,
   addressFromContractId,
   Contract,
-  ContractEvent
+  ContractEvent,
+  HexString,
+  Address
 } from '@alephium/web3'
 import {
   buildProject,
@@ -21,9 +23,14 @@ import {
 import { testAddress, testPrivateKey } from '@alephium/web3-test'
 import {
   Burn,
+  CollectFee,
   CreatePair,
+  EnableFeeCollector,
+  FeeCollectorFactoryImpl,
+  FeeCollectorPerTokenPairImpl,
   GetToken,
   Mint,
+  SetFeeCollectorFactory,
   Swap,
   TestToken,
   TokenPair,
@@ -62,9 +69,28 @@ async function deployTokenPairTemplate() {
   }))
 }
 
+async function deployFeeCollectorTemplate() {
+  return await waitTxConfirmed(FeeCollectorPerTokenPairImpl.deploy(signer, {
+    initialFields: {
+      tokenPairFactory: '',
+      tokenPair: ''
+    }
+  }))
+}
+
+async function deployFeeCollectorFactory(tokenPairFactoryId: HexString) {
+  const feeCollectorTemplate = await deployFeeCollectorTemplate()
+  return await waitTxConfirmed(FeeCollectorFactoryImpl.deploy(signer, {
+    initialFields: {
+      feeCollectorPerTokenPairTemplateId: feeCollectorTemplate.contractInstance.contractId,
+      tokenPairFactory: tokenPairFactoryId
+    }
+  }))
+}
+
 async function deployTokenPairFactory() {
   const tokenPairTemplate = await deployTokenPairTemplate()
-  return await waitTxConfirmed(TokenPairFactory.deploy(signer, {
+  const result = await waitTxConfirmed(TokenPairFactory.deploy(signer, {
     initialFields: {
       pairTemplateId: tokenPairTemplate.contractInstance.contractId,
       pairSize: 0n,
@@ -72,6 +98,14 @@ async function deployTokenPairFactory() {
       feeCollectorFactory: '',
     }
   }))
+  const feeCollectorFactory = await deployFeeCollectorFactory(result.contractInstance.contractId)
+  await waitTxConfirmed(SetFeeCollectorFactory.execute(signer, {
+    initialFields: {
+      tokenPairFactory: result.contractInstance.contractId,
+      feeCollectorFactory: feeCollectorFactory.contractInstance.contractId
+    }
+  }))
+  return result
 }
 
 async function createTokenPair(tokenPairFactory: TokenPairFactoryInstance, token0Id: string, token1Id: string) {
@@ -91,6 +125,31 @@ async function createTokenPair(tokenPairFactory: TokenPairFactoryInstance, token
   }))
   const tokenPairId = subContractId(tokenPairFactory.contractId, token0Id + token1Id, groupOfAddress(testAddress))
   return TokenPair.at(addressFromContractId(tokenPairId))
+}
+
+async function enableFeeCollector(tokenPairFactory: TokenPairFactoryInstance, tokenPair: TokenPairInstance) {
+  await waitTxConfirmed(EnableFeeCollector.execute(signer, {
+    initialFields: {
+      tokenPairFactory: tokenPairFactory.contractId,
+      tokenPair: tokenPair.contractId
+    },
+    attoAlphAmount: ONE_ALPH + DUST_AMOUNT
+  }))
+}
+
+async function collectFeeManually(feeCollectorId: HexString, signerProvider = signer) {
+  await waitTxConfirmed(CollectFee.execute(signerProvider, {
+    initialFields: { feeCollector: feeCollectorId }
+  }))
+}
+
+async function deployFeeCollector(tokenPairFactoryId: HexString, tokenPairId: HexString) {
+  return await waitTxConfirmed(FeeCollectorPerTokenPairImpl.deploy(signer, {
+    initialFields: {
+      tokenPair: tokenPairId,
+      tokenPairFactory: tokenPairFactoryId
+    }
+  }))
 }
 
 async function deployTestToken(): Promise<string> {
@@ -118,6 +177,13 @@ async function balanceOf(tokenId: string, address = testAddress): Promise<bigint
   const balances = await web3.getCurrentNodeProvider().addresses.getAddressesAddressBalance(address)
   const balance = balances.tokenBalances?.find((t) => t.id === tokenId)
   return balance === undefined ? 0n : BigInt(balance.amount)
+}
+
+async function transferAlphTo(to: Address, amount: bigint) {
+  return await waitTxConfirmed(signer.signAndSubmitTransferTx({
+    signerAddress: testAddress,
+    destinations: [{ address: to, attoAlphAmount: amount }]
+  }))
 }
 
 class Fixture {
@@ -411,7 +477,7 @@ describe('test token pair', () => {
     // sleep 1 second to make sure the time elapsed large than 0
     await sleep(1000)
     const swapResult = await fixture.swap(0n, swapAmount, expectedOutputAmount, 0n, sender.address, sender)
-    expect(swapResult.gasAmount).toEqual(44586)
+    expect(swapResult.gasAmount).toEqual(44594)
   })
 
   test('burn', async () => {
@@ -487,4 +553,67 @@ describe('test token pair', () => {
     expect(tokenPairState2.fields.price0CumulativeLast).toEqual(initialPrice[0] * timeElapsed0 + newPrice0[0] * timeElapsed1 + newPrice1[0] * timeElapsed2)
     expect(tokenPairState2.fields.price1CumulativeLast).toEqual(initialPrice[1] * timeElapsed0 + newPrice0[1] * timeElapsed1 + newPrice1[1] * timeElapsed2)
   }, 20000)
+
+  it('collectFeeManually', async () => {
+    await enableFeeCollector(tokenPairFactory, tokenPair)
+    const feeCollectorId = await tokenPair.fetchState().then((s) => s.fields.feeCollectorId)
+    expect(feeCollectorId).not.toEqual('')
+    const feeCollectorAddress = addressFromContractId(feeCollectorId)
+
+    const token0Amount = expandTo18Decimals(5)
+    const token1Amount = expandTo18Decimals(10)
+    await fixture.mint(token0Amount, token1Amount)
+    const tokenPairState0 = await tokenPair.fetchState()
+    const expectedKLast0 = tokenPairState0.fields.reserve0 * tokenPairState0.fields.reserve1
+
+    const balance0 = await balanceOf(tokenPair.contractId, feeCollectorAddress)
+    expect(balance0).toEqual(0n)
+    await collectFeeManually(feeCollectorId)
+    const balance1 = await balanceOf(tokenPair.contractId, feeCollectorAddress)
+    expect(balance1).toEqual(0n)
+
+    const kLast0 = await tokenPair.fetchState().then((s) => s.fields.kLast)
+    expect(expectedKLast0).toEqual(kLast0)
+
+    const swapAmount = expandTo18Decimals(1)
+    const expectedOutputAmount = 1662497915624478906n
+    await fixture.swap(swapAmount, 0n, 0n, expectedOutputAmount)
+    const tokenPairState1 = await tokenPair.fetchState()
+    const expectedKLast1 = tokenPairState1.fields.reserve0 * tokenPairState1.fields.reserve1
+
+    const balance2 = await balanceOf(tokenPair.contractId, feeCollectorAddress)
+    expect(balance2).toEqual(0n)
+    await collectFeeManually(feeCollectorId)
+    const balance3 = await balanceOf(tokenPair.contractId, feeCollectorAddress)
+    expect(balance3).toEqual(294676942923694n)
+
+    const kLast1 = await tokenPair.fetchState().then((s) => s.fields.kLast)
+    expect(expectedKLast1).toEqual(kLast1)
+
+    await collectFeeManually(feeCollectorId)
+    const balance4 = await balanceOf(tokenPair.contractId, feeCollectorAddress)
+    expect(balance4).toEqual(balance3)
+    const kLast2 = await tokenPair.fetchState().then((s) => s.fields.kLast)
+    expect(kLast2).toEqual(kLast1)
+  }, 10000)
+
+  it('collectFeeManually:error', async () => {
+    const errorPrefix = '[API Error] - Execution error when estimating gas for tx script or contract: '
+    const errorCodes = TokenPair.consts.ErrorCodes
+    const feeCollectorNotEnabledError = `${errorPrefix}AssertionFailedWithErrorCode(${tokenPair.address},${Number(errorCodes.FeeCollectorNotEnabled)})`
+    const invalidFeeCollector = await deployFeeCollector(tokenPairFactory.contractId, tokenPair.contractId)
+    await expect(collectFeeManually(invalidFeeCollector.contractInstance.contractId)).rejects.toThrowError(feeCollectorNotEnabledError)
+
+    await enableFeeCollector(tokenPairFactory, tokenPair)
+    const feeCollectorId = await tokenPair.fetchState().then((s) => s.fields.feeCollectorId)
+    const feeCollectorAddress = addressFromContractId(feeCollectorId)
+    const invalidCaller = PrivateKeyWallet.Random(signer.account.group)
+    await transferAlphTo(invalidCaller.address, ONE_ALPH)
+
+    const invalidCallerError0 = `${errorPrefix}AssertionFailedWithErrorCode(${feeCollectorAddress},${Number(errorCodes.InvalidCaller)})`
+    await expect(collectFeeManually(feeCollectorId, invalidCaller)).rejects.toThrowError(invalidCallerError0)
+
+    const invalidCallerError1 = `${errorPrefix}AssertionFailedWithErrorCode(${tokenPair.address},${Number(errorCodes.InvalidCaller)})`
+    await expect(collectFeeManually(invalidFeeCollector.contractInstance.contractId)).rejects.toThrowError(invalidCallerError1)
+  })
 })
