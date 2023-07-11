@@ -180,9 +180,9 @@ Contract TokenPair(
 
   @using(assetsInContract = true)
   pub fn collectFeeManually() -> () {
-    assert!(feeCollectorId != #, ErrorCodes.FeeCollectorNotEnabled)
     checkCaller!(callerContractId!() == feeCollectorId, ErrorCodes.InvalidCaller)
-    let (_, feeAmount) = mintFee(reserve0, reserve1)
+    let (feeOn, feeAmount) = mintFee(reserve0, reserve1)
+    assert!(feeOn, ErrorCodes.FeeCollectorNotEnabled)
     collectFeeAndUpdateKLast{selfAddress!() -> selfTokenId!(): feeAmount}(feeAmount)
   }
 

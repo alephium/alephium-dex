@@ -600,9 +600,9 @@ describe('test token pair', () => {
   it('collectFeeManually:error', async () => {
     const errorPrefix = '[API Error] - Execution error when estimating gas for tx script or contract: '
     const errorCodes = TokenPair.consts.ErrorCodes
-    const feeCollectorNotEnabledError = `${errorPrefix}AssertionFailedWithErrorCode(${tokenPair.address},${Number(errorCodes.FeeCollectorNotEnabled)})`
+    const invalidFeeCollectorCaller = `${errorPrefix}AssertionFailedWithErrorCode(${tokenPair.address},${Number(errorCodes.InvalidCaller)})`
     const invalidFeeCollector = await deployFeeCollector(tokenPairFactory.contractId, tokenPair.contractId)
-    await expect(collectFeeManually(invalidFeeCollector.contractInstance.contractId)).rejects.toThrowError(feeCollectorNotEnabledError)
+    await expect(collectFeeManually(invalidFeeCollector.contractInstance.contractId)).rejects.toThrowError(invalidFeeCollectorCaller)
 
     await enableFeeCollector(tokenPairFactory, tokenPair)
     const feeCollectorId = await tokenPair.fetchState().then((s) => s.fields.feeCollectorId)
