@@ -22,5 +22,3 @@ jobs:
           npm ci
           npm run compile && test -z "$(git status --porcelain)"
           npm run test
-          npx @alephium/cli devnet stop
-
