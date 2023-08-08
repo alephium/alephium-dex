@@ -13,12 +13,12 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
+      - name: start ALPH docker image
+        working-directory: ./docker
+        run: docker-compose up -d
       - name: Run tests
         working-directory: .
         run: |
           npm ci
-          npx @alephium/cli devnet start
           npm run compile && test -z "$(git status --porcelain)"
           npm run test
-          npx @alephium/cli devnet stop
-

@@ -8,7 +8,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { theme } from "./muiTheme";
 import { store } from "./state"
 import { Provider } from "react-redux"
-import { AlephiumConnectProvider } from "@alephium/web3-react"
+import { AlephiumWalletProvider } from "@alephium/web3-react"
 import { network, networkId } from "./utils/consts";
 
 ReactDOM.render(
@@ -16,13 +16,13 @@ ReactDOM.render(
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-          <AlephiumConnectProvider addressGroup={network.groupIndex} network={networkId}>
+          <AlephiumWalletProvider addressGroup={network.groupIndex} network={networkId}>
             <SnackbarProvider maxSnack={3}>
               <HashRouter>
                 <App />
               </HashRouter>
             </SnackbarProvider>
-          </AlephiumConnectProvider>
+          </AlephiumWalletProvider>
       </ThemeProvider>
     </Provider>
   </ErrorBoundary>,

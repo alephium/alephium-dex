@@ -16,7 +16,7 @@ function Pool() {
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
   const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
   const wallet = useAlephiumWallet()
-  const balance = useAvailableBalances()
+  const { balance } = useAvailableBalances()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     setTokenAInfo(tokenInfo)

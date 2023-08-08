@@ -27,7 +27,7 @@ function AddLiquidity() {
   const dispatch = useDispatch()
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
-  const balance = useAvailableBalances()
+  const { balance, updateBalanceForTx } = useAvailableBalances()
   const history = useHistory()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
@@ -145,6 +145,7 @@ function AddLiquidity() {
         )
         console.log(`add liquidity succeed, tx id: ${result.txId}`)
         setTxId(result.txId)
+        updateBalanceForTx(result.txId)
         setAddingLiquidity(false)
       }
     } catch (error) {
@@ -152,7 +153,7 @@ function AddLiquidity() {
       setAddingLiquidity(false)
       console.error(`failed to add liquidity, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline, balance])
+  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline, balance, updateBalanceForTx])
 
   const readyToAddLiquidity =
     wallet !== undefined &&

@@ -38,7 +38,7 @@ function RemoveLiquidity() {
   const [deadline,] = useDeadline()
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
-  const availableBalance = useAvailableBalances()
+  const { balance: availableBalance, updateBalanceForTx } = useAvailableBalances()
   const history = useHistory()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
@@ -173,6 +173,7 @@ function RemoveLiquidity() {
         )
         console.log(`remove liquidity succeed, tx id: ${result.txId}`)
         setTxId(result.txId)
+        updateBalanceForTx(result.txId)
         setRemovingLiquidity(false)
       }
     } catch (error) {
@@ -180,7 +181,7 @@ function RemoveLiquidity() {
       setRemovingLiquidity(false)
       console.error(`failed to remove liquidity, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, amount, removeLiquidityDetails, slippage, deadline])
+  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, amount, removeLiquidityDetails, slippage, deadline, updateBalanceForTx])
 
   const readyToRemoveLiquidity =
     wallet !== undefined &&
