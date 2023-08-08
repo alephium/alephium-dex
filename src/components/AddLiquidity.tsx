@@ -153,7 +153,7 @@ function AddLiquidity() {
       setAddingLiquidity(false)
       console.error(`failed to add liquidity, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline, balance])
+  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline, balance, updateBalanceForTx])
 
   const readyToAddLiquidity =
     wallet !== undefined &&

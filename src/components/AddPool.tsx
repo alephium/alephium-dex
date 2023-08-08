@@ -96,7 +96,7 @@ function AddPool() {
       setAddingPool(false)
       console.error(`failed to add pool, error: ${error}`)
     }
-  }, [wallet, tokenAInfo, tokenBInfo])
+  }, [wallet, tokenAInfo, tokenBInfo, updateBalanceForTx])
 
   const readyToAddPool =
     wallet !== undefined &&

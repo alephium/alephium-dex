@@ -181,7 +181,7 @@ function RemoveLiquidity() {
       setRemovingLiquidity(false)
       console.error(`failed to remove liquidity, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, amount, removeLiquidityDetails, slippage, deadline])
+  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, amount, removeLiquidityDetails, slippage, deadline, updateBalanceForTx])
 
   const readyToRemoveLiquidity =
     wallet !== undefined &&

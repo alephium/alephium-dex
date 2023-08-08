@@ -157,7 +157,7 @@ function Swap() {
       setSwapping(false)
       console.error(`failed to swap, error: ${error}`)
     }
-  }, [wallet, swapDetails, slippage, deadline, balance])
+  }, [wallet, swapDetails, slippage, deadline, balance, updateBalanceForTx])
 
   const readyToSwap =
     wallet !== undefined &&
