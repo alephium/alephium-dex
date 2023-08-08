@@ -9,7 +9,7 @@ import {
   TestContractResult,
   HexString,
   ContractFactory,
-  SubscribeOptions,
+  EventSubscribeOptions,
   EventSubscription,
   CallContractParams,
   CallContractResult,
@@ -142,6 +142,7 @@ class Factory extends ContractFactory<
   TokenPairInstance,
   TokenPairTypes.Fields
 > {
+  eventIndex = { Mint: 0, Burn: 1, Swap: 2 };
   consts = {
     MINIMUM_LIQUIDITY: BigInt(1000),
     ErrorCodes: {
@@ -318,7 +319,7 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   subscribeMintEvent(
-    options: SubscribeOptions<TokenPairTypes.MintEvent>,
+    options: EventSubscribeOptions<TokenPairTypes.MintEvent>,
     fromCount?: number
   ): EventSubscription {
     return subscribeContractEvent(
@@ -331,7 +332,7 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   subscribeBurnEvent(
-    options: SubscribeOptions<TokenPairTypes.BurnEvent>,
+    options: EventSubscribeOptions<TokenPairTypes.BurnEvent>,
     fromCount?: number
   ): EventSubscription {
     return subscribeContractEvent(
@@ -344,7 +345,7 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   subscribeSwapEvent(
-    options: SubscribeOptions<TokenPairTypes.SwapEvent>,
+    options: EventSubscribeOptions<TokenPairTypes.SwapEvent>,
     fromCount?: number
   ): EventSubscription {
     return subscribeContractEvent(
@@ -357,7 +358,7 @@ export class TokenPairInstance extends ContractInstance {
   }
 
   subscribeAllEvents(
-    options: SubscribeOptions<
+    options: EventSubscribeOptions<
       | TokenPairTypes.MintEvent
       | TokenPairTypes.BurnEvent
       | TokenPairTypes.SwapEvent

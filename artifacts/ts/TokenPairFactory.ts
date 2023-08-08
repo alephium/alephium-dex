@@ -9,7 +9,7 @@ import {
   TestContractResult,
   HexString,
   ContractFactory,
-  SubscribeOptions,
+  EventSubscribeOptions,
   EventSubscription,
   CallContractParams,
   CallContractResult,
@@ -69,6 +69,7 @@ class Factory extends ContractFactory<
   TokenPairFactoryInstance,
   TokenPairFactoryTypes.Fields
 > {
+  eventIndex = { PairCreated: 0 };
   consts = {
     ErrorCodes: {
       ReserveOverflow: BigInt(0),
@@ -185,7 +186,7 @@ export class TokenPairFactoryInstance extends ContractInstance {
   }
 
   subscribePairCreatedEvent(
-    options: SubscribeOptions<TokenPairFactoryTypes.PairCreatedEvent>,
+    options: EventSubscribeOptions<TokenPairFactoryTypes.PairCreatedEvent>,
     fromCount?: number
   ): EventSubscription {
     return subscribeContractEvent(

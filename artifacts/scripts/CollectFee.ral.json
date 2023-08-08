@@ -1,5 +1,5 @@
 {
-  "version": "v2.3.5",
+  "version": "v2.5.0",
   "name": "CollectFee",
   "bytecodeTemplate": "010100000000040c0c{0}0103",
   "fieldsSig": {
