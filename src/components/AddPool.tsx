@@ -18,7 +18,7 @@ function AddPool() {
   const [addingPool, setAddingPool] = useState<boolean>(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const wallet = useAlephiumWallet()
-  const balance = useAvailableBalances()
+  const { balance, updateBalanceForTx } = useAvailableBalances()
   const history = useHistory()
 
   useEffect(() => {
@@ -88,6 +88,7 @@ function AddPool() {
         )
         console.log(`add pool succeed, tx id: ${result.txId}, token pair id: ${result.tokenPairId}`)
         setTxId(result.txId)
+        updateBalanceForTx(result.txId)
         setAddingPool(false)
       }
     } catch (error) {

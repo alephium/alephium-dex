@@ -28,7 +28,7 @@ function Swap() {
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
   const wallet = useAlephiumWallet()
-  const balance = useAvailableBalances()
+  const { balance, updateBalanceForTx } = useAvailableBalances()
 
   const handleTokenInChange = useCallback((tokenInfo) => {
     dispatch(selectTokenIn(tokenInfo))
@@ -149,6 +149,7 @@ function Swap() {
         )
         console.log(`swap tx submitted, tx id: ${result.txId}`)
         setTxId(result.txId)
+        updateBalanceForTx(result.txId)
         setSwapping(false)
       }
     } catch (error) {
