@@ -6,16 +6,17 @@ import { commonStyles } from "./style";
 import { TokenInfo } from "@alephium/token-list";
 import { useTokenPairState } from "../state/useTokenPairState";
 import TokenSelectDialog from "./TokenSelectDialog";
-import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
+import { useAvailableBalances } from "../hooks/useAvailableBalances";
 import { DetailItem } from "./DetailsItem";
 import BigNumber from "bignumber.js";
+import { useWallet } from "@alephium/web3-react";
 
 function Pool() {
   const commonClasses = commonStyles()
   const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
   const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
-  const wallet = useAlephiumWallet()
+  const wallet = useWallet()
   const { balance } = useAvailableBalances()
 
   const handleTokenAChange = useCallback((tokenInfo) => {

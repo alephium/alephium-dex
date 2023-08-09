@@ -4,11 +4,12 @@ import { TokenInfo } from "@alephium/token-list"
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import { tokenPairExist, createTokenPair } from "../utils/dex";
-import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
+import { useAvailableBalances } from "../hooks/useAvailableBalances";
 import { commonStyles } from "./style";
 import TokenSelectDialog from "./TokenSelectDialog";
 import { useHistory } from "react-router-dom";
 import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
+import { useWallet } from "@alephium/web3-react";
 
 function AddPool() {
   const commonClasses = commonStyles();
@@ -17,7 +18,7 @@ function AddPool() {
   const [txId, setTxId] = useState<string | undefined>(undefined)
   const [addingPool, setAddingPool] = useState<boolean>(false)
   const [error, setError] = useState<string | undefined>(undefined)
-  const wallet = useAlephiumWallet()
+  const wallet = useWallet()
   const { balance, updateBalanceForTx } = useAvailableBalances()
   const history = useHistory()
 
