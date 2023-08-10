@@ -14,7 +14,7 @@ import {
   bigIntToString
 } from "../utils/dex";
 import { formatUnits } from "ethers/lib/utils";
-import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
+import { useAvailableBalances } from "../hooks/useAvailableBalance";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
 import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
@@ -23,6 +23,7 @@ import { useTokenPairState } from "../state/useTokenPairState";
 import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
 import { DetailItem } from "./DetailsItem";
 import { useHistory } from "react-router-dom";
+import { useWallet } from "@alephium/web3-react";
 
 function RemoveLiquidity() {
   const classes = commonStyles();
@@ -37,7 +38,7 @@ function RemoveLiquidity() {
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
   const [error, setError] = useState<string | undefined>(undefined)
-  const wallet = useAlephiumWallet()
+  const wallet = useWallet()
   const { balance: availableBalance, updateBalanceForTx } = useAvailableBalances()
   const history = useHistory()
 
@@ -163,7 +164,7 @@ function RemoveLiquidity() {
         const result = await removeLiquidity(
           wallet.signer,
           wallet.signer.explorerProvider,
-          wallet.address,
+          wallet.account.address,
           tokenPairState,
           amount,
           removeLiquidityDetails.amount0,

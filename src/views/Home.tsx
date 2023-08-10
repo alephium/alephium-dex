@@ -6,11 +6,13 @@ import AddLiquidity from "../components/AddLiquidity";
 import RemoveLiquidity from "../components/RemoveLiquidity";
 import AddPool from "../components/AddPool";
 import Pool from "../components/Pools";
-import { AlephiumConnectButton } from "@alephium/web3-react";
+import { AlephiumConnectButton, useWallet } from "@alephium/web3-react";
 import TransactionSettings from "../components/Settings";
 import { useDispatch } from "react-redux"
 import { reset as resetSwapState } from "../state/swap/actions";
 import { reset as resetMintState } from "../state/mint/actions";
+import { useEffect } from "react";
+import { web3 } from "@alephium/web3";
 
 const useStyles = makeStyles((theme) => ({
   spacer: {
@@ -49,6 +51,13 @@ const useStyles = makeStyles((theme) => ({
 function Home() {
   const classes = useStyles();
   const dispatch = useDispatch()
+  const wallet = useWallet()
+
+  useEffect(() => {
+    if (wallet?.nodeProvider !== undefined) {
+      web3.setCurrentNodeProvider(wallet.nodeProvider)
+    }
+  }, [wallet?.nodeProvider])
 
   return (
     <div className={classes.bg}>
