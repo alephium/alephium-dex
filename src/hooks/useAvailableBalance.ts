@@ -1,33 +1,6 @@
-import { SignerProvider, Address, web3, ALPH_TOKEN_ID, node, NodeProvider } from '@alephium/web3'
+import { ALPH_TOKEN_ID, node } from '@alephium/web3'
 import { useMemo } from 'react'
-import { useAlephiumConnectContext, useBalance } from "@alephium/web3-react"
-
-export interface AlephiumWallet {
-  signer: SignerProvider
-  address: Address
-  group: number
-  nodeProvider: NodeProvider
-}
-
-export function useAlephiumWallet() {
-  const context = useAlephiumConnectContext();
-
-  return useMemo(() => {
-    if (context.signerProvider?.nodeProvider === undefined) {
-      return undefined;
-    }
-    web3.setCurrentNodeProvider(context.signerProvider.nodeProvider);
-    if (context.account !== undefined) {
-      return {
-        signer: context.signerProvider,
-        address: context.account.address,
-        group: context.account.group,
-        nodeProvider: context.signerProvider.nodeProvider
-      }
-    }
-    return undefined;
-  }, [context.signerProvider, context.account]);
-}
+import { useBalance } from "@alephium/web3-react"
 
 export function useAvailableBalances() {
   const { balance, updateBalanceForTx } = useBalance()

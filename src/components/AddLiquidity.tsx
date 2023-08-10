@@ -5,7 +5,7 @@ import ButtonWithLoader from "./ButtonWithLoader";
 import TokenSelectDialog from "./TokenSelectDialog";
 import NumberTextField from "./NumberTextField";
 import { addLiquidity, bigIntToString, PairTokenDecimals, minimalAmount, AddLiquidityDetails, tryGetBalance } from "../utils/dex";
-import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
+import { useAvailableBalances } from "../hooks/useAvailableBalance";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { useDeadline } from "../hooks/useDeadline";
 import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
@@ -17,6 +17,7 @@ import { commonStyles } from "./style";
 import { useHistory } from "react-router-dom";
 import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
 import { DetailItem } from "./DetailsItem";
+import { useWallet } from "@alephium/web3-react";
 
 function AddLiquidity() {
   const classes = commonStyles();
@@ -26,7 +27,7 @@ function AddLiquidity() {
   const [deadline,] = useDeadline()
   const dispatch = useDispatch()
   const [error, setError] = useState<string | undefined>(undefined)
-  const wallet = useAlephiumWallet()
+  const wallet = useWallet()
   const { balance, updateBalanceForTx } = useAvailableBalances()
   const history = useHistory()
 
@@ -134,7 +135,7 @@ function AddLiquidity() {
           balance,
           wallet.signer,
           wallet.signer.explorerProvider,
-          wallet.address,
+          wallet.account.address,
           tokenPairState,
           tokenAInfo,
           tokenBInfo,

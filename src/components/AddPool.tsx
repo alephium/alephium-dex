@@ -4,11 +4,12 @@ import { TokenInfo } from "@alephium/token-list"
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ButtonWithLoader from "./ButtonWithLoader";
 import { tokenPairExist, createTokenPair } from "../utils/dex";
-import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
+import { useAvailableBalances } from "../hooks/useAvailableBalance";
 import { commonStyles } from "./style";
 import TokenSelectDialog from "./TokenSelectDialog";
 import { useHistory } from "react-router-dom";
 import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
+import { useWallet } from "@alephium/web3-react";
 
 function AddPool() {
   const commonClasses = commonStyles();
@@ -17,13 +18,13 @@ function AddPool() {
   const [txId, setTxId] = useState<string | undefined>(undefined)
   const [addingPool, setAddingPool] = useState<boolean>(false)
   const [error, setError] = useState<string | undefined>(undefined)
-  const wallet = useAlephiumWallet()
+  const wallet = useWallet()
   const { balance, updateBalanceForTx } = useAvailableBalances()
   const history = useHistory()
 
   useEffect(() => {
     async function checkContractExist() {
-      if (tokenAInfo !== undefined && tokenBInfo !== undefined && wallet !== undefined) {
+      if (tokenAInfo !== undefined && tokenBInfo !== undefined && wallet !== undefined && wallet.nodeProvider !== undefined) {
         try {
           const exist = await tokenPairExist(wallet.nodeProvider, tokenAInfo.id, tokenBInfo.id)
           if (exist) setError(`token pair already exist`)
@@ -82,7 +83,7 @@ function AddPool() {
         const result = await createTokenPair(
           wallet.signer,
           wallet.signer.explorerProvider,
-          wallet.address,
+          wallet.account.address,
           tokenAInfo.id,
           tokenBInfo.id
         )

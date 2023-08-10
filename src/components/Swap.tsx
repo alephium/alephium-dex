@@ -6,7 +6,7 @@ import TokenSelectDialog from "./TokenSelectDialog";
 import HoverIcon from "./HoverIcon";
 import NumberTextField from "./NumberTextField";
 import { bigIntToString, getSwapDetails, swap, SwapDetails, tryGetBalance } from "../utils/dex";
-import { useAlephiumWallet, useAvailableBalances } from "../hooks/useAlephiumWallet";
+import { useAvailableBalances } from "../hooks/useAvailableBalance";
 import { useDeadline } from "../hooks/useDeadline";
 import { useSlippageTolerance } from "../hooks/useSlippageTolerance";
 import { DEFAULT_SLIPPAGE } from "../state/settings/reducer";
@@ -18,6 +18,7 @@ import { commonStyles } from "./style";
 import { TransactionSubmitted, WaitingForTxSubmission } from "./Transactions";
 import BigNumber from "bignumber.js";
 import { DetailItem } from "./DetailsItem";
+import { useWallet } from "@alephium/web3-react";
 
 function Swap() {
   const classes = commonStyles();
@@ -27,7 +28,7 @@ function Swap() {
   const [error, setError] = useState<string | undefined>(undefined)
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
-  const wallet = useAlephiumWallet()
+  const wallet = useWallet()
   const { balance, updateBalanceForTx } = useAvailableBalances()
 
   const handleTokenInChange = useCallback((tokenInfo) => {
@@ -144,7 +145,7 @@ function Swap() {
           balance,
           wallet.signer,
           wallet.signer.explorerProvider,
-          wallet.address,
+          wallet.account.address,
           deadline
         )
         console.log(`swap tx submitted, tx id: ${result.txId}`)
