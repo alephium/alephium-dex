@@ -16,7 +16,7 @@ function Pool() {
   const [tokenAInfo, setTokenAInfo] = useState<TokenInfo | undefined>(undefined)
   const [tokenBInfo, setTokenBInfo] = useState<TokenInfo | undefined>(undefined)
   const { tokenPairState, getTokenPairStateError } = useTokenPairState(tokenAInfo, tokenBInfo)
-  const wallet = useWallet()
+  const { connectionStatus } = useWallet()
   const { balance } = useAvailableBalances()
 
   const handleTokenAChange = useCallback((tokenInfo) => {
@@ -55,14 +55,14 @@ function Pool() {
       <div className={commonClasses.spacer} />
       <Paper className={commonClasses.mainPaper}>
         <div>
-          {wallet === undefined ?
+          {connectionStatus !== 'connected' ?
             <div>
               <Typography variant="h6" color="error" className={commonClasses.error}>
                 Your wallet is not connected
               </Typography>
             </div> : null
           }
-          <Collapse in={wallet !== undefined}>
+          <Collapse in={connectionStatus === 'connected'}>
             {
               <>
                 {tokenPairContent}
