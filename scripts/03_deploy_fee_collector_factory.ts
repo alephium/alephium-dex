@@ -5,7 +5,7 @@ import { FeeCollectorFactoryImpl, FeeCollectorPerTokenPairImpl } from '../artifa
 const deployFeeCollectorFactory: DeployFunction<Settings> = async (deployer: Deployer): Promise<void> => {
   const feeCollectorPerTokenPairTemplateInitialFields = {
     tokenPairFactory: '',
-    tokenPairId: ''
+    tokenPair: ''
   }
   const feeCollectorPerTokenPairTemplateResult = await deployer.deployContract(FeeCollectorPerTokenPairImpl, { initialFields: feeCollectorPerTokenPairTemplateInitialFields })
   const tokenPairFactoryId = deployer.getDeployContractResult('TokenPairFactory').contractInstance.contractId

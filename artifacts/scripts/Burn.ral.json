@@ -1,5 +1,5 @@
 {
-  "version": "v2.5.0",
+  "version": "v2.5.3",
   "name": "Burn",
   "bytecodeTemplate": "0101030000000c{1}{0}{2}a3{1}{2}0e0e{0}010f1818",
   "fieldsSig": {
