@@ -76,6 +76,10 @@ class Factory extends ContractFactory<
   ExampleOracleSimpleInstance,
   ExampleOracleSimpleTypes.Fields
 > {
+  getInitialFieldsWithDefaultValues() {
+    return this.contract.getInitialFieldsWithDefaultValues() as ExampleOracleSimpleTypes.Fields;
+  }
+
   consts = {
     Resolution: BigInt(112),
     Period: BigInt(86400),

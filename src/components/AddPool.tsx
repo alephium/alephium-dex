@@ -18,15 +18,15 @@ function AddPool() {
   const [txId, setTxId] = useState<string | undefined>(undefined)
   const [addingPool, setAddingPool] = useState<boolean>(false)
   const [error, setError] = useState<string | undefined>(undefined)
-  const wallet = useWallet()
+  const { account, signer, connectionStatus, nodeProvider, explorerProvider } = useWallet()
   const { balance, updateBalanceForTx } = useAvailableBalances()
   const history = useHistory()
 
   useEffect(() => {
     async function checkContractExist() {
-      if (tokenAInfo !== undefined && tokenBInfo !== undefined && wallet !== undefined && wallet.nodeProvider !== undefined) {
+      if (tokenAInfo !== undefined && tokenBInfo !== undefined && connectionStatus === 'connected' && nodeProvider !== undefined) {
         try {
-          const exist = await tokenPairExist(wallet.nodeProvider, tokenAInfo.id, tokenBInfo.id)
+          const exist = await tokenPairExist(nodeProvider, tokenAInfo.id, tokenBInfo.id)
           if (exist) setError(`token pair already exist`)
         } catch (err) {
           setError(`${err}`)
@@ -36,7 +36,7 @@ function AddPool() {
 
     setError(undefined)
     checkContractExist()
-  }, [tokenAInfo, tokenBInfo, wallet])
+  }, [tokenAInfo, tokenBInfo, nodeProvider, connectionStatus])
 
   const handleTokenAChange = useCallback((tokenInfo) => {
     setTokenAInfo(tokenInfo)
@@ -79,11 +79,11 @@ function AddPool() {
   const handleAddPool = useCallback(async () => {
     try {
       setAddingPool(true)
-      if (wallet !== undefined && wallet.signer.explorerProvider !== undefined && tokenAInfo !== undefined && tokenBInfo !== undefined) {
+      if (connectionStatus === 'connected' && explorerProvider !== undefined && tokenAInfo !== undefined && tokenBInfo !== undefined) {
         const result = await createTokenPair(
-          wallet.signer,
-          wallet.signer.explorerProvider,
-          wallet.account.address,
+          signer,
+          explorerProvider,
+          account.address,
           tokenAInfo.id,
           tokenBInfo.id
         )
@@ -97,10 +97,10 @@ function AddPool() {
       setAddingPool(false)
       console.error(`failed to add pool, error: ${error}`)
     }
-  }, [wallet, tokenAInfo, tokenBInfo, updateBalanceForTx])
+  }, [signer, account, connectionStatus, explorerProvider, tokenAInfo, tokenBInfo, updateBalanceForTx])
 
   const readyToAddPool =
-    wallet !== undefined &&
+    connectionStatus === 'connected'
     tokenAInfo !== undefined &&
     tokenBInfo !== undefined &&
     !addingPool && !completed && 
@@ -135,7 +135,7 @@ function AddPool() {
           buttonText="Add Liquidity"
           onClick={redirectToAddLiquidity}
         />
-        {wallet === undefined ?
+        {connectionStatus !== 'connected' ?
           <div>
             <Typography variant="h6" color="error" className={commonClasses.error}>
               Your wallet is not connected
@@ -143,7 +143,7 @@ function AddPool() {
           </div> : null
         }
         <div>
-          <Collapse in={!addingPool && !completed && wallet !== undefined}>
+          <Collapse in={!addingPool && !completed && connectionStatus === 'connected'}>
             {
               <>
                 {tokenPairContent}

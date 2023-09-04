@@ -64,6 +64,10 @@ class Factory extends ContractFactory<
   FeeCollectorFactoryImplInstance,
   FeeCollectorFactoryImplTypes.Fields
 > {
+  getInitialFieldsWithDefaultValues() {
+    return this.contract.getInitialFieldsWithDefaultValues() as FeeCollectorFactoryImplTypes.Fields;
+  }
+
   consts = {
     ErrorCodes: {
       ReserveOverflow: BigInt(0),

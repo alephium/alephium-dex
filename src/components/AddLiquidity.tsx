@@ -27,7 +27,7 @@ function AddLiquidity() {
   const [deadline,] = useDeadline()
   const dispatch = useDispatch()
   const [error, setError] = useState<string | undefined>(undefined)
-  const wallet = useWallet()
+  const { signer, account, connectionStatus, explorerProvider } = useWallet()
   const { balance, updateBalanceForTx } = useAvailableBalances()
   const history = useHistory()
 
@@ -123,8 +123,8 @@ function AddLiquidity() {
     try {
       setAddingLiquidity(true)
       if (
-        wallet !== undefined &&
-        wallet.signer.explorerProvider !== undefined &&
+        connectionStatus === 'connected' &&
+        explorerProvider !== undefined &&
         tokenPairState !== undefined &&
         tokenAInfo !== undefined &&
         tokenBInfo !== undefined &&
@@ -133,9 +133,9 @@ function AddLiquidity() {
       ) {
         const result = await addLiquidity(
           balance,
-          wallet.signer,
-          wallet.signer.explorerProvider,
-          wallet.account.address,
+          signer,
+          explorerProvider,
+          account.address,
           tokenPairState,
           tokenAInfo,
           tokenBInfo,
@@ -154,10 +154,10 @@ function AddLiquidity() {
       setAddingLiquidity(false)
       console.error(`failed to add liquidity, error: ${error}`)
     }
-  }, [wallet, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline, balance, updateBalanceForTx])
+  }, [connectionStatus, explorerProvider, signer, account, tokenPairState, tokenAInfo, tokenBInfo, tokenAAmount, tokenBAmount, slippage, deadline, balance, updateBalanceForTx])
 
   const readyToAddLiquidity =
-    wallet !== undefined &&
+    connectionStatus === 'connected' &&
     tokenAInfo !== undefined &&
     tokenBInfo !== undefined &&
     tokenAAmount !== undefined &&
@@ -194,7 +194,7 @@ function AddLiquidity() {
           buttonText="Swap Coins"
           onClick={redirectToSwap}
         />
-        {wallet === undefined ?
+        {connectionStatus !== 'connected' ?
           <div>
             <Typography variant="h6" color="error" className={classes.error}>
               Your wallet is not connected
@@ -202,7 +202,7 @@ function AddLiquidity() {
           </div> : null
         }
         <div>
-          <Collapse in={!addingLiquidity && !completed && wallet !== undefined}>
+          <Collapse in={!addingLiquidity && !completed && connectionStatus === 'connected'}>
             {
               <>
                 {sourceContent}

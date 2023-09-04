@@ -41,11 +41,11 @@
     ]
   },
   "dependencies": {
-    "@alephium/cli": "^0.17.1",
-    "@alephium/web3": "^0.17.1",
-    "@alephium/web3-test": "^0.17.1",
-    "@alephium/web3-wallet": "^0.17.1",
-    "@alephium/web3-react": "^0.17.1",
+    "@alephium/cli": "^0.21.0",
+    "@alephium/web3": "^0.21.0",
+    "@alephium/web3-test": "^0.21.0",
+    "@alephium/web3-wallet": "^0.21.0",
+    "@alephium/web3-react": "^0.21.0",
     "@alephium/token-list": "0.0.11",
     "@material-ui/core": "^4.12.2",
     "@material-ui/icons": "^4.11.2",
