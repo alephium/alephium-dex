@@ -16,13 +16,13 @@ import { default as BurnScriptJson } from "../scripts/Burn.ral.json";
 import { default as CollectFeeScriptJson } from "../scripts/CollectFee.ral.json";
 import { default as CreatePairScriptJson } from "../scripts/CreatePair.ral.json";
 import { default as EnableFeeCollectorScriptJson } from "../scripts/EnableFeeCollector.ral.json";
+import { default as GetTokenScriptJson } from "../test/GetToken.ral.json";
 import { default as MintScriptJson } from "../scripts/Mint.ral.json";
 import { default as RemoveLiquidityScriptJson } from "../scripts/RemoveLiquidity.ral.json";
 import { default as SetFeeCollectorFactoryScriptJson } from "../scripts/SetFeeCollectorFactory.ral.json";
 import { default as SwapScriptJson } from "../scripts/Swap.ral.json";
 import { default as SwapMaxInScriptJson } from "../scripts/SwapMaxIn.ral.json";
 import { default as SwapMinOutScriptJson } from "../scripts/SwapMinOut.ral.json";
-import { default as GetTokenScriptJson } from "../test/GetToken.ral.json";
 
 export const AddLiquidity = new ExecutableScript<{
   sender: Address;
@@ -53,6 +53,11 @@ export const EnableFeeCollector = new ExecutableScript<{
   tokenPairFactory: HexString;
   tokenPair: HexString;
 }>(Script.fromJson(EnableFeeCollectorScriptJson));
+export const GetToken = new ExecutableScript<{
+  token: HexString;
+  sender: Address;
+  amount: bigint;
+}>(Script.fromJson(GetTokenScriptJson));
 export const Mint = new ExecutableScript<{
   tokenPair: HexString;
   sender: Address;
@@ -99,8 +104,3 @@ export const SwapMinOut = new ExecutableScript<{
   amountOutMin: bigint;
   deadline: bigint;
 }>(Script.fromJson(SwapMinOutScriptJson));
-export const GetToken = new ExecutableScript<{
-  token: HexString;
-  sender: Address;
-  amount: bigint;
-}>(Script.fromJson(GetTokenScriptJson));
