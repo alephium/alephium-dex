@@ -142,6 +142,10 @@ class Factory extends ContractFactory<
   TokenPairInstance,
   TokenPairTypes.Fields
 > {
+  getInitialFieldsWithDefaultValues() {
+    return this.contract.getInitialFieldsWithDefaultValues() as TokenPairTypes.Fields;
+  }
+
   eventIndex = { Mint: 0, Burn: 1, Swap: 2 };
   consts = {
     MINIMUM_LIQUIDITY: BigInt(1000),

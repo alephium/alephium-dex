@@ -28,7 +28,7 @@ function Swap() {
   const [error, setError] = useState<string | undefined>(undefined)
   const [slippage,] = useSlippageTolerance()
   const [deadline,] = useDeadline()
-  const wallet = useWallet()
+  const { connectionStatus, signer, account, explorerProvider } = useWallet()
   const { balance, updateBalanceForTx } = useAvailableBalances()
 
   const handleTokenInChange = useCallback((tokenInfo) => {
@@ -139,13 +139,13 @@ function Swap() {
   const handleSwap = useCallback(async () => {
     try {
       setSwapping(true)
-      if (wallet !== undefined && wallet.signer.explorerProvider !== undefined && swapDetails !== undefined) {
+      if (connectionStatus === 'connected' && explorerProvider !== undefined && swapDetails !== undefined) {
         const result = await swap(
           swapDetails,
           balance,
-          wallet.signer,
-          wallet.signer.explorerProvider,
-          wallet.account.address,
+          signer,
+          explorerProvider,
+          account.address,
           deadline
         )
         console.log(`swap tx submitted, tx id: ${result.txId}`)
@@ -158,10 +158,10 @@ function Swap() {
       setSwapping(false)
       console.error(`failed to swap, error: ${error}`)
     }
-  }, [wallet, swapDetails, slippage, deadline, balance, updateBalanceForTx])
+  }, [connectionStatus, account, explorerProvider, signer, swapDetails, slippage, deadline, balance, updateBalanceForTx])
 
   const readyToSwap =
-    wallet !== undefined &&
+    connectionStatus === 'connected' &&
     !swapping && !completed &&
     error === undefined &&
     swapDetails !== undefined
@@ -195,7 +195,7 @@ function Swap() {
           buttonText="Swap More Coins"
           onClick={handleReset}
         />
-        {wallet === undefined ?
+        {connectionStatus !== 'connected' ?
           <div>
             <Typography variant="h6" color="error" className={classes.error}>
               Your wallet is not connected
@@ -203,7 +203,7 @@ function Swap() {
           </div> : null
         }
         <div>
-          <Collapse in={!swapping && !completed && wallet !== undefined}>
+          <Collapse in={!swapping && !completed && connectionStatus === 'connected'}>
             {
               <>
                 {sourceContent}

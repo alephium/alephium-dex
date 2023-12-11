@@ -69,6 +69,10 @@ class Factory extends ContractFactory<
   TokenPairFactoryInstance,
   TokenPairFactoryTypes.Fields
 > {
+  getInitialFieldsWithDefaultValues() {
+    return this.contract.getInitialFieldsWithDefaultValues() as TokenPairFactoryTypes.Fields;
+  }
+
   eventIndex = { PairCreated: 0 };
   consts = {
     ErrorCodes: {

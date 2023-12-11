@@ -2,13 +2,13 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export * from "./Router";
-export * from "./TokenPair";
-export * from "./TokenPairFactory";
 export * from "./ExampleOracleSimple";
 export * from "./FeeCollectorFactoryImpl";
 export * from "./FeeCollectorPerTokenPairImpl";
 export * from "./FullMathTest";
 export * from "./MathTest";
+export * from "./Router";
 export * from "./TestToken";
+export * from "./TokenPair";
+export * from "./TokenPairFactory";
 export * from "./scripts";

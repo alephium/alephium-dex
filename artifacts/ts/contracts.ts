@@ -4,30 +4,30 @@
 
 import { Contract, ContractFactory } from "@alephium/web3";
 import {
-  Router,
-  TokenPair,
-  TokenPairFactory,
   ExampleOracleSimple,
   FeeCollectorFactoryImpl,
   FeeCollectorPerTokenPairImpl,
   FullMathTest,
   MathTest,
+  Router,
   TestToken,
+  TokenPair,
+  TokenPairFactory,
 } from ".";
 
 let contracts: ContractFactory<any>[] | undefined = undefined;
 export function getContractByCodeHash(codeHash: string): Contract {
   if (contracts === undefined) {
     contracts = [
-      Router,
-      TokenPair,
-      TokenPairFactory,
       ExampleOracleSimple,
       FeeCollectorFactoryImpl,
       FeeCollectorPerTokenPairImpl,
       FullMathTest,
       MathTest,
+      Router,
       TestToken,
+      TokenPair,
+      TokenPairFactory,
     ];
   }
   const c = contracts.find(
