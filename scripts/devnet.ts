@@ -164,14 +164,18 @@ export async function getCreatedContractId(provider: NodeProvider, txId: string,
   return binToHex(contractIdFromAddress(address))
 }
 
-function getSigner(privateKeys: string[], index: number) {
-  if (privateKeys.length === 0) {
-    throw new Error('No private key specified')
+function getSigner(privateKeys: string[] | string, index: number) {
+  if (Array.isArray(privateKeys)) {
+    if (privateKeys.length === 0) {
+      throw new Error('No private key specified')
+    }
+    if (index < 0 || index >= privateKeys.length) {
+      throw new Error(`Invalid private key index: ${index}`)
+    }
+    return new PrivateKeyWallet({ privateKey: privateKeys[index] })
+  } else {
+    return new PrivateKeyWallet({ privateKey: privateKeys })
   }
-  if (index < 0 || index >= privateKeys.length) {
-    throw new Error(`Invalid private key index: ${index}`)
-  }
-  return new PrivateKeyWallet({ privateKey: privateKeys[index] })
 }
 
 program
