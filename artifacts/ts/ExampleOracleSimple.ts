@@ -23,6 +23,10 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as ExampleOracleSimpleContractJson } from "../examples/ExampleOracleSimple.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -76,6 +80,14 @@ class Factory extends ContractFactory<
   ExampleOracleSimpleInstance,
   ExampleOracleSimpleTypes.Fields
 > {
+  encodeFields(fields: ExampleOracleSimpleTypes.Fields) {
+    return encodeContractFields(
+      addStdIdToFields(this.contract, fields),
+      this.contract.fieldsSig,
+      []
+    );
+  }
+
   getInitialFieldsWithDefaultValues() {
     return this.contract.getInitialFieldsWithDefaultValues() as ExampleOracleSimpleTypes.Fields;
   }
@@ -98,52 +110,57 @@ class Factory extends ContractFactory<
 
   tests = {
     fullMul: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         ExampleOracleSimpleTypes.Fields,
         { x: bigint; y: bigint }
       >
-    ): Promise<TestContractResult<[bigint, bigint]>> => {
-      return testMethod(this, "fullMul", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+      return testMethod(this, "fullMul", params, getContractByCodeHash);
     },
     mulDiv: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         ExampleOracleSimpleTypes.Fields,
         { a: bigint; b: bigint; denominator: bigint }
       >
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "mulDiv", params);
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "mulDiv", params, getContractByCodeHash);
     },
     fraction: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         ExampleOracleSimpleTypes.Fields,
         { numerator: bigint; denominator: bigint }
       >
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "fraction", params);
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "fraction", params, getContractByCodeHash);
     },
     currentCumulativePrices: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         ExampleOracleSimpleTypes.Fields,
         { currentBlockTimeStamp: bigint }
       >
-    ): Promise<TestContractResult<[bigint, bigint]>> => {
-      return testMethod(this, "currentCumulativePrices", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+      return testMethod(
+        this,
+        "currentCumulativePrices",
+        params,
+        getContractByCodeHash
+      );
     },
     update: async (
       params: Omit<
-        TestContractParams<ExampleOracleSimpleTypes.Fields, never>,
+        TestContractParamsWithoutMaps<ExampleOracleSimpleTypes.Fields, never>,
         "testArgs"
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "update", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "update", params, getContractByCodeHash);
     },
     consult: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         ExampleOracleSimpleTypes.Fields,
         { tokenId: HexString; amountIn: bigint }
       >
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "consult", params);
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "consult", params, getContractByCodeHash);
     },
   };
 }
@@ -153,7 +170,8 @@ export const ExampleOracleSimple = new Factory(
   Contract.fromJson(
     ExampleOracleSimpleContractJson,
     "",
-    "77c214087d18764740b2479fc13342959a21a02a36977c0d998667644200071a"
+    "77c214087d18764740b2479fc13342959a21a02a36977c0d998667644200071a",
+    []
   )
 );
 

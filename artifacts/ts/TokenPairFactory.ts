@@ -23,6 +23,10 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as TokenPairFactoryContractJson } from "../dex/TokenPairFactory.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -69,6 +73,14 @@ class Factory extends ContractFactory<
   TokenPairFactoryInstance,
   TokenPairFactoryTypes.Fields
 > {
+  encodeFields(fields: TokenPairFactoryTypes.Fields) {
+    return encodeContractFields(
+      addStdIdToFields(this.contract, fields),
+      this.contract.fieldsSig,
+      []
+    );
+  }
+
   getInitialFieldsWithDefaultValues() {
     return this.contract.getInitialFieldsWithDefaultValues() as TokenPairFactoryTypes.Fields;
   }
@@ -103,55 +115,70 @@ class Factory extends ContractFactory<
 
   tests = {
     setFeeCollectorFactory: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairFactoryTypes.Fields,
         { factory: HexString }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "setFeeCollectorFactory", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "setFeeCollectorFactory",
+        params,
+        getContractByCodeHash
+      );
     },
     updateFeeSetter: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairFactoryTypes.Fields,
         { newFeeSetter: Address }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "updateFeeSetter", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "updateFeeSetter", params, getContractByCodeHash);
     },
     getFeeSetter: async (
       params: Omit<
-        TestContractParams<TokenPairFactoryTypes.Fields, never>,
+        TestContractParamsWithoutMaps<TokenPairFactoryTypes.Fields, never>,
         "testArgs"
       >
-    ): Promise<TestContractResult<Address>> => {
-      return testMethod(this, "getFeeSetter", params);
+    ): Promise<TestContractResultWithoutMaps<Address>> => {
+      return testMethod(this, "getFeeSetter", params, getContractByCodeHash);
     },
     enableFeeCollector: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairFactoryTypes.Fields,
         { tokenPair: HexString; alphAmount: bigint }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "enableFeeCollector", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "enableFeeCollector",
+        params,
+        getContractByCodeHash
+      );
     },
     updateFeeCollector: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairFactoryTypes.Fields,
         { tokenPair: HexString; newFeeCollectorId: HexString }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "updateFeeCollector", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "updateFeeCollector",
+        params,
+        getContractByCodeHash
+      );
     },
     sortTokens: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairFactoryTypes.Fields,
         { tokenA: HexString; tokenB: HexString }
       >
-    ): Promise<TestContractResult<[HexString, HexString]>> => {
-      return testMethod(this, "sortTokens", params);
+    ): Promise<TestContractResultWithoutMaps<[HexString, HexString]>> => {
+      return testMethod(this, "sortTokens", params, getContractByCodeHash);
     },
     createPair: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairFactoryTypes.Fields,
         {
           payer: Address;
@@ -160,8 +187,8 @@ class Factory extends ContractFactory<
           tokenBId: HexString;
         }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "createPair", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "createPair", params, getContractByCodeHash);
     },
   };
 }
@@ -171,7 +198,8 @@ export const TokenPairFactory = new Factory(
   Contract.fromJson(
     TokenPairFactoryContractJson,
     "",
-    "44144899a2b71465a80654889afa8a2bf4a8f3cd0f30ad1880d2ffc7c12ad18b"
+    "44144899a2b71465a80654889afa8a2bf4a8f3cd0f30ad1880d2ffc7c12ad18b",
+    []
   )
 );
 

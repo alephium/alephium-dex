@@ -23,6 +23,10 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as FeeCollectorFactoryImplContractJson } from "../examples/FeeCollectorFactoryImpl.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -64,6 +68,14 @@ class Factory extends ContractFactory<
   FeeCollectorFactoryImplInstance,
   FeeCollectorFactoryImplTypes.Fields
 > {
+  encodeFields(fields: FeeCollectorFactoryImplTypes.Fields) {
+    return encodeContractFields(
+      addStdIdToFields(this.contract, fields),
+      this.contract.fieldsSig,
+      []
+    );
+  }
+
   getInitialFieldsWithDefaultValues() {
     return this.contract.getInitialFieldsWithDefaultValues() as FeeCollectorFactoryImplTypes.Fields;
   }
@@ -97,12 +109,17 @@ class Factory extends ContractFactory<
 
   tests = {
     createFeeCollector: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         FeeCollectorFactoryImplTypes.Fields,
         { caller: Address; alphAmount: bigint; tokenPair: HexString }
       >
-    ): Promise<TestContractResult<HexString>> => {
-      return testMethod(this, "createFeeCollector", params);
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(
+        this,
+        "createFeeCollector",
+        params,
+        getContractByCodeHash
+      );
     },
   };
 }
@@ -112,7 +129,8 @@ export const FeeCollectorFactoryImpl = new Factory(
   Contract.fromJson(
     FeeCollectorFactoryImplContractJson,
     "",
-    "966f75cddefe774a87dbf778012f4f3f494b3a860f4c975d0c5262a1be185d49"
+    "966f75cddefe774a87dbf778012f4f3f494b3a860f4c975d0c5262a1be185d49",
+    []
   )
 );
 

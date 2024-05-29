@@ -23,6 +23,10 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as TokenPairContractJson } from "../dex/TokenPair.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -142,6 +146,14 @@ class Factory extends ContractFactory<
   TokenPairInstance,
   TokenPairTypes.Fields
 > {
+  encodeFields(fields: TokenPairTypes.Fields) {
+    return encodeContractFields(
+      addStdIdToFields(this.contract, fields),
+      this.contract.fieldsSig,
+      []
+    );
+  }
+
   getInitialFieldsWithDefaultValues() {
     return this.contract.getInitialFieldsWithDefaultValues() as TokenPairTypes.Fields;
   }
@@ -177,102 +189,155 @@ class Factory extends ContractFactory<
 
   tests = {
     getSymbol: async (
-      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<HexString>> => {
-      return testMethod(this, "getSymbol", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(this, "getSymbol", params, getContractByCodeHash);
     },
     getName: async (
-      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<HexString>> => {
-      return testMethod(this, "getName", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(this, "getName", params, getContractByCodeHash);
     },
     getDecimals: async (
-      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "getDecimals", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "getDecimals", params, getContractByCodeHash);
     },
     getTotalSupply: async (
-      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "getTotalSupply", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "getTotalSupply", params, getContractByCodeHash);
     },
     uqdiv: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairTypes.Fields,
         { a: bigint; b: bigint }
       >
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "uqdiv", params);
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "uqdiv", params, getContractByCodeHash);
     },
     sqrt: async (
-      params: TestContractParams<TokenPairTypes.Fields, { y: bigint }>
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "sqrt", params);
+      params: TestContractParamsWithoutMaps<
+        TokenPairTypes.Fields,
+        { y: bigint }
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "sqrt", params, getContractByCodeHash);
     },
     setFeeCollectorId: async (
-      params: TestContractParams<TokenPairTypes.Fields, { id: HexString }>
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "setFeeCollectorId", params);
+      params: TestContractParamsWithoutMaps<
+        TokenPairTypes.Fields,
+        { id: HexString }
+      >
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "setFeeCollectorId",
+        params,
+        getContractByCodeHash
+      );
     },
     getTokenPair: async (
-      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<[HexString, HexString]>> => {
-      return testMethod(this, "getTokenPair", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<[HexString, HexString]>> => {
+      return testMethod(this, "getTokenPair", params, getContractByCodeHash);
     },
     getReserves: async (
-      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<[bigint, bigint]>> => {
-      return testMethod(this, "getReserves", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+      return testMethod(this, "getReserves", params, getContractByCodeHash);
     },
     getBlockTimeStampLast: async (
-      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "getBlockTimeStampLast", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(
+        this,
+        "getBlockTimeStampLast",
+        params,
+        getContractByCodeHash
+      );
     },
     getPrice0CumulativeLast: async (
-      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "getPrice0CumulativeLast", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(
+        this,
+        "getPrice0CumulativeLast",
+        params,
+        getContractByCodeHash
+      );
     },
     getPrice1CumulativeLast: async (
-      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "getPrice1CumulativeLast", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(
+        this,
+        "getPrice1CumulativeLast",
+        params,
+        getContractByCodeHash
+      );
     },
     update: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairTypes.Fields,
         { newReserve0: bigint; newReserve1: bigint }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "update", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "update", params, getContractByCodeHash);
     },
     mintFee: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairTypes.Fields,
         { reserve0_: bigint; reserve1_: bigint }
       >
-    ): Promise<TestContractResult<[boolean, bigint]>> => {
-      return testMethod(this, "mintFee", params);
+    ): Promise<TestContractResultWithoutMaps<[boolean, bigint]>> => {
+      return testMethod(this, "mintFee", params, getContractByCodeHash);
     },
     mint: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairTypes.Fields,
         { sender: Address; amount0: bigint; amount1: bigint }
       >
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "mint", params);
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "mint", params, getContractByCodeHash);
     },
     burn: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairTypes.Fields,
         { sender: Address; liquidity: bigint }
       >
-    ): Promise<TestContractResult<[bigint, bigint]>> => {
-      return testMethod(this, "burn", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+      return testMethod(this, "burn", params, getContractByCodeHash);
     },
     swap: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TokenPairTypes.Fields,
         {
           sender: Address;
@@ -283,18 +348,34 @@ class Factory extends ContractFactory<
           amount1Out: bigint;
         }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "swap", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "swap", params, getContractByCodeHash);
     },
     collectFeeManually: async (
-      params: Omit<TestContractParams<TokenPairTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "collectFeeManually", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "collectFeeManually",
+        params,
+        getContractByCodeHash
+      );
     },
     collectFeeAndUpdateKLast: async (
-      params: TestContractParams<TokenPairTypes.Fields, { feeAmount: bigint }>
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "collectFeeAndUpdateKLast", params);
+      params: TestContractParamsWithoutMaps<
+        TokenPairTypes.Fields,
+        { feeAmount: bigint }
+      >
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "collectFeeAndUpdateKLast",
+        params,
+        getContractByCodeHash
+      );
     },
   };
 }
@@ -304,7 +385,8 @@ export const TokenPair = new Factory(
   Contract.fromJson(
     TokenPairContractJson,
     "",
-    "4a98763809adb6e899e3e7864e6d5dcb60c6fd0806f1264c3596b482021035f2"
+    "4a98763809adb6e899e3e7864e6d5dcb60c6fd0806f1264c3596b482021035f2",
+    []
   )
 );
 

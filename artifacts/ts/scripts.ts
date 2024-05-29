@@ -33,37 +33,44 @@ export const AddLiquidity = new ExecutableScript<{
   amount0Min: bigint;
   amount1Min: bigint;
   deadline: bigint;
-}>(Script.fromJson(AddLiquidityScriptJson));
+}>(Script.fromJson(AddLiquidityScriptJson, "", []));
+
 export const Burn = new ExecutableScript<{
   tokenPair: HexString;
   sender: Address;
   liquidity: bigint;
-}>(Script.fromJson(BurnScriptJson));
+}>(Script.fromJson(BurnScriptJson, "", []));
+
 export const CollectFee = new ExecutableScript<{ feeCollector: HexString }>(
-  Script.fromJson(CollectFeeScriptJson)
+  Script.fromJson(CollectFeeScriptJson, "", [])
 );
+
 export const CreatePair = new ExecutableScript<{
   payer: Address;
   factory: HexString;
   alphAmount: bigint;
   tokenAId: HexString;
   tokenBId: HexString;
-}>(Script.fromJson(CreatePairScriptJson));
+}>(Script.fromJson(CreatePairScriptJson, "", []));
+
 export const EnableFeeCollector = new ExecutableScript<{
   tokenPairFactory: HexString;
   tokenPair: HexString;
-}>(Script.fromJson(EnableFeeCollectorScriptJson));
+}>(Script.fromJson(EnableFeeCollectorScriptJson, "", []));
+
 export const GetToken = new ExecutableScript<{
   token: HexString;
   sender: Address;
   amount: bigint;
-}>(Script.fromJson(GetTokenScriptJson));
+}>(Script.fromJson(GetTokenScriptJson, "", []));
+
 export const Mint = new ExecutableScript<{
   tokenPair: HexString;
   sender: Address;
   amount0: bigint;
   amount1: bigint;
-}>(Script.fromJson(MintScriptJson));
+}>(Script.fromJson(MintScriptJson, "", []));
+
 export const RemoveLiquidity = new ExecutableScript<{
   sender: Address;
   router: HexString;
@@ -72,11 +79,13 @@ export const RemoveLiquidity = new ExecutableScript<{
   amount0Min: bigint;
   amount1Min: bigint;
   deadline: bigint;
-}>(Script.fromJson(RemoveLiquidityScriptJson));
+}>(Script.fromJson(RemoveLiquidityScriptJson, "", []));
+
 export const SetFeeCollectorFactory = new ExecutableScript<{
   tokenPairFactory: HexString;
   feeCollectorFactory: HexString;
-}>(Script.fromJson(SetFeeCollectorFactoryScriptJson));
+}>(Script.fromJson(SetFeeCollectorFactoryScriptJson, "", []));
+
 export const Swap = new ExecutableScript<{
   tokenPair: HexString;
   sender: Address;
@@ -85,7 +94,8 @@ export const Swap = new ExecutableScript<{
   amount1In: bigint;
   amount0Out: bigint;
   amount1Out: bigint;
-}>(Script.fromJson(SwapScriptJson));
+}>(Script.fromJson(SwapScriptJson, "", []));
+
 export const SwapMaxIn = new ExecutableScript<{
   sender: Address;
   router: HexString;
@@ -94,7 +104,8 @@ export const SwapMaxIn = new ExecutableScript<{
   amountInMax: bigint;
   amountOut: bigint;
   deadline: bigint;
-}>(Script.fromJson(SwapMaxInScriptJson));
+}>(Script.fromJson(SwapMaxInScriptJson, "", []));
+
 export const SwapMinOut = new ExecutableScript<{
   sender: Address;
   router: HexString;
@@ -103,4 +114,4 @@ export const SwapMinOut = new ExecutableScript<{
   amountIn: bigint;
   amountOutMin: bigint;
   deadline: bigint;
-}>(Script.fromJson(SwapMinOutScriptJson));
+}>(Script.fromJson(SwapMinOutScriptJson, "", []));

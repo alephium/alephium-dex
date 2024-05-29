@@ -23,6 +23,10 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as MathTestContractJson } from "../test/MathTest.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -56,6 +60,10 @@ export namespace MathTestTypes {
 }
 
 class Factory extends ContractFactory<MathTestInstance, {}> {
+  encodeFields() {
+    return encodeContractFields({}, this.contract.fieldsSig, []);
+  }
+
   at(address: string): MathTestInstance {
     return new MathTestInstance(address);
   }
@@ -63,16 +71,19 @@ class Factory extends ContractFactory<MathTestInstance, {}> {
   tests = {
     uqdiv: async (
       params: Omit<
-        TestContractParams<never, { a: bigint; b: bigint }>,
+        TestContractParamsWithoutMaps<never, { a: bigint; b: bigint }>,
         "initialFields"
       >
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "uqdiv", params);
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "uqdiv", params, getContractByCodeHash);
     },
     sqrt: async (
-      params: Omit<TestContractParams<never, { y: bigint }>, "initialFields">
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "sqrt", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<never, { y: bigint }>,
+        "initialFields"
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "sqrt", params, getContractByCodeHash);
     },
   };
 }
@@ -82,7 +93,8 @@ export const MathTest = new Factory(
   Contract.fromJson(
     MathTestContractJson,
     "",
-    "085c8183210ec7296681e12ab74e37bebee9d495e78e24cc9b3cd1b110d6df2a"
+    "085c8183210ec7296681e12ab74e37bebee9d495e78e24cc9b3cd1b110d6df2a",
+    []
   )
 );
 

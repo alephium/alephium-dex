@@ -23,6 +23,10 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as RouterContractJson } from "../dex/Router.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -71,6 +75,10 @@ export namespace RouterTypes {
 }
 
 class Factory extends ContractFactory<RouterInstance, {}> {
+  encodeFields() {
+    return encodeContractFields({}, this.contract.fieldsSig, []);
+  }
+
   consts = {
     ErrorCodes: {
       ReserveOverflow: BigInt(0),
@@ -101,7 +109,7 @@ class Factory extends ContractFactory<RouterInstance, {}> {
   tests = {
     addLiquidity_: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             reserve0: bigint;
@@ -114,12 +122,12 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<[bigint, bigint]>> => {
-      return testMethod(this, "addLiquidity_", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+      return testMethod(this, "addLiquidity_", params, getContractByCodeHash);
     },
     addLiquidity: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             tokenPair: HexString;
@@ -133,12 +141,12 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<[bigint, bigint, bigint]>> => {
-      return testMethod(this, "addLiquidity", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint, bigint]>> => {
+      return testMethod(this, "addLiquidity", params, getContractByCodeHash);
     },
     removeLiquidity: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             tokenPairId: HexString;
@@ -151,23 +159,28 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<[bigint, bigint]>> => {
-      return testMethod(this, "removeLiquidity", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+      return testMethod(this, "removeLiquidity", params, getContractByCodeHash);
     },
     getReserveInAndReserveOut: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           { tokenPair: HexString; tokenInId: HexString }
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<[bigint, bigint]>> => {
-      return testMethod(this, "getReserveInAndReserveOut", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+      return testMethod(
+        this,
+        "getReserveInAndReserveOut",
+        params,
+        getContractByCodeHash
+      );
     },
     swapExactTokenForToken: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             tokenPair: HexString;
@@ -181,12 +194,17 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "swapExactTokenForToken", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "swapExactTokenForToken",
+        params,
+        getContractByCodeHash
+      );
     },
     swapTokenForExactToken: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             tokenPair: HexString;
@@ -200,12 +218,17 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "swapTokenForExactToken", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "swapTokenForExactToken",
+        params,
+        getContractByCodeHash
+      );
     },
     swap: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             tokenPair: HexString;
@@ -218,8 +241,8 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "swap", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "swap", params, getContractByCodeHash);
     },
   };
 }
@@ -229,7 +252,8 @@ export const Router = new Factory(
   Contract.fromJson(
     RouterContractJson,
     "",
-    "5b325453e5506a90851742af5f7797303703acecb523830220a105a88273b1b0"
+    "5b325453e5506a90851742af5f7797303703acecb523830220a105a88273b1b0",
+    []
   )
 );
 

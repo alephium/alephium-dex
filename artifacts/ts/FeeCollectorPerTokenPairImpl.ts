@@ -23,6 +23,10 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as FeeCollectorPerTokenPairImplContractJson } from "../examples/FeeCollectorPerTokenPairImpl.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -41,6 +45,14 @@ class Factory extends ContractFactory<
   FeeCollectorPerTokenPairImplInstance,
   FeeCollectorPerTokenPairImplTypes.Fields
 > {
+  encodeFields(fields: FeeCollectorPerTokenPairImplTypes.Fields) {
+    return encodeContractFields(
+      addStdIdToFields(this.contract, fields),
+      this.contract.fieldsSig,
+      []
+    );
+  }
+
   getInitialFieldsWithDefaultValues() {
     return this.contract.getInitialFieldsWithDefaultValues() as FeeCollectorPerTokenPairImplTypes.Fields;
   }
@@ -74,36 +86,44 @@ class Factory extends ContractFactory<
 
   tests = {
     collectFee: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         FeeCollectorPerTokenPairImplTypes.Fields,
         { from: Address; amount: bigint }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "collectFee", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "collectFee", params, getContractByCodeHash);
     },
     withdraw: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         FeeCollectorPerTokenPairImplTypes.Fields,
         { to: Address; amount: bigint }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "withdraw", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "withdraw", params, getContractByCodeHash);
     },
     destroy: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         FeeCollectorPerTokenPairImplTypes.Fields,
         { to: Address }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "destroy", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "destroy", params, getContractByCodeHash);
     },
     collectFeeManually: async (
       params: Omit<
-        TestContractParams<FeeCollectorPerTokenPairImplTypes.Fields, never>,
+        TestContractParamsWithoutMaps<
+          FeeCollectorPerTokenPairImplTypes.Fields,
+          never
+        >,
         "testArgs"
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "collectFeeManually", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "collectFeeManually",
+        params,
+        getContractByCodeHash
+      );
     },
   };
 }
@@ -113,7 +133,8 @@ export const FeeCollectorPerTokenPairImpl = new Factory(
   Contract.fromJson(
     FeeCollectorPerTokenPairImplContractJson,
     "",
-    "393eee49cd23c00d61848a8b2272e848f5278cc17f8c0b2333e2ed744edf5b79"
+    "393eee49cd23c00d61848a8b2272e848f5278cc17f8c0b2333e2ed744edf5b79",
+    []
   )
 );
 
