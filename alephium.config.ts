@@ -8,7 +8,7 @@ export type Settings = {
 const configuration: Configuration<Settings> = {
   networks: {
     devnet: {
-      nodeUrl: 'http://localhost:22973',
+      nodeUrl: 'http://127.0.0.1:22973',
       privateKeys: ['a642942e67258589cd2b1822c631506632db5a12aabcf413604e785300d762a5'],
       settings: { feeSetter: '1DrDyTr9RpRsQnDnXo2YRiPzPW4ooHX5LLoqXrqfMrpQH' }
     },

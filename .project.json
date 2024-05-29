@@ -1,5 +1,5 @@
 {
-  "fullNodeVersion": "v2.5.3",
+  "fullNodeVersion": "v3.1.2",
   "compilerOptionsUsed": {
     "ignoreUnusedConstantsWarnings": true,
     "ignoreUnusedVariablesWarnings": false,
@@ -14,14 +14,18 @@
       "sourceCodeHash": "ae7c7a47ec7728436f5b56c039f277705fe3a71e64709d6ba40d8d802e3f6fbe",
       "bytecodeDebugPatch": "",
       "codeHashDebug": "",
-      "warnings": []
+      "warnings": [
+        "The return values of the function \"Router.addLiquidity\" are not used. If this is intentional, consider using anonymous variables to suppress this warning."
+      ]
     },
     "Burn": {
       "sourceFile": "scripts/burn.ral",
       "sourceCodeHash": "28aacad8f388d36812349552df3bcf44278bffeebc35223d98868e7d380af791",
       "bytecodeDebugPatch": "",
       "codeHashDebug": "",
-      "warnings": []
+      "warnings": [
+        "The return values of the function \"TokenPair.burn\" are not used. If this is intentional, consider using anonymous variables to suppress this warning."
+      ]
     },
     "CollectFee": {
       "sourceFile": "scripts/collect_fee.ral",
@@ -109,7 +113,7 @@
     },
     "IFungibleToken": {
       "sourceFile": "../node_modules/@alephium/web3/std/fungible_token_interface.ral",
-      "sourceCodeHash": "6809cb06fb20fa7edf529461998beeebd12b1636d439612cca2f84214dbf4a20",
+      "sourceCodeHash": "62910bf11e1eeb6cb2fd468626ff606a9b06306b2b81590c3b10f6deb5966bde",
       "bytecodeDebugPatch": "",
       "codeHashDebug": "",
       "warnings": []
@@ -133,7 +137,9 @@
       "sourceCodeHash": "20250bff8040a0260e1980607150116ee2d6aef9bdf39254316fcf0eaccb39f0",
       "bytecodeDebugPatch": "",
       "codeHashDebug": "",
-      "warnings": []
+      "warnings": [
+        "The return values of the function \"TokenPair.mint\" are not used. If this is intentional, consider using anonymous variables to suppress this warning."
+      ]
     },
     "OracleErrors": {
       "sourceFile": "examples/errors.ral",
@@ -147,7 +153,9 @@
       "sourceCodeHash": "a37e6c625f753ee67a3ac20bd4d71d19985d1a34381acf8833ea2a193378eb2e",
       "bytecodeDebugPatch": "",
       "codeHashDebug": "",
-      "warnings": []
+      "warnings": [
+        "The return values of the function \"Router.removeLiquidity\" are not used. If this is intentional, consider using anonymous variables to suppress this warning."
+      ]
     },
     "Router": {
       "sourceFile": "dex/router.ral",
