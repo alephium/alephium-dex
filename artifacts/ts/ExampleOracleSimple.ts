@@ -25,6 +25,9 @@ import {
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
   TestContractResultWithoutMaps,
+  SignExecuteContractMethodParams,
+  SignExecuteScriptTxResult,
+  signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
 } from "@alephium/web3";
@@ -57,6 +60,10 @@ export namespace ExampleOracleSimpleTypes {
       params: CallContractParams<{ numerator: bigint; denominator: bigint }>;
       result: CallContractResult<bigint>;
     };
+    update: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<null>;
+    };
     consult: {
       params: CallContractParams<{ tokenId: HexString; amountIn: bigint }>;
       result: CallContractResult<bigint>;
@@ -74,6 +81,43 @@ export namespace ExampleOracleSimpleTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+
+  export interface SignExecuteMethodTable {
+    fullMul: {
+      params: SignExecuteContractMethodParams<{ x: bigint; y: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
+    mulDiv: {
+      params: SignExecuteContractMethodParams<{
+        a: bigint;
+        b: bigint;
+        denominator: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    fraction: {
+      params: SignExecuteContractMethodParams<{
+        numerator: bigint;
+        denominator: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    update: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    consult: {
+      params: SignExecuteContractMethodParams<{
+        tokenId: HexString;
+        amountIn: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+  }
+  export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["params"];
+  export type SignExecuteMethodResult<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["result"];
 }
 
 class Factory extends ContractFactory<
@@ -219,6 +263,17 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    update: async (
+      params?: ExampleOracleSimpleTypes.CallMethodParams<"update">
+    ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"update">> => {
+      return callMethod(
+        ExampleOracleSimple,
+        this,
+        "update",
+        params === undefined ? {} : params,
+        getContractByCodeHash
+      );
+    },
     consult: async (
       params: ExampleOracleSimpleTypes.CallMethodParams<"consult">
     ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"consult">> => {
@@ -229,6 +284,38 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
         params,
         getContractByCodeHash
       );
+    },
+  };
+
+  view = this.methods;
+
+  transact = {
+    fullMul: async (
+      params: ExampleOracleSimpleTypes.SignExecuteMethodParams<"fullMul">
+    ): Promise<ExampleOracleSimpleTypes.SignExecuteMethodResult<"fullMul">> => {
+      return signExecuteMethod(ExampleOracleSimple, this, "fullMul", params);
+    },
+    mulDiv: async (
+      params: ExampleOracleSimpleTypes.SignExecuteMethodParams<"mulDiv">
+    ): Promise<ExampleOracleSimpleTypes.SignExecuteMethodResult<"mulDiv">> => {
+      return signExecuteMethod(ExampleOracleSimple, this, "mulDiv", params);
+    },
+    fraction: async (
+      params: ExampleOracleSimpleTypes.SignExecuteMethodParams<"fraction">
+    ): Promise<
+      ExampleOracleSimpleTypes.SignExecuteMethodResult<"fraction">
+    > => {
+      return signExecuteMethod(ExampleOracleSimple, this, "fraction", params);
+    },
+    update: async (
+      params: ExampleOracleSimpleTypes.SignExecuteMethodParams<"update">
+    ): Promise<ExampleOracleSimpleTypes.SignExecuteMethodResult<"update">> => {
+      return signExecuteMethod(ExampleOracleSimple, this, "update", params);
+    },
+    consult: async (
+      params: ExampleOracleSimpleTypes.SignExecuteMethodParams<"consult">
+    ): Promise<ExampleOracleSimpleTypes.SignExecuteMethodResult<"consult">> => {
+      return signExecuteMethod(ExampleOracleSimple, this, "consult", params);
     },
   };
 

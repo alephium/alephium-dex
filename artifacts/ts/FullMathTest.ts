@@ -25,6 +25,9 @@ import {
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
   TestContractResultWithoutMaps,
+  SignExecuteContractMethodParams,
+  SignExecuteScriptTxResult,
+  signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
 } from "@alephium/web3";
@@ -61,6 +64,32 @@ export namespace FullMathTestTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+
+  export interface SignExecuteMethodTable {
+    fullMul: {
+      params: SignExecuteContractMethodParams<{ x: bigint; y: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
+    mulDiv: {
+      params: SignExecuteContractMethodParams<{
+        a: bigint;
+        b: bigint;
+        denominator: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    fraction: {
+      params: SignExecuteContractMethodParams<{
+        numerator: bigint;
+        denominator: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+  }
+  export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["params"];
+  export type SignExecuteMethodResult<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["result"];
 }
 
 class Factory extends ContractFactory<FullMathTestInstance, {}> {
@@ -170,6 +199,26 @@ export class FullMathTestInstance extends ContractInstance {
         params,
         getContractByCodeHash
       );
+    },
+  };
+
+  view = this.methods;
+
+  transact = {
+    fullMul: async (
+      params: FullMathTestTypes.SignExecuteMethodParams<"fullMul">
+    ): Promise<FullMathTestTypes.SignExecuteMethodResult<"fullMul">> => {
+      return signExecuteMethod(FullMathTest, this, "fullMul", params);
+    },
+    mulDiv: async (
+      params: FullMathTestTypes.SignExecuteMethodParams<"mulDiv">
+    ): Promise<FullMathTestTypes.SignExecuteMethodResult<"mulDiv">> => {
+      return signExecuteMethod(FullMathTest, this, "mulDiv", params);
+    },
+    fraction: async (
+      params: FullMathTestTypes.SignExecuteMethodParams<"fraction">
+    ): Promise<FullMathTestTypes.SignExecuteMethodResult<"fraction">> => {
+      return signExecuteMethod(FullMathTest, this, "fraction", params);
     },
   };
 

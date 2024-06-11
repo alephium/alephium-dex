@@ -25,6 +25,9 @@ import {
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
   TestContractResultWithoutMaps,
+  SignExecuteContractMethodParams,
+  SignExecuteScriptTxResult,
+  signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
 } from "@alephium/web3";
@@ -57,6 +60,21 @@ export namespace MathTestTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+
+  export interface SignExecuteMethodTable {
+    uqdiv: {
+      params: SignExecuteContractMethodParams<{ a: bigint; b: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
+    sqrt: {
+      params: SignExecuteContractMethodParams<{ y: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
+  }
+  export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["params"];
+  export type SignExecuteMethodResult<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["result"];
 }
 
 class Factory extends ContractFactory<MathTestInstance, {}> {
@@ -118,6 +136,21 @@ export class MathTestInstance extends ContractInstance {
       params: MathTestTypes.CallMethodParams<"sqrt">
     ): Promise<MathTestTypes.CallMethodResult<"sqrt">> => {
       return callMethod(MathTest, this, "sqrt", params, getContractByCodeHash);
+    },
+  };
+
+  view = this.methods;
+
+  transact = {
+    uqdiv: async (
+      params: MathTestTypes.SignExecuteMethodParams<"uqdiv">
+    ): Promise<MathTestTypes.SignExecuteMethodResult<"uqdiv">> => {
+      return signExecuteMethod(MathTest, this, "uqdiv", params);
+    },
+    sqrt: async (
+      params: MathTestTypes.SignExecuteMethodParams<"sqrt">
+    ): Promise<MathTestTypes.SignExecuteMethodResult<"sqrt">> => {
+      return signExecuteMethod(MathTest, this, "sqrt", params);
     },
   };
 

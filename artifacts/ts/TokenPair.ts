@@ -25,6 +25,9 @@ import {
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
   TestContractResultWithoutMaps,
+  SignExecuteContractMethodParams,
+  SignExecuteScriptTxResult,
+  signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
 } from "@alephium/web3";
@@ -95,6 +98,10 @@ export namespace TokenPairTypes {
       params: CallContractParams<{ y: bigint }>;
       result: CallContractResult<bigint>;
     };
+    setFeeCollectorId: {
+      params: CallContractParams<{ id: HexString }>;
+      result: CallContractResult<null>;
+    };
     getTokenPair: {
       params: Omit<CallContractParams<{}>, "args">;
       result: CallContractResult<[HexString, HexString]>;
@@ -127,6 +134,21 @@ export namespace TokenPairTypes {
       params: CallContractParams<{ sender: Address; liquidity: bigint }>;
       result: CallContractResult<[bigint, bigint]>;
     };
+    swap: {
+      params: CallContractParams<{
+        sender: Address;
+        to: Address;
+        amount0In: bigint;
+        amount1In: bigint;
+        amount0Out: bigint;
+        amount1Out: bigint;
+      }>;
+      result: CallContractResult<null>;
+    };
+    collectFeeManually: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<null>;
+    };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
     CallMethodTable[T]["params"];
@@ -140,6 +162,91 @@ export namespace TokenPairTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+
+  export interface SignExecuteMethodTable {
+    getSymbol: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getName: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getDecimals: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getTotalSupply: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    uqdiv: {
+      params: SignExecuteContractMethodParams<{ a: bigint; b: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
+    sqrt: {
+      params: SignExecuteContractMethodParams<{ y: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
+    setFeeCollectorId: {
+      params: SignExecuteContractMethodParams<{ id: HexString }>;
+      result: SignExecuteScriptTxResult;
+    };
+    getTokenPair: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getReserves: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getBlockTimeStampLast: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getPrice0CumulativeLast: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getPrice1CumulativeLast: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    mint: {
+      params: SignExecuteContractMethodParams<{
+        sender: Address;
+        amount0: bigint;
+        amount1: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    burn: {
+      params: SignExecuteContractMethodParams<{
+        sender: Address;
+        liquidity: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    swap: {
+      params: SignExecuteContractMethodParams<{
+        sender: Address;
+        to: Address;
+        amount0In: bigint;
+        amount1In: bigint;
+        amount0Out: bigint;
+        amount1Out: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    collectFeeManually: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+  }
+  export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["params"];
+  export type SignExecuteMethodResult<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["result"];
 }
 
 class Factory extends ContractFactory<
@@ -520,6 +627,17 @@ export class TokenPairInstance extends ContractInstance {
     ): Promise<TokenPairTypes.CallMethodResult<"sqrt">> => {
       return callMethod(TokenPair, this, "sqrt", params, getContractByCodeHash);
     },
+    setFeeCollectorId: async (
+      params: TokenPairTypes.CallMethodParams<"setFeeCollectorId">
+    ): Promise<TokenPairTypes.CallMethodResult<"setFeeCollectorId">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "setFeeCollectorId",
+        params,
+        getContractByCodeHash
+      );
+    },
     getTokenPair: async (
       params?: TokenPairTypes.CallMethodParams<"getTokenPair">
     ): Promise<TokenPairTypes.CallMethodResult<"getTokenPair">> => {
@@ -584,6 +702,130 @@ export class TokenPairInstance extends ContractInstance {
       params: TokenPairTypes.CallMethodParams<"burn">
     ): Promise<TokenPairTypes.CallMethodResult<"burn">> => {
       return callMethod(TokenPair, this, "burn", params, getContractByCodeHash);
+    },
+    swap: async (
+      params: TokenPairTypes.CallMethodParams<"swap">
+    ): Promise<TokenPairTypes.CallMethodResult<"swap">> => {
+      return callMethod(TokenPair, this, "swap", params, getContractByCodeHash);
+    },
+    collectFeeManually: async (
+      params?: TokenPairTypes.CallMethodParams<"collectFeeManually">
+    ): Promise<TokenPairTypes.CallMethodResult<"collectFeeManually">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "collectFeeManually",
+        params === undefined ? {} : params,
+        getContractByCodeHash
+      );
+    },
+  };
+
+  view = this.methods;
+
+  transact = {
+    getSymbol: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"getSymbol">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"getSymbol">> => {
+      return signExecuteMethod(TokenPair, this, "getSymbol", params);
+    },
+    getName: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"getName">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"getName">> => {
+      return signExecuteMethod(TokenPair, this, "getName", params);
+    },
+    getDecimals: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"getDecimals">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"getDecimals">> => {
+      return signExecuteMethod(TokenPair, this, "getDecimals", params);
+    },
+    getTotalSupply: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"getTotalSupply">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"getTotalSupply">> => {
+      return signExecuteMethod(TokenPair, this, "getTotalSupply", params);
+    },
+    uqdiv: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"uqdiv">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"uqdiv">> => {
+      return signExecuteMethod(TokenPair, this, "uqdiv", params);
+    },
+    sqrt: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"sqrt">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"sqrt">> => {
+      return signExecuteMethod(TokenPair, this, "sqrt", params);
+    },
+    setFeeCollectorId: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"setFeeCollectorId">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"setFeeCollectorId">> => {
+      return signExecuteMethod(TokenPair, this, "setFeeCollectorId", params);
+    },
+    getTokenPair: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"getTokenPair">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"getTokenPair">> => {
+      return signExecuteMethod(TokenPair, this, "getTokenPair", params);
+    },
+    getReserves: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"getReserves">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"getReserves">> => {
+      return signExecuteMethod(TokenPair, this, "getReserves", params);
+    },
+    getBlockTimeStampLast: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"getBlockTimeStampLast">
+    ): Promise<
+      TokenPairTypes.SignExecuteMethodResult<"getBlockTimeStampLast">
+    > => {
+      return signExecuteMethod(
+        TokenPair,
+        this,
+        "getBlockTimeStampLast",
+        params
+      );
+    },
+    getPrice0CumulativeLast: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"getPrice0CumulativeLast">
+    ): Promise<
+      TokenPairTypes.SignExecuteMethodResult<"getPrice0CumulativeLast">
+    > => {
+      return signExecuteMethod(
+        TokenPair,
+        this,
+        "getPrice0CumulativeLast",
+        params
+      );
+    },
+    getPrice1CumulativeLast: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"getPrice1CumulativeLast">
+    ): Promise<
+      TokenPairTypes.SignExecuteMethodResult<"getPrice1CumulativeLast">
+    > => {
+      return signExecuteMethod(
+        TokenPair,
+        this,
+        "getPrice1CumulativeLast",
+        params
+      );
+    },
+    mint: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"mint">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"mint">> => {
+      return signExecuteMethod(TokenPair, this, "mint", params);
+    },
+    burn: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"burn">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"burn">> => {
+      return signExecuteMethod(TokenPair, this, "burn", params);
+    },
+    swap: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"swap">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"swap">> => {
+      return signExecuteMethod(TokenPair, this, "swap", params);
+    },
+    collectFeeManually: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"collectFeeManually">
+    ): Promise<
+      TokenPairTypes.SignExecuteMethodResult<"collectFeeManually">
+    > => {
+      return signExecuteMethod(TokenPair, this, "collectFeeManually", params);
     },
   };
 

@@ -25,6 +25,9 @@ import {
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
   TestContractResultWithoutMaps,
+  SignExecuteContractMethodParams,
+  SignExecuteScriptTxResult,
+  signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
 } from "@alephium/web3";
@@ -59,6 +62,30 @@ export namespace RouterTypes {
       }>;
       result: CallContractResult<[bigint, bigint]>;
     };
+    swapExactTokenForToken: {
+      params: CallContractParams<{
+        tokenPair: HexString;
+        sender: Address;
+        tokenInId: HexString;
+        amountIn: bigint;
+        amountOutMin: bigint;
+        to: Address;
+        deadline: bigint;
+      }>;
+      result: CallContractResult<null>;
+    };
+    swapTokenForExactToken: {
+      params: CallContractParams<{
+        tokenPair: HexString;
+        sender: Address;
+        tokenInId: HexString;
+        amountInMax: bigint;
+        amountOut: bigint;
+        to: Address;
+        deadline: bigint;
+      }>;
+      result: CallContractResult<null>;
+    };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
     CallMethodTable[T]["params"];
@@ -72,6 +99,60 @@ export namespace RouterTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+
+  export interface SignExecuteMethodTable {
+    addLiquidity: {
+      params: SignExecuteContractMethodParams<{
+        tokenPair: HexString;
+        sender: Address;
+        amount0Desired: bigint;
+        amount1Desired: bigint;
+        amount0Min: bigint;
+        amount1Min: bigint;
+        deadline: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    removeLiquidity: {
+      params: SignExecuteContractMethodParams<{
+        tokenPairId: HexString;
+        sender: Address;
+        liquidity: bigint;
+        amount0Min: bigint;
+        amount1Min: bigint;
+        deadline: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    swapExactTokenForToken: {
+      params: SignExecuteContractMethodParams<{
+        tokenPair: HexString;
+        sender: Address;
+        tokenInId: HexString;
+        amountIn: bigint;
+        amountOutMin: bigint;
+        to: Address;
+        deadline: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    swapTokenForExactToken: {
+      params: SignExecuteContractMethodParams<{
+        tokenPair: HexString;
+        sender: Address;
+        tokenInId: HexString;
+        amountInMax: bigint;
+        amountOut: bigint;
+        to: Address;
+        deadline: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+  }
+  export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["params"];
+  export type SignExecuteMethodResult<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["result"];
 }
 
 class Factory extends ContractFactory<RouterInstance, {}> {
@@ -289,6 +370,57 @@ export class RouterInstance extends ContractInstance {
         params,
         getContractByCodeHash
       );
+    },
+    swapExactTokenForToken: async (
+      params: RouterTypes.CallMethodParams<"swapExactTokenForToken">
+    ): Promise<RouterTypes.CallMethodResult<"swapExactTokenForToken">> => {
+      return callMethod(
+        Router,
+        this,
+        "swapExactTokenForToken",
+        params,
+        getContractByCodeHash
+      );
+    },
+    swapTokenForExactToken: async (
+      params: RouterTypes.CallMethodParams<"swapTokenForExactToken">
+    ): Promise<RouterTypes.CallMethodResult<"swapTokenForExactToken">> => {
+      return callMethod(
+        Router,
+        this,
+        "swapTokenForExactToken",
+        params,
+        getContractByCodeHash
+      );
+    },
+  };
+
+  view = this.methods;
+
+  transact = {
+    addLiquidity: async (
+      params: RouterTypes.SignExecuteMethodParams<"addLiquidity">
+    ): Promise<RouterTypes.SignExecuteMethodResult<"addLiquidity">> => {
+      return signExecuteMethod(Router, this, "addLiquidity", params);
+    },
+    removeLiquidity: async (
+      params: RouterTypes.SignExecuteMethodParams<"removeLiquidity">
+    ): Promise<RouterTypes.SignExecuteMethodResult<"removeLiquidity">> => {
+      return signExecuteMethod(Router, this, "removeLiquidity", params);
+    },
+    swapExactTokenForToken: async (
+      params: RouterTypes.SignExecuteMethodParams<"swapExactTokenForToken">
+    ): Promise<
+      RouterTypes.SignExecuteMethodResult<"swapExactTokenForToken">
+    > => {
+      return signExecuteMethod(Router, this, "swapExactTokenForToken", params);
+    },
+    swapTokenForExactToken: async (
+      params: RouterTypes.SignExecuteMethodParams<"swapTokenForExactToken">
+    ): Promise<
+      RouterTypes.SignExecuteMethodResult<"swapTokenForExactToken">
+    > => {
+      return signExecuteMethod(Router, this, "swapTokenForExactToken", params);
     },
   };
 
