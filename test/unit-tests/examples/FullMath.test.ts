@@ -1,15 +1,11 @@
 import { web3 } from '@alephium/web3'
 import { FullMathTest } from '../../../artifacts/ts'
-import { buildProject, randomBigInt } from '../fixtures/DexFixture'
+import { randomBigInt } from '../fixtures/DexFixture'
 import { expectAssertionError, randomContractAddress } from '@alephium/web3-test'
 import { OracleErrorCodes } from '../fixtures/ExampleOracleFixture'
 
 describe('test math', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
-
-  beforeEach(async () => {
-    await buildProject()
-  })
 
   const UpperBound = 1n << 256n
   const U256Max = UpperBound - 1n

@@ -1,7 +1,6 @@
 import { Token, web3, subContractId, ALPH_TOKEN_ID } from '@alephium/web3'
 import { expectAssertionError } from '@alephium/web3-test'
 import {
-  buildProject,
   createTokenPairFactory,
   getContractState,
   oneAlph,
@@ -15,8 +14,6 @@ describe('test token pair factory', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
 
   test('create pair', async () => {
-    await buildProject()
-
     const payer = randomP2PKHAddress()
     const fixture = createTokenPairFactory(payer)
 

@@ -2,7 +2,6 @@ import { ContractState, DUST_AMOUNT, web3 } from '@alephium/web3'
 import { expectAssertionError } from '@alephium/web3-test'
 import { Router, TokenPairTypes } from '../../artifacts/ts'
 import {
-  buildProject,
   createRouter,
   createTokenPair,
   defaultGasFee,
@@ -18,8 +17,6 @@ describe('test router', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
 
   test('addLiquidity_', async () => {
-    await buildProject()
-
     const routerFixture = createRouter()
     async function test(
       reserve0: bigint,
@@ -63,8 +60,6 @@ describe('test router', () => {
   }, 20000)
 
   test('addLiquidity', async () => {
-    await buildProject()
-
     const sender = randomP2PKHAddress()
     const routerFixture = createRouter()
 
@@ -127,8 +122,6 @@ describe('test router', () => {
   })
 
   test('removeLiquidity', async () => {
-    await buildProject()
-
     const sender = randomP2PKHAddress()
     const routerFixture = createRouter()
 
@@ -198,8 +191,6 @@ describe('test router', () => {
   })
 
   test('getReserveInAndReserveOut', async () => {
-    await buildProject()
-
     const sender = randomP2PKHAddress()
     const routerFixture = createRouter()
     const [token0Id, token1Id] = randomTokenPair()
@@ -221,8 +212,6 @@ describe('test router', () => {
   })
 
   test('swapExactTokenForToken', async () => {
-    await buildProject()
-
     const sender = randomP2PKHAddress()
     const routerFixture = createRouter()
 
@@ -286,8 +275,6 @@ describe('test router', () => {
   })
 
   test('swapTokenForExactToken', async () => {
-    await buildProject()
-
     const sender = randomP2PKHAddress()
     const routerFixture = createRouter()
 

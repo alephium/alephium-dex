@@ -10,7 +10,6 @@ import {
   TokenPairFactory
 } from '../../../artifacts/ts'
 import {
-  buildProject,
   contractBalanceOf,
   ContractFixture,
   createTokenPair,
@@ -61,8 +60,6 @@ describe('test fee collector', () => {
   let feeCollectorFactoryFixture: ContractFixture<FeeCollectorFactoryImplTypes.Fields>
   let tokenPairFixture: ContractFixture<TokenPairTypes.Fields>
   beforeEach(async () => {
-    await buildProject()
-
     sender = randomP2PKHAddress()
     const tokenPair = randomTokenPair()
     token0Id = tokenPair[0]

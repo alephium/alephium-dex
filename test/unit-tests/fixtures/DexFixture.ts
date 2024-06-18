@@ -9,7 +9,6 @@ import {
   Fields,
   groupOfAddress,
   number256ToBigint,
-  Project,
   Token
 } from '@alephium/web3'
 import { randomBytes } from 'crypto'
@@ -20,7 +19,7 @@ export const oneAlph = 10n ** 18n
 export const minimalAlphInContract = oneAlph
 export const maxAlphAmount = 10n ** 18n * 1000000000n
 export const gasPrice = 100000000000n
-export const maxGasPerTx = 625000n
+export const maxGasPerTx = 5000000n
 export const defaultGasFee = gasPrice * maxGasPerTx
 export const minimumLiquidity = 1000n
 
@@ -39,12 +38,6 @@ export class ContractFixture<F extends Fields> {
     this.dependencies = dependencies
     this.address = address
     this.contractId = selfState.contractId
-  }
-}
-
-export async function buildProject(): Promise<void> {
-  if (typeof Project.currentProject === 'undefined') {
-    await Project.build({ ignoreUnusedConstantsWarnings: true })
   }
 }
 
