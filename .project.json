@@ -64,7 +64,7 @@
     },
     "FeeCollectorFactory": {
       "sourceFile": "dex/fee_collector_factory.ral",
-      "sourceCodeHash": "dbdcabe131650b1315fdf3216f7345971a1fcce2ffe6414f4384bbb07c56339d",
+      "sourceCodeHash": "44c41462b5814731ef8f83248b9ee77b8260b0e4f8bf17aebe53bc7260d38df2",
       "bytecodeDebugPatch": "",
       "codeHashDebug": "",
       "warnings": []
@@ -78,7 +78,7 @@
     },
     "FeeCollectorPerTokenPair": {
       "sourceFile": "dex/fee_collector_per_token_pair.ral",
-      "sourceCodeHash": "5216b65256a0c226981db05459321c7a56add721c3ed1506613b07283724fc4f",
+      "sourceCodeHash": "1a0c1bb3ac308845730af303de241bc0436b2133daa7074636662a20713ed84b",
       "bytecodeDebugPatch": "",
       "codeHashDebug": "",
       "warnings": []
@@ -201,9 +201,9 @@
     },
     "TokenPair": {
       "sourceFile": "dex/token_pair.ral",
-      "sourceCodeHash": "3de8e04bfa9588f981d679c403f74177fb777e9d199c880f7300bd3f1365e373",
+      "sourceCodeHash": "fe3049c8d6472fce53015f300c82cefc0d3cac80550bd1afb428b9c39ce8c12b",
       "bytecodeDebugPatch": "",
-      "codeHashDebug": "4a98763809adb6e899e3e7864e6d5dcb60c6fd0806f1264c3596b482021035f2",
+      "codeHashDebug": "44cb575528fd174a595daf0a095f1b0f2e6b234213a99449173542520f63222e",
       "warnings": []
     },
     "TokenPairFactory": {

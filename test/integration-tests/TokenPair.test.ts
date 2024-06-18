@@ -472,7 +472,7 @@ describe('test token pair', () => {
     // sleep 1 second to make sure the time elapsed large than 0
     await sleep(1000)
     const swapResult = await fixture.swap(0n, swapAmount, expectedOutputAmount, 0n, sender.address, sender)
-    expect(swapResult.gasAmount).toEqual(44591)
+    expect(swapResult.gasAmount).toEqual(44587)
   })
 
   test('burn', async () => {
