@@ -23,6 +23,13 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  SignExecuteContractMethodParams,
+  SignExecuteScriptTxResult,
+  signExecuteMethod,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as FeeCollectorFactoryImplContractJson } from "../examples/FeeCollectorFactoryImpl.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -58,12 +65,35 @@ export namespace FeeCollectorFactoryImplTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+
+  export interface SignExecuteMethodTable {
+    createFeeCollector: {
+      params: SignExecuteContractMethodParams<{
+        caller: Address;
+        alphAmount: bigint;
+        tokenPair: HexString;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+  }
+  export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["params"];
+  export type SignExecuteMethodResult<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["result"];
 }
 
 class Factory extends ContractFactory<
   FeeCollectorFactoryImplInstance,
   FeeCollectorFactoryImplTypes.Fields
 > {
+  encodeFields(fields: FeeCollectorFactoryImplTypes.Fields) {
+    return encodeContractFields(
+      addStdIdToFields(this.contract, fields),
+      this.contract.fieldsSig,
+      []
+    );
+  }
+
   getInitialFieldsWithDefaultValues() {
     return this.contract.getInitialFieldsWithDefaultValues() as FeeCollectorFactoryImplTypes.Fields;
   }
@@ -97,12 +127,17 @@ class Factory extends ContractFactory<
 
   tests = {
     createFeeCollector: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         FeeCollectorFactoryImplTypes.Fields,
         { caller: Address; alphAmount: bigint; tokenPair: HexString }
       >
-    ): Promise<TestContractResult<HexString>> => {
-      return testMethod(this, "createFeeCollector", params);
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(
+        this,
+        "createFeeCollector",
+        params,
+        getContractByCodeHash
+      );
     },
   };
 }
@@ -112,7 +147,8 @@ export const FeeCollectorFactoryImpl = new Factory(
   Contract.fromJson(
     FeeCollectorFactoryImplContractJson,
     "",
-    "966f75cddefe774a87dbf778012f4f3f494b3a860f4c975d0c5262a1be185d49"
+    "966f75cddefe774a87dbf778012f4f3f494b3a860f4c975d0c5262a1be185d49",
+    []
   )
 );
 
@@ -138,6 +174,23 @@ export class FeeCollectorFactoryImplInstance extends ContractInstance {
         "createFeeCollector",
         params,
         getContractByCodeHash
+      );
+    },
+  };
+
+  view = this.methods;
+
+  transact = {
+    createFeeCollector: async (
+      params: FeeCollectorFactoryImplTypes.SignExecuteMethodParams<"createFeeCollector">
+    ): Promise<
+      FeeCollectorFactoryImplTypes.SignExecuteMethodResult<"createFeeCollector">
+    > => {
+      return signExecuteMethod(
+        FeeCollectorFactoryImpl,
+        this,
+        "createFeeCollector",
+        params
       );
     },
   };

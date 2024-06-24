@@ -23,6 +23,13 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  SignExecuteContractMethodParams,
+  SignExecuteScriptTxResult,
+  signExecuteMethod,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as RouterContractJson } from "../dex/Router.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -55,6 +62,30 @@ export namespace RouterTypes {
       }>;
       result: CallContractResult<[bigint, bigint]>;
     };
+    swapExactTokenForToken: {
+      params: CallContractParams<{
+        tokenPair: HexString;
+        sender: Address;
+        tokenInId: HexString;
+        amountIn: bigint;
+        amountOutMin: bigint;
+        to: Address;
+        deadline: bigint;
+      }>;
+      result: CallContractResult<null>;
+    };
+    swapTokenForExactToken: {
+      params: CallContractParams<{
+        tokenPair: HexString;
+        sender: Address;
+        tokenInId: HexString;
+        amountInMax: bigint;
+        amountOut: bigint;
+        to: Address;
+        deadline: bigint;
+      }>;
+      result: CallContractResult<null>;
+    };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
     CallMethodTable[T]["params"];
@@ -68,9 +99,67 @@ export namespace RouterTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+
+  export interface SignExecuteMethodTable {
+    addLiquidity: {
+      params: SignExecuteContractMethodParams<{
+        tokenPair: HexString;
+        sender: Address;
+        amount0Desired: bigint;
+        amount1Desired: bigint;
+        amount0Min: bigint;
+        amount1Min: bigint;
+        deadline: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    removeLiquidity: {
+      params: SignExecuteContractMethodParams<{
+        tokenPairId: HexString;
+        sender: Address;
+        liquidity: bigint;
+        amount0Min: bigint;
+        amount1Min: bigint;
+        deadline: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    swapExactTokenForToken: {
+      params: SignExecuteContractMethodParams<{
+        tokenPair: HexString;
+        sender: Address;
+        tokenInId: HexString;
+        amountIn: bigint;
+        amountOutMin: bigint;
+        to: Address;
+        deadline: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    swapTokenForExactToken: {
+      params: SignExecuteContractMethodParams<{
+        tokenPair: HexString;
+        sender: Address;
+        tokenInId: HexString;
+        amountInMax: bigint;
+        amountOut: bigint;
+        to: Address;
+        deadline: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+  }
+  export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["params"];
+  export type SignExecuteMethodResult<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["result"];
 }
 
 class Factory extends ContractFactory<RouterInstance, {}> {
+  encodeFields() {
+    return encodeContractFields({}, this.contract.fieldsSig, []);
+  }
+
   consts = {
     ErrorCodes: {
       ReserveOverflow: BigInt(0),
@@ -101,7 +190,7 @@ class Factory extends ContractFactory<RouterInstance, {}> {
   tests = {
     addLiquidity_: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             reserve0: bigint;
@@ -114,12 +203,12 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<[bigint, bigint]>> => {
-      return testMethod(this, "addLiquidity_", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+      return testMethod(this, "addLiquidity_", params, getContractByCodeHash);
     },
     addLiquidity: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             tokenPair: HexString;
@@ -133,12 +222,12 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<[bigint, bigint, bigint]>> => {
-      return testMethod(this, "addLiquidity", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint, bigint]>> => {
+      return testMethod(this, "addLiquidity", params, getContractByCodeHash);
     },
     removeLiquidity: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             tokenPairId: HexString;
@@ -151,23 +240,28 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<[bigint, bigint]>> => {
-      return testMethod(this, "removeLiquidity", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+      return testMethod(this, "removeLiquidity", params, getContractByCodeHash);
     },
     getReserveInAndReserveOut: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           { tokenPair: HexString; tokenInId: HexString }
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<[bigint, bigint]>> => {
-      return testMethod(this, "getReserveInAndReserveOut", params);
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+      return testMethod(
+        this,
+        "getReserveInAndReserveOut",
+        params,
+        getContractByCodeHash
+      );
     },
     swapExactTokenForToken: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             tokenPair: HexString;
@@ -181,12 +275,17 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "swapExactTokenForToken", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "swapExactTokenForToken",
+        params,
+        getContractByCodeHash
+      );
     },
     swapTokenForExactToken: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             tokenPair: HexString;
@@ -200,12 +299,17 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "swapTokenForExactToken", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "swapTokenForExactToken",
+        params,
+        getContractByCodeHash
+      );
     },
     swap: async (
       params: Omit<
-        TestContractParams<
+        TestContractParamsWithoutMaps<
           never,
           {
             tokenPair: HexString;
@@ -218,8 +322,8 @@ class Factory extends ContractFactory<RouterInstance, {}> {
         >,
         "initialFields"
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "swap", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "swap", params, getContractByCodeHash);
     },
   };
 }
@@ -229,7 +333,8 @@ export const Router = new Factory(
   Contract.fromJson(
     RouterContractJson,
     "",
-    "5b325453e5506a90851742af5f7797303703acecb523830220a105a88273b1b0"
+    "5b325453e5506a90851742af5f7797303703acecb523830220a105a88273b1b0",
+    []
   )
 );
 
@@ -265,6 +370,57 @@ export class RouterInstance extends ContractInstance {
         params,
         getContractByCodeHash
       );
+    },
+    swapExactTokenForToken: async (
+      params: RouterTypes.CallMethodParams<"swapExactTokenForToken">
+    ): Promise<RouterTypes.CallMethodResult<"swapExactTokenForToken">> => {
+      return callMethod(
+        Router,
+        this,
+        "swapExactTokenForToken",
+        params,
+        getContractByCodeHash
+      );
+    },
+    swapTokenForExactToken: async (
+      params: RouterTypes.CallMethodParams<"swapTokenForExactToken">
+    ): Promise<RouterTypes.CallMethodResult<"swapTokenForExactToken">> => {
+      return callMethod(
+        Router,
+        this,
+        "swapTokenForExactToken",
+        params,
+        getContractByCodeHash
+      );
+    },
+  };
+
+  view = this.methods;
+
+  transact = {
+    addLiquidity: async (
+      params: RouterTypes.SignExecuteMethodParams<"addLiquidity">
+    ): Promise<RouterTypes.SignExecuteMethodResult<"addLiquidity">> => {
+      return signExecuteMethod(Router, this, "addLiquidity", params);
+    },
+    removeLiquidity: async (
+      params: RouterTypes.SignExecuteMethodParams<"removeLiquidity">
+    ): Promise<RouterTypes.SignExecuteMethodResult<"removeLiquidity">> => {
+      return signExecuteMethod(Router, this, "removeLiquidity", params);
+    },
+    swapExactTokenForToken: async (
+      params: RouterTypes.SignExecuteMethodParams<"swapExactTokenForToken">
+    ): Promise<
+      RouterTypes.SignExecuteMethodResult<"swapExactTokenForToken">
+    > => {
+      return signExecuteMethod(Router, this, "swapExactTokenForToken", params);
+    },
+    swapTokenForExactToken: async (
+      params: RouterTypes.SignExecuteMethodParams<"swapTokenForExactToken">
+    ): Promise<
+      RouterTypes.SignExecuteMethodResult<"swapTokenForExactToken">
+    > => {
+      return signExecuteMethod(Router, this, "swapTokenForExactToken", params);
     },
   };
 

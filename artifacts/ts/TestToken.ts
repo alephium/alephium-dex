@@ -23,6 +23,13 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  SignExecuteContractMethodParams,
+  SignExecuteScriptTxResult,
+  signExecuteMethod,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as TestTokenContractJson } from "../test/TestToken.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -55,6 +62,10 @@ export namespace TestTokenTypes {
       params: Omit<CallContractParams<{}>, "args">;
       result: CallContractResult<bigint>;
     };
+    getToken: {
+      params: CallContractParams<{ sender: Address; amount: bigint }>;
+      result: CallContractResult<null>;
+    };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
     CallMethodTable[T]["params"];
@@ -68,12 +79,50 @@ export namespace TestTokenTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+
+  export interface SignExecuteMethodTable {
+    getSymbol: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getName: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getDecimals: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getTotalSupply: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getToken: {
+      params: SignExecuteContractMethodParams<{
+        sender: Address;
+        amount: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+  }
+  export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["params"];
+  export type SignExecuteMethodResult<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["result"];
 }
 
 class Factory extends ContractFactory<
   TestTokenInstance,
   TestTokenTypes.Fields
 > {
+  encodeFields(fields: TestTokenTypes.Fields) {
+    return encodeContractFields(
+      addStdIdToFields(this.contract, fields),
+      this.contract.fieldsSig,
+      []
+    );
+  }
+
   getInitialFieldsWithDefaultValues() {
     return this.contract.getInitialFieldsWithDefaultValues() as TestTokenTypes.Fields;
   }
@@ -84,32 +133,44 @@ class Factory extends ContractFactory<
 
   tests = {
     getSymbol: async (
-      params: Omit<TestContractParams<TestTokenTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<HexString>> => {
-      return testMethod(this, "getSymbol", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TestTokenTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(this, "getSymbol", params, getContractByCodeHash);
     },
     getName: async (
-      params: Omit<TestContractParams<TestTokenTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<HexString>> => {
-      return testMethod(this, "getName", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TestTokenTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(this, "getName", params, getContractByCodeHash);
     },
     getDecimals: async (
-      params: Omit<TestContractParams<TestTokenTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "getDecimals", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TestTokenTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "getDecimals", params, getContractByCodeHash);
     },
     getTotalSupply: async (
-      params: Omit<TestContractParams<TestTokenTypes.Fields, never>, "testArgs">
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "getTotalSupply", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<TestTokenTypes.Fields, never>,
+        "testArgs"
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "getTotalSupply", params, getContractByCodeHash);
     },
     getToken: async (
-      params: TestContractParams<
+      params: TestContractParamsWithoutMaps<
         TestTokenTypes.Fields,
         { sender: Address; amount: bigint }
       >
-    ): Promise<TestContractResult<null>> => {
-      return testMethod(this, "getToken", params);
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "getToken", params, getContractByCodeHash);
     },
   };
 }
@@ -119,7 +180,8 @@ export const TestToken = new Factory(
   Contract.fromJson(
     TestTokenContractJson,
     "",
-    "0831d766037e7873066276e891997881e8787f4fb4bd9d154925d80869efa129"
+    "0831d766037e7873066276e891997881e8787f4fb4bd9d154925d80869efa129",
+    []
   )
 );
 
@@ -177,6 +239,47 @@ export class TestTokenInstance extends ContractInstance {
         params === undefined ? {} : params,
         getContractByCodeHash
       );
+    },
+    getToken: async (
+      params: TestTokenTypes.CallMethodParams<"getToken">
+    ): Promise<TestTokenTypes.CallMethodResult<"getToken">> => {
+      return callMethod(
+        TestToken,
+        this,
+        "getToken",
+        params,
+        getContractByCodeHash
+      );
+    },
+  };
+
+  view = this.methods;
+
+  transact = {
+    getSymbol: async (
+      params: TestTokenTypes.SignExecuteMethodParams<"getSymbol">
+    ): Promise<TestTokenTypes.SignExecuteMethodResult<"getSymbol">> => {
+      return signExecuteMethod(TestToken, this, "getSymbol", params);
+    },
+    getName: async (
+      params: TestTokenTypes.SignExecuteMethodParams<"getName">
+    ): Promise<TestTokenTypes.SignExecuteMethodResult<"getName">> => {
+      return signExecuteMethod(TestToken, this, "getName", params);
+    },
+    getDecimals: async (
+      params: TestTokenTypes.SignExecuteMethodParams<"getDecimals">
+    ): Promise<TestTokenTypes.SignExecuteMethodResult<"getDecimals">> => {
+      return signExecuteMethod(TestToken, this, "getDecimals", params);
+    },
+    getTotalSupply: async (
+      params: TestTokenTypes.SignExecuteMethodParams<"getTotalSupply">
+    ): Promise<TestTokenTypes.SignExecuteMethodResult<"getTotalSupply">> => {
+      return signExecuteMethod(TestToken, this, "getTotalSupply", params);
+    },
+    getToken: async (
+      params: TestTokenTypes.SignExecuteMethodParams<"getToken">
+    ): Promise<TestTokenTypes.SignExecuteMethodResult<"getToken">> => {
+      return signExecuteMethod(TestToken, this, "getToken", params);
     },
   };
 

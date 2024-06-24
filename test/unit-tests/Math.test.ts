@@ -1,5 +1,5 @@
 import { web3 } from '@alephium/web3'
-import { buildProject, randomBigInt } from './fixtures/DexFixture'
+import { randomBigInt } from './fixtures/DexFixture'
 import BigNumber from 'bignumber.js'
 import { MathTest } from '../../artifacts/ts'
 
@@ -7,7 +7,6 @@ describe('test math', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
 
   test('uqdiv', async () => {
-    await buildProject()
     const u112Max = (1n << 112n) - 1n
 
     for (let i = 0; i < 10; i++) {
@@ -21,7 +20,6 @@ describe('test math', () => {
   }, 10000)
 
   test('sqrt', async () => {
-    await buildProject()
     const u256Max = (1n << 256n) - 1n
 
     for (let i = 0; i < 10; i++) {

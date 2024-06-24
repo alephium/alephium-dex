@@ -157,7 +157,6 @@ Contract TokenPair(
 
   @using(preapprovedAssets = true, assetsInContract = true, checkExternalCaller = false)
   pub fn swap(sender: Address, to: Address, amount0In: U256, amount1In: U256, amount0Out: U256, amount1Out: U256) -> () {
-    assert!(isAssetAddress!(sender), ErrorCodes.InvalidToAddress)
     assert!(amount0Out > 0 || amount1Out > 0, ErrorCodes.InsufficientOutputAmount)
     assert!(amount0Out < reserve0 && amount1Out < reserve1, ErrorCodes.InsufficientLiquidity)
 

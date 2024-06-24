@@ -1,6 +1,5 @@
 import { ALPH_TOKEN_ID, DUST_AMOUNT, ONE_ALPH, sleep, web3 } from '@alephium/web3'
 import {
-  buildProject,
   contractBalanceOf,
   ContractFixture,
   createTokenPair,
@@ -25,9 +24,7 @@ describe('test token pair', () => {
   let token0Id: string
   let token1Id: string
   let fixture: ContractFixture<TokenPairTypes.Fields>
-  beforeEach(async () => {
-    await buildProject()
-
+  beforeEach(() => {
     sender = randomP2PKHAddress()
     const tokenPair = randomTokenPair()
     token0Id = tokenPair[0]
@@ -474,7 +471,7 @@ describe('test token pair', () => {
       }]
     })
 
-    expect(swapResult.gasUsed).toEqual(23404)
+    expect(swapResult.gasUsed).toEqual(23400)
   })
 
   test('burn', async () => {

@@ -23,6 +23,13 @@ import {
   fetchContractState,
   ContractInstance,
   getContractEventsCurrentCount,
+  TestContractParamsWithoutMaps,
+  TestContractResultWithoutMaps,
+  SignExecuteContractMethodParams,
+  SignExecuteScriptTxResult,
+  signExecuteMethod,
+  addStdIdToFields,
+  encodeContractFields,
 } from "@alephium/web3";
 import { default as MathTestContractJson } from "../test/MathTest.ral.json";
 import { getContractByCodeHash } from "./contracts";
@@ -53,9 +60,28 @@ export namespace MathTestTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+
+  export interface SignExecuteMethodTable {
+    uqdiv: {
+      params: SignExecuteContractMethodParams<{ a: bigint; b: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
+    sqrt: {
+      params: SignExecuteContractMethodParams<{ y: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
+  }
+  export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["params"];
+  export type SignExecuteMethodResult<T extends keyof SignExecuteMethodTable> =
+    SignExecuteMethodTable[T]["result"];
 }
 
 class Factory extends ContractFactory<MathTestInstance, {}> {
+  encodeFields() {
+    return encodeContractFields({}, this.contract.fieldsSig, []);
+  }
+
   at(address: string): MathTestInstance {
     return new MathTestInstance(address);
   }
@@ -63,16 +89,19 @@ class Factory extends ContractFactory<MathTestInstance, {}> {
   tests = {
     uqdiv: async (
       params: Omit<
-        TestContractParams<never, { a: bigint; b: bigint }>,
+        TestContractParamsWithoutMaps<never, { a: bigint; b: bigint }>,
         "initialFields"
       >
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "uqdiv", params);
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "uqdiv", params, getContractByCodeHash);
     },
     sqrt: async (
-      params: Omit<TestContractParams<never, { y: bigint }>, "initialFields">
-    ): Promise<TestContractResult<bigint>> => {
-      return testMethod(this, "sqrt", params);
+      params: Omit<
+        TestContractParamsWithoutMaps<never, { y: bigint }>,
+        "initialFields"
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "sqrt", params, getContractByCodeHash);
     },
   };
 }
@@ -82,7 +111,8 @@ export const MathTest = new Factory(
   Contract.fromJson(
     MathTestContractJson,
     "",
-    "085c8183210ec7296681e12ab74e37bebee9d495e78e24cc9b3cd1b110d6df2a"
+    "085c8183210ec7296681e12ab74e37bebee9d495e78e24cc9b3cd1b110d6df2a",
+    []
   )
 );
 
@@ -106,6 +136,21 @@ export class MathTestInstance extends ContractInstance {
       params: MathTestTypes.CallMethodParams<"sqrt">
     ): Promise<MathTestTypes.CallMethodResult<"sqrt">> => {
       return callMethod(MathTest, this, "sqrt", params, getContractByCodeHash);
+    },
+  };
+
+  view = this.methods;
+
+  transact = {
+    uqdiv: async (
+      params: MathTestTypes.SignExecuteMethodParams<"uqdiv">
+    ): Promise<MathTestTypes.SignExecuteMethodResult<"uqdiv">> => {
+      return signExecuteMethod(MathTest, this, "uqdiv", params);
+    },
+    sqrt: async (
+      params: MathTestTypes.SignExecuteMethodParams<"sqrt">
+    ): Promise<MathTestTypes.SignExecuteMethodResult<"sqrt">> => {
+      return signExecuteMethod(MathTest, this, "sqrt", params);
     },
   };
 

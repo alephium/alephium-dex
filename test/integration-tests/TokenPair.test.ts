@@ -12,7 +12,6 @@ import {
   Address
 } from '@alephium/web3'
 import {
-  buildProject,
   contractBalanceOf,
   randomP2PKHAddress,
   expandTo18Decimals,
@@ -20,7 +19,8 @@ import {
   minimumLiquidity,
   sortTokens
 } from '../unit-tests/fixtures/DexFixture'
-import { testAddress, testPrivateKey } from '@alephium/web3-test'
+import { testAddress, testPrivateKey, expectAssertionError } from '@alephium/web3-test'
+import { getContractByCodeHash } from '../../artifacts/ts/contracts'
 import {
   Burn,
   CollectFee,
@@ -260,7 +260,7 @@ class Fixture {
 
   async getEventByTxId<T extends ContractEvent>(txId: string) {
     const result = await web3.getCurrentNodeProvider().events.getEventsTxIdTxid(txId)
-    return Contract.fromApiEvent(result.events[0], TokenPair.contract.codeHash, txId) as T
+    return Contract.fromApiEvent(result.events[0], TokenPair.contract.codeHash, txId, getContractByCodeHash) as T
   }
 }
 
@@ -273,8 +273,6 @@ describe('test token pair', () => {
   let token1Id: string
   let tokenPair: TokenPairInstance
   beforeEach(async () => {
-    await buildProject()
-
     fixture = await Fixture.create()
     tokenPairFactory = fixture.tokenPairFactory
     tokenPair = fixture.tokenPair
@@ -334,12 +332,10 @@ describe('test token pair', () => {
     async function test(token0Amount: bigint, token1Amount: bigint) {
       return await fixture.mint(token0Amount, token1Amount)
     }
-    const error = `[API Error] - Execution error when estimating gas for tx script or contract: AssertionFailedWithErrorCode(${tokenPair.address},${TokenPair.consts.ErrorCodes.ReserveOverflow})`
-
     const maxReserve = (1n << 112n) - 1n
-    await expect(test(maxReserve + 1n, maxReserve)).rejects.toThrowError(error)
-    await expect(test(maxReserve, maxReserve + 1n)).rejects.toThrowError(error)
-    await expect(test(maxReserve + 1n, maxReserve + 1n)).rejects.toThrowError(error)
+    await expectAssertionError(test(maxReserve + 1n, maxReserve), tokenPair.address, Number(TokenPair.consts.ErrorCodes.ReserveOverflow))
+    await expectAssertionError(test(maxReserve, maxReserve + 1n), tokenPair.address, Number(TokenPair.consts.ErrorCodes.ReserveOverflow))
+    await expectAssertionError(test(maxReserve + 1n, maxReserve + 1n), tokenPair.address, Number(TokenPair.consts.ErrorCodes.ReserveOverflow))
     await test(maxReserve, maxReserve)
   }, 10000)
 
@@ -359,8 +355,7 @@ describe('test token pair', () => {
     test(`getInputPrice: ${i}`, async () =>  {
       const [swapAmount, token0Amount, token1Amount, expectedOutputAmount] = swapTestCase
       await fixture.mint(token0Amount, token1Amount)
-      const error = `[API Error] - Execution error when estimating gas for tx script or contract: AssertionFailedWithErrorCode(${tokenPair.address},${TokenPair.consts.ErrorCodes.InvalidK})`
-      await expect(fixture.swap(swapAmount, 0n, 0n, expectedOutputAmount + 1n)).rejects.toThrowError(error)
+      await expectAssertionError(fixture.swap(swapAmount, 0n, 0n, expectedOutputAmount + 1n), tokenPair.address, Number(TokenPair.consts.ErrorCodes.InvalidK))
       await fixture.swap(swapAmount, 0n, 0n, expectedOutputAmount)
     })
   })
@@ -477,7 +472,7 @@ describe('test token pair', () => {
     // sleep 1 second to make sure the time elapsed large than 0
     await sleep(1000)
     const swapResult = await fixture.swap(0n, swapAmount, expectedOutputAmount, 0n, sender.address, sender)
-    expect(swapResult.gasAmount).toEqual(44591)
+    expect(swapResult.gasAmount).toEqual(44587)
   })
 
   test('burn', async () => {
@@ -598,11 +593,9 @@ describe('test token pair', () => {
   }, 10000)
 
   it('collectFeeManually:error', async () => {
-    const errorPrefix = '[API Error] - Execution error when estimating gas for tx script or contract: '
     const errorCodes = TokenPair.consts.ErrorCodes
-    const invalidFeeCollectorCaller = `${errorPrefix}AssertionFailedWithErrorCode(${tokenPair.address},${Number(errorCodes.InvalidCaller)})`
     const invalidFeeCollector = await deployFeeCollector(tokenPairFactory.contractId, tokenPair.contractId)
-    await expect(collectFeeManually(invalidFeeCollector.contractInstance.contractId)).rejects.toThrowError(invalidFeeCollectorCaller)
+    await expectAssertionError(collectFeeManually(invalidFeeCollector.contractInstance.contractId), tokenPair.address, Number(errorCodes.InvalidCaller))
 
     await enableFeeCollector(tokenPairFactory, tokenPair)
     const feeCollectorId = await tokenPair.fetchState().then((s) => s.fields.feeCollectorId)
@@ -610,10 +603,7 @@ describe('test token pair', () => {
     const invalidCaller = PrivateKeyWallet.Random(signer.account.group)
     await transferAlphTo(invalidCaller.address, ONE_ALPH)
 
-    const invalidCallerError0 = `${errorPrefix}AssertionFailedWithErrorCode(${feeCollectorAddress},${Number(errorCodes.InvalidCaller)})`
-    await expect(collectFeeManually(feeCollectorId, invalidCaller)).rejects.toThrowError(invalidCallerError0)
-
-    const invalidCallerError1 = `${errorPrefix}AssertionFailedWithErrorCode(${tokenPair.address},${Number(errorCodes.InvalidCaller)})`
-    await expect(collectFeeManually(invalidFeeCollector.contractInstance.contractId)).rejects.toThrowError(invalidCallerError1)
+    await expectAssertionError(collectFeeManually(feeCollectorId, invalidCaller), feeCollectorAddress, Number(errorCodes.InvalidCaller))
+    await expectAssertionError(collectFeeManually(invalidFeeCollector.contractInstance.contractId), tokenPair.address, Number(errorCodes.InvalidCaller))
   })
 })

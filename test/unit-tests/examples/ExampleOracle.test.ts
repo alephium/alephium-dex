@@ -2,7 +2,6 @@ import { web3 } from "@alephium/web3"
 import { expectAssertionError } from "@alephium/web3-test"
 import { ExampleOracleSimple, ExampleOracleSimpleTypes } from "../../../artifacts/ts"
 import {
-  buildProject,
   ContractFixture,
   createTokenPair,
   encodePrice,
@@ -18,8 +17,6 @@ describe('test example oracle', () => {
   web3.setCurrentNodeProvider('http://127.0.0.1:22973')
 
   test('update', async () => {
-    await buildProject()
-
     const sender = randomP2PKHAddress()
     const [token0Id, token1Id] = randomTokenPair()
     const token0Amount = expandTo18Decimals(5)
