@@ -1,53 +1,53 @@
 import { createTheme, responsiveFontSizes } from "@material-ui/core";
 
 export const COLORS = {
-  blue: "#1975e6",
-  blueWithTransparency: "rgba(25, 117, 230, 0.8)",
-  gray: "#4e4e54",
-  green: "#0ac2af",
-  greenWithTransparency: "rgba(10, 194, 175, 0.8)",
-  lightGreen: "rgba(51, 242, 223, 1)",
-  lightBlue: "#83b9fc",
-  nearBlack: "#000008",
-  nearBlackWithMinorTransparency: "rgba(0,0,0,.70)",
-  red: "#aa0818",
-  darkRed: "#810612",
+  primary: "#ff5722",
+  primaryWithTransparency: "rgba(255, 87, 34, 0.8)",
+  secondary: "#4caf50",
+  secondaryWithTransparency: "rgba(76, 175, 80, 0.8)",
+  background: "#fafafa",
+  divider: "#bdbdbd",
+  text: "#212121",
+  error: "#e91e63",
 };
 
 export const theme = responsiveFontSizes(
   createTheme({
     palette: {
-      type: "dark",
+      type: "light",
       background: {
-        default: COLORS.nearBlack,
-        paper: COLORS.nearBlack,
+        default: COLORS.background,
+        paper: COLORS.background,
       },
-      divider: COLORS.gray,
+      divider: COLORS.divider,
       text: {
-        primary: "rgba(255,255,255,0.98)",
+        primary: COLORS.text,
       },
       primary: {
-        main: COLORS.blueWithTransparency, // #0074FF
-        light: COLORS.lightBlue,
+        main: COLORS.primaryWithTransparency,
+        light: COLORS.primary,
       },
       secondary: {
-        main: COLORS.greenWithTransparency, // #00EFD8
-        light: COLORS.lightGreen,
+        main: COLORS.secondaryWithTransparency,
+        light: COLORS.secondary,
       },
       error: {
-        main: COLORS.red,
+        main: COLORS.error,
       },
     },
     typography: {
-      fontFamily: "'Sora', sans-serif",
+      fontFamily: "'Roboto', sans-serif",
       h1: {
-        fontWeight: "200",
+        fontWeight: "bold",
+        fontSize: "2.5rem",
       },
       h2: {
-        fontWeight: "200",
+        fontWeight: "bold",
+        fontSize: "2rem",
       },
       h4: {
-        fontWeight: "500",
+        fontWeight: "600",
+        fontSize: "1.5rem",
       },
     },
     overrides: {
@@ -55,38 +55,37 @@ export const theme = responsiveFontSizes(
         "@global": {
           "*": {
             scrollbarWidth: "thin",
-            scrollbarColor: `${COLORS.gray} ${COLORS.nearBlackWithMinorTransparency}`,
+            scrollbarColor: `${COLORS.divider} ${COLORS.background}`,
           },
           "*::-webkit-scrollbar": {
             width: "8px",
             height: "8px",
-            backgroundColor: COLORS.nearBlackWithMinorTransparency,
+            backgroundColor: COLORS.background,
           },
           "*::-webkit-scrollbar-thumb": {
-            backgroundColor: COLORS.gray,
+            backgroundColor: COLORS.divider,
             borderRadius: "4px",
           },
           "*::-webkit-scrollbar-corner": {
-            // this hides an annoying white box which appears when both scrollbars are present
             backgroundColor: "transparent",
           },
         },
       },
       MuiAccordion: {
         root: {
-          backgroundColor: COLORS.nearBlackWithMinorTransparency,
+          backgroundColor: COLORS.background,
           "&:before": {
             display: "none",
           },
         },
         rounded: {
           "&:first-child": {
-            borderTopLeftRadius: "16px",
-            borderTopRightRadius: "16px",
+            borderTopLeftRadius: "8px",
+            borderTopRightRadius: "8px",
           },
           "&:last-child": {
-            borderBottomLeftRadius: "16px",
-            borderBottomRightRadius: "16px",
+            borderBottomLeftRadius: "8px",
+            borderBottomRightRadius: "8px",
           },
         },
       },
@@ -98,18 +97,18 @@ export const theme = responsiveFontSizes(
       },
       MuiButton: {
         root: {
-          borderRadius: "5px",
-          textTransform: "none",
+          borderRadius: "8px",
+          textTransform: "uppercase",
         },
       },
       MuiLink: {
         root: {
-          color: COLORS.lightBlue,
+          color: COLORS.primary,
         },
       },
       MuiPaper: {
         rounded: {
-          borderRadius: "16px",
+          borderRadius: "8px",
         },
       },
       MuiStepper: {
@@ -120,8 +119,8 @@ export const theme = responsiveFontSizes(
       },
       MuiStep: {
         root: {
-          backgroundColor: COLORS.nearBlackWithMinorTransparency,
-          borderRadius: "16px",
+          backgroundColor: COLORS.background,
+          borderRadius: "8px",
           padding: 16,
         },
       },
@@ -137,22 +136,22 @@ export const theme = responsiveFontSizes(
       },
       MuiStepLabel: {
         label: {
-          fontSize: 16,
-          fontWeight: "300",
+          fontSize: 18,
+          fontWeight: "500",
           "&.MuiStepLabel-active": {
-            fontWeight: "300",
+            fontWeight: "600",
           },
           "&.MuiStepLabel-completed": {
-            fontWeight: "300",
+            fontWeight: "600",
           },
         },
       },
       MuiTab: {
         root: {
-          fontSize: 18,
-          fontWeight: "300",
-          padding: 12,
-          textTransform: "none",
+          fontSize: 20,
+          fontWeight: "500",
+          padding: 16,
+          textTransform: "uppercase",
         },
       },
     },
