@@ -81,6 +81,10 @@ export namespace ExampleOracleSimpleTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> =
+    Callss["length"] extends 1
+      ? MultiCallResults<Callss[0]>
+      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
 
   export interface SignExecuteMethodTable {
     fullMul: {
@@ -132,19 +136,15 @@ class Factory extends ContractFactory<
     );
   }
 
-  getInitialFieldsWithDefaultValues() {
-    return this.contract.getInitialFieldsWithDefaultValues() as ExampleOracleSimpleTypes.Fields;
-  }
-
   consts = {
-    Resolution: BigInt(112),
-    Period: BigInt(86400),
+    Resolution: BigInt("112"),
+    Period: BigInt("86400"),
     ErrorCodes: {
-      FullDivOverflow: BigInt(0),
-      DivByZero: BigInt(1),
-      FractionOverflow: BigInt(2),
-      PeriodNotElapsed: BigInt(3),
-      InvalidToken: BigInt(4),
+      FullDivOverflow: BigInt("0"),
+      DivByZero: BigInt("1"),
+      FractionOverflow: BigInt("2"),
+      PeriodNotElapsed: BigInt("3"),
+      InvalidToken: BigInt("4"),
     },
   };
 
@@ -229,7 +229,7 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
     return fetchContractState(ExampleOracleSimple, this);
   }
 
-  methods = {
+  view = {
     fullMul: async (
       params: ExampleOracleSimpleTypes.CallMethodParams<"fullMul">
     ): Promise<ExampleOracleSimpleTypes.CallMethodResult<"fullMul">> => {
@@ -287,8 +287,6 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
     },
   };
 
-  view = this.methods;
-
   transact = {
     fullMul: async (
       params: ExampleOracleSimpleTypes.SignExecuteMethodParams<"fullMul">
@@ -319,14 +317,14 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
     },
   };
 
-  async multicall<Calls extends ExampleOracleSimpleTypes.MultiCallParams>(
-    calls: Calls
-  ): Promise<ExampleOracleSimpleTypes.MultiCallResults<Calls>> {
+  async multicall<Callss extends ExampleOracleSimpleTypes.MultiCallParams[]>(
+    ...callss: Callss
+  ): Promise<ExampleOracleSimpleTypes.MulticallReturnType<Callss>> {
     return (await multicallMethods(
       ExampleOracleSimple,
       this,
-      calls,
+      callss,
       getContractByCodeHash
-    )) as ExampleOracleSimpleTypes.MultiCallResults<Calls>;
+    )) as ExampleOracleSimpleTypes.MulticallReturnType<Callss>;
   }
 }

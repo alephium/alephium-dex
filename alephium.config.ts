@@ -28,7 +28,8 @@ const configuration: Configuration<Settings> = {
 
   compilerOptions: {
     errorOnWarnings: true,
-    ignoreUnusedConstantsWarnings: true
+    ignoreUnusedConstantsWarnings: true,
+    ignoreUnusedFunctionReturnWarnings: true
   }
 }
 

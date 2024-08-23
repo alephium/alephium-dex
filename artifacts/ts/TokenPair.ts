@@ -162,6 +162,10 @@ export namespace TokenPairTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> =
+    Callss["length"] extends 1
+      ? MultiCallResults<Callss[0]>
+      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
 
   export interface SignExecuteMethodTable {
     getSymbol: {
@@ -261,32 +265,28 @@ class Factory extends ContractFactory<
     );
   }
 
-  getInitialFieldsWithDefaultValues() {
-    return this.contract.getInitialFieldsWithDefaultValues() as TokenPairTypes.Fields;
-  }
-
   eventIndex = { Mint: 0, Burn: 1, Swap: 2 };
   consts = {
-    MINIMUM_LIQUIDITY: BigInt(1000),
+    MINIMUM_LIQUIDITY: BigInt("1000"),
     ErrorCodes: {
-      ReserveOverflow: BigInt(0),
-      InsufficientInitLiquidity: BigInt(1),
-      InsufficientLiquidityMinted: BigInt(2),
-      InsufficientLiquidityBurned: BigInt(3),
-      InvalidToAddress: BigInt(4),
-      InsufficientLiquidity: BigInt(5),
-      InvalidTokenInId: BigInt(6),
-      InvalidCalleeId: BigInt(7),
-      InvalidK: BigInt(8),
-      InsufficientOutputAmount: BigInt(9),
-      InsufficientInputAmount: BigInt(10),
-      IdenticalTokenIds: BigInt(11),
-      Expired: BigInt(12),
-      InsufficientToken0Amount: BigInt(13),
-      InsufficientToken1Amount: BigInt(14),
-      TokenNotExist: BigInt(15),
-      InvalidCaller: BigInt(16),
-      FeeCollectorNotEnabled: BigInt(17),
+      ReserveOverflow: BigInt("0"),
+      InsufficientInitLiquidity: BigInt("1"),
+      InsufficientLiquidityMinted: BigInt("2"),
+      InsufficientLiquidityBurned: BigInt("3"),
+      InvalidToAddress: BigInt("4"),
+      InsufficientLiquidity: BigInt("5"),
+      InvalidTokenInId: BigInt("6"),
+      InvalidCalleeId: BigInt("7"),
+      InvalidK: BigInt("8"),
+      InsufficientOutputAmount: BigInt("9"),
+      InsufficientInputAmount: BigInt("10"),
+      IdenticalTokenIds: BigInt("11"),
+      Expired: BigInt("12"),
+      InsufficientToken0Amount: BigInt("13"),
+      InsufficientToken1Amount: BigInt("14"),
+      TokenNotExist: BigInt("15"),
+      InvalidCaller: BigInt("16"),
+      FeeCollectorNotEnabled: BigInt("17"),
     },
   };
 
@@ -566,7 +566,7 @@ export class TokenPairInstance extends ContractInstance {
     );
   }
 
-  methods = {
+  view = {
     getSymbol: async (
       params?: TokenPairTypes.CallMethodParams<"getSymbol">
     ): Promise<TokenPairTypes.CallMethodResult<"getSymbol">> => {
@@ -721,8 +721,6 @@ export class TokenPairInstance extends ContractInstance {
     },
   };
 
-  view = this.methods;
-
   transact = {
     getSymbol: async (
       params: TokenPairTypes.SignExecuteMethodParams<"getSymbol">
@@ -829,14 +827,14 @@ export class TokenPairInstance extends ContractInstance {
     },
   };
 
-  async multicall<Calls extends TokenPairTypes.MultiCallParams>(
-    calls: Calls
-  ): Promise<TokenPairTypes.MultiCallResults<Calls>> {
+  async multicall<Callss extends TokenPairTypes.MultiCallParams[]>(
+    ...callss: Callss
+  ): Promise<TokenPairTypes.MulticallReturnType<Callss>> {
     return (await multicallMethods(
       TokenPair,
       this,
-      calls,
+      callss,
       getContractByCodeHash
-    )) as TokenPairTypes.MultiCallResults<Calls>;
+    )) as TokenPairTypes.MulticallReturnType<Callss>;
   }
 }

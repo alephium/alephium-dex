@@ -99,6 +99,10 @@ export namespace RouterTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> =
+    Callss["length"] extends 1
+      ? MultiCallResults<Callss[0]>
+      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
 
   export interface SignExecuteMethodTable {
     addLiquidity: {
@@ -162,24 +166,24 @@ class Factory extends ContractFactory<RouterInstance, {}> {
 
   consts = {
     ErrorCodes: {
-      ReserveOverflow: BigInt(0),
-      InsufficientInitLiquidity: BigInt(1),
-      InsufficientLiquidityMinted: BigInt(2),
-      InsufficientLiquidityBurned: BigInt(3),
-      InvalidToAddress: BigInt(4),
-      InsufficientLiquidity: BigInt(5),
-      InvalidTokenInId: BigInt(6),
-      InvalidCalleeId: BigInt(7),
-      InvalidK: BigInt(8),
-      InsufficientOutputAmount: BigInt(9),
-      InsufficientInputAmount: BigInt(10),
-      IdenticalTokenIds: BigInt(11),
-      Expired: BigInt(12),
-      InsufficientToken0Amount: BigInt(13),
-      InsufficientToken1Amount: BigInt(14),
-      TokenNotExist: BigInt(15),
-      InvalidCaller: BigInt(16),
-      FeeCollectorNotEnabled: BigInt(17),
+      ReserveOverflow: BigInt("0"),
+      InsufficientInitLiquidity: BigInt("1"),
+      InsufficientLiquidityMinted: BigInt("2"),
+      InsufficientLiquidityBurned: BigInt("3"),
+      InvalidToAddress: BigInt("4"),
+      InsufficientLiquidity: BigInt("5"),
+      InvalidTokenInId: BigInt("6"),
+      InvalidCalleeId: BigInt("7"),
+      InvalidK: BigInt("8"),
+      InsufficientOutputAmount: BigInt("9"),
+      InsufficientInputAmount: BigInt("10"),
+      IdenticalTokenIds: BigInt("11"),
+      Expired: BigInt("12"),
+      InsufficientToken0Amount: BigInt("13"),
+      InsufficientToken1Amount: BigInt("14"),
+      TokenNotExist: BigInt("15"),
+      InvalidCaller: BigInt("16"),
+      FeeCollectorNotEnabled: BigInt("17"),
     },
   };
 
@@ -348,7 +352,7 @@ export class RouterInstance extends ContractInstance {
     return fetchContractState(Router, this);
   }
 
-  methods = {
+  view = {
     addLiquidity: async (
       params: RouterTypes.CallMethodParams<"addLiquidity">
     ): Promise<RouterTypes.CallMethodResult<"addLiquidity">> => {
@@ -395,8 +399,6 @@ export class RouterInstance extends ContractInstance {
     },
   };
 
-  view = this.methods;
-
   transact = {
     addLiquidity: async (
       params: RouterTypes.SignExecuteMethodParams<"addLiquidity">
@@ -424,14 +426,14 @@ export class RouterInstance extends ContractInstance {
     },
   };
 
-  async multicall<Calls extends RouterTypes.MultiCallParams>(
-    calls: Calls
-  ): Promise<RouterTypes.MultiCallResults<Calls>> {
+  async multicall<Callss extends RouterTypes.MultiCallParams[]>(
+    ...callss: Callss
+  ): Promise<RouterTypes.MulticallReturnType<Callss>> {
     return (await multicallMethods(
       Router,
       this,
-      calls,
+      callss,
       getContractByCodeHash
-    )) as RouterTypes.MultiCallResults<Calls>;
+    )) as RouterTypes.MulticallReturnType<Callss>;
   }
 }

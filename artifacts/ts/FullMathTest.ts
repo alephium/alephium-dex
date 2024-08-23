@@ -64,6 +64,10 @@ export namespace FullMathTestTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> =
+    Callss["length"] extends 1
+      ? MultiCallResults<Callss[0]>
+      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
 
   export interface SignExecuteMethodTable {
     fullMul: {
@@ -98,13 +102,13 @@ class Factory extends ContractFactory<FullMathTestInstance, {}> {
   }
 
   consts = {
-    Resolution: BigInt(112),
+    Resolution: BigInt("112"),
     ErrorCodes: {
-      FullDivOverflow: BigInt(0),
-      DivByZero: BigInt(1),
-      FractionOverflow: BigInt(2),
-      PeriodNotElapsed: BigInt(3),
-      InvalidToken: BigInt(4),
+      FullDivOverflow: BigInt("0"),
+      DivByZero: BigInt("1"),
+      FractionOverflow: BigInt("2"),
+      PeriodNotElapsed: BigInt("3"),
+      InvalidToken: BigInt("4"),
     },
   };
 
@@ -166,7 +170,7 @@ export class FullMathTestInstance extends ContractInstance {
     return fetchContractState(FullMathTest, this);
   }
 
-  methods = {
+  view = {
     fullMul: async (
       params: FullMathTestTypes.CallMethodParams<"fullMul">
     ): Promise<FullMathTestTypes.CallMethodResult<"fullMul">> => {
@@ -202,8 +206,6 @@ export class FullMathTestInstance extends ContractInstance {
     },
   };
 
-  view = this.methods;
-
   transact = {
     fullMul: async (
       params: FullMathTestTypes.SignExecuteMethodParams<"fullMul">
@@ -222,14 +224,14 @@ export class FullMathTestInstance extends ContractInstance {
     },
   };
 
-  async multicall<Calls extends FullMathTestTypes.MultiCallParams>(
-    calls: Calls
-  ): Promise<FullMathTestTypes.MultiCallResults<Calls>> {
+  async multicall<Callss extends FullMathTestTypes.MultiCallParams[]>(
+    ...callss: Callss
+  ): Promise<FullMathTestTypes.MulticallReturnType<Callss>> {
     return (await multicallMethods(
       FullMathTest,
       this,
-      calls,
+      callss,
       getContractByCodeHash
-    )) as FullMathTestTypes.MultiCallResults<Calls>;
+    )) as FullMathTestTypes.MulticallReturnType<Callss>;
   }
 }

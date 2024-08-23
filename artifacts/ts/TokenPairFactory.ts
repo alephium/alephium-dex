@@ -98,6 +98,10 @@ export namespace TokenPairFactoryTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> =
+    Callss["length"] extends 1
+      ? MultiCallResults<Callss[0]>
+      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
 
   export interface SignExecuteMethodTable {
     setFeeCollectorFactory: {
@@ -154,31 +158,27 @@ class Factory extends ContractFactory<
     );
   }
 
-  getInitialFieldsWithDefaultValues() {
-    return this.contract.getInitialFieldsWithDefaultValues() as TokenPairFactoryTypes.Fields;
-  }
-
   eventIndex = { PairCreated: 0 };
   consts = {
     ErrorCodes: {
-      ReserveOverflow: BigInt(0),
-      InsufficientInitLiquidity: BigInt(1),
-      InsufficientLiquidityMinted: BigInt(2),
-      InsufficientLiquidityBurned: BigInt(3),
-      InvalidToAddress: BigInt(4),
-      InsufficientLiquidity: BigInt(5),
-      InvalidTokenInId: BigInt(6),
-      InvalidCalleeId: BigInt(7),
-      InvalidK: BigInt(8),
-      InsufficientOutputAmount: BigInt(9),
-      InsufficientInputAmount: BigInt(10),
-      IdenticalTokenIds: BigInt(11),
-      Expired: BigInt(12),
-      InsufficientToken0Amount: BigInt(13),
-      InsufficientToken1Amount: BigInt(14),
-      TokenNotExist: BigInt(15),
-      InvalidCaller: BigInt(16),
-      FeeCollectorNotEnabled: BigInt(17),
+      ReserveOverflow: BigInt("0"),
+      InsufficientInitLiquidity: BigInt("1"),
+      InsufficientLiquidityMinted: BigInt("2"),
+      InsufficientLiquidityBurned: BigInt("3"),
+      InvalidToAddress: BigInt("4"),
+      InsufficientLiquidity: BigInt("5"),
+      InvalidTokenInId: BigInt("6"),
+      InvalidCalleeId: BigInt("7"),
+      InvalidK: BigInt("8"),
+      InsufficientOutputAmount: BigInt("9"),
+      InsufficientInputAmount: BigInt("10"),
+      IdenticalTokenIds: BigInt("11"),
+      Expired: BigInt("12"),
+      InsufficientToken0Amount: BigInt("13"),
+      InsufficientToken1Amount: BigInt("14"),
+      TokenNotExist: BigInt("15"),
+      InvalidCaller: BigInt("16"),
+      FeeCollectorNotEnabled: BigInt("17"),
     },
   };
 
@@ -303,7 +303,7 @@ export class TokenPairFactoryInstance extends ContractInstance {
     );
   }
 
-  methods = {
+  view = {
     setFeeCollectorFactory: async (
       params: TokenPairFactoryTypes.CallMethodParams<"setFeeCollectorFactory">
     ): Promise<
@@ -378,8 +378,6 @@ export class TokenPairFactoryInstance extends ContractInstance {
     },
   };
 
-  view = this.methods;
-
   transact = {
     setFeeCollectorFactory: async (
       params: TokenPairFactoryTypes.SignExecuteMethodParams<"setFeeCollectorFactory">
@@ -443,14 +441,14 @@ export class TokenPairFactoryInstance extends ContractInstance {
     },
   };
 
-  async multicall<Calls extends TokenPairFactoryTypes.MultiCallParams>(
-    calls: Calls
-  ): Promise<TokenPairFactoryTypes.MultiCallResults<Calls>> {
+  async multicall<Callss extends TokenPairFactoryTypes.MultiCallParams[]>(
+    ...callss: Callss
+  ): Promise<TokenPairFactoryTypes.MulticallReturnType<Callss>> {
     return (await multicallMethods(
       TokenPairFactory,
       this,
-      calls,
+      callss,
       getContractByCodeHash
-    )) as TokenPairFactoryTypes.MultiCallResults<Calls>;
+    )) as TokenPairFactoryTypes.MulticallReturnType<Callss>;
   }
 }

@@ -73,6 +73,10 @@ export namespace FeeCollectorPerTokenPairImplTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> =
+    Callss["length"] extends 1
+      ? MultiCallResults<Callss[0]>
+      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
 
   export interface SignExecuteMethodTable {
     collectFee: {
@@ -113,30 +117,26 @@ class Factory extends ContractFactory<
     );
   }
 
-  getInitialFieldsWithDefaultValues() {
-    return this.contract.getInitialFieldsWithDefaultValues() as FeeCollectorPerTokenPairImplTypes.Fields;
-  }
-
   consts = {
     ErrorCodes: {
-      ReserveOverflow: BigInt(0),
-      InsufficientInitLiquidity: BigInt(1),
-      InsufficientLiquidityMinted: BigInt(2),
-      InsufficientLiquidityBurned: BigInt(3),
-      InvalidToAddress: BigInt(4),
-      InsufficientLiquidity: BigInt(5),
-      InvalidTokenInId: BigInt(6),
-      InvalidCalleeId: BigInt(7),
-      InvalidK: BigInt(8),
-      InsufficientOutputAmount: BigInt(9),
-      InsufficientInputAmount: BigInt(10),
-      IdenticalTokenIds: BigInt(11),
-      Expired: BigInt(12),
-      InsufficientToken0Amount: BigInt(13),
-      InsufficientToken1Amount: BigInt(14),
-      TokenNotExist: BigInt(15),
-      InvalidCaller: BigInt(16),
-      FeeCollectorNotEnabled: BigInt(17),
+      ReserveOverflow: BigInt("0"),
+      InsufficientInitLiquidity: BigInt("1"),
+      InsufficientLiquidityMinted: BigInt("2"),
+      InsufficientLiquidityBurned: BigInt("3"),
+      InvalidToAddress: BigInt("4"),
+      InsufficientLiquidity: BigInt("5"),
+      InvalidTokenInId: BigInt("6"),
+      InvalidCalleeId: BigInt("7"),
+      InvalidK: BigInt("8"),
+      InsufficientOutputAmount: BigInt("9"),
+      InsufficientInputAmount: BigInt("10"),
+      IdenticalTokenIds: BigInt("11"),
+      Expired: BigInt("12"),
+      InsufficientToken0Amount: BigInt("13"),
+      InsufficientToken1Amount: BigInt("14"),
+      TokenNotExist: BigInt("15"),
+      InvalidCaller: BigInt("16"),
+      FeeCollectorNotEnabled: BigInt("17"),
     },
   };
 
@@ -208,7 +208,7 @@ export class FeeCollectorPerTokenPairImplInstance extends ContractInstance {
     return fetchContractState(FeeCollectorPerTokenPairImpl, this);
   }
 
-  methods = {
+  view = {
     collectFee: async (
       params: FeeCollectorPerTokenPairImplTypes.CallMethodParams<"collectFee">
     ): Promise<
@@ -262,8 +262,6 @@ export class FeeCollectorPerTokenPairImplInstance extends ContractInstance {
       );
     },
   };
-
-  view = this.methods;
 
   transact = {
     collectFee: async (
