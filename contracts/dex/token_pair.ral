@@ -168,10 +168,10 @@ Contract TokenPair(
     let kAdjusted = reserve0 * reserve1 * 1000_000
     assert!(newReserve0Adjusted * newReserve1Adjusted >= kAdjusted, ErrorCodes.InvalidK)
 
-    if (amount0In > 0) { transferTokenToSelf!(sender, token0Id, amount0In) }
-    if (amount1In > 0) { transferTokenToSelf!(sender, token1Id, amount1In) }
-    if (amount0Out > 0) { transferTokenFromSelf!(to, token0Id, amount0Out) }
-    if (amount1Out > 0) { transferTokenFromSelf!(to, token1Id, amount1Out) }
+    transferTokenToSelf!(sender, token0Id, amount0In)
+    transferTokenToSelf!(sender, token1Id, amount1In)
+    transferTokenFromSelf!(to, token0Id, amount0Out)
+    transferTokenFromSelf!(to, token1Id, amount1Out)
 
     update(newReserve0, newReserve1)
     emit Swap(sender, amount0In, amount1In, amount0Out, amount1Out, to)
