@@ -15,7 +15,7 @@ jobs:
           node-version: '16'
       - name: start ALPH docker image
         working-directory: ./docker
-        run: docker-compose up -d
+        run: docker compose up -d
       - name: Run tests
         working-directory: .
         run: |
