@@ -21,6 +21,7 @@ import {
   callMethod,
   multicallMethods,
   fetchContractState,
+  Asset,
   ContractInstance,
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
@@ -30,9 +31,10 @@ import {
   signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
+  Narrow,
 } from "@alephium/web3";
 import { default as TokenPairFactoryContractJson } from "../dex/TokenPairFactory.ral.json";
-import { getContractByCodeHash } from "./contracts";
+import { getContractByCodeHash, registerContract } from "./contracts";
 
 // Custom types for the contract
 export namespace TokenPairFactoryTypes {
@@ -76,6 +78,10 @@ export namespace TokenPairFactoryTypes {
       }>;
       result: CallContractResult<null>;
     };
+    sortTokens: {
+      params: CallContractParams<{ tokenA: HexString; tokenB: HexString }>;
+      result: CallContractResult<[HexString, HexString]>;
+    };
     createPair: {
       params: CallContractParams<{
         payer: Address;
@@ -98,10 +104,9 @@ export namespace TokenPairFactoryTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
-  export type MulticallReturnType<Callss extends MultiCallParams[]> =
-    Callss["length"] extends 1
-      ? MultiCallResults<Callss[0]>
-      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> = {
+    [index in keyof Callss]: MultiCallResults<Callss[index]>;
+  };
 
   export interface SignExecuteMethodTable {
     setFeeCollectorFactory: {
@@ -127,6 +132,13 @@ export namespace TokenPairFactoryTypes {
       params: SignExecuteContractMethodParams<{
         tokenPair: HexString;
         newFeeCollectorId: HexString;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    sortTokens: {
+      params: SignExecuteContractMethodParams<{
+        tokenA: HexString;
+        tokenB: HexString;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -264,6 +276,14 @@ class Factory extends ContractFactory<
       return testMethod(this, "createPair", params, getContractByCodeHash);
     },
   };
+
+  stateForTest(
+    initFields: TokenPairFactoryTypes.Fields,
+    asset?: Asset,
+    address?: string
+  ) {
+    return this.stateForTest_(initFields, asset, address, undefined);
+  }
 }
 
 // Use this object to test and deploy the contract
@@ -275,6 +295,7 @@ export const TokenPairFactory = new Factory(
     []
   )
 );
+registerContract(TokenPairFactory);
 
 // Use this class to interact with the blockchain
 export class TokenPairFactoryInstance extends ContractInstance {
@@ -365,6 +386,17 @@ export class TokenPairFactoryInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    sortTokens: async (
+      params: TokenPairFactoryTypes.CallMethodParams<"sortTokens">
+    ): Promise<TokenPairFactoryTypes.CallMethodResult<"sortTokens">> => {
+      return callMethod(
+        TokenPairFactory,
+        this,
+        "sortTokens",
+        params,
+        getContractByCodeHash
+      );
+    },
     createPair: async (
       params: TokenPairFactoryTypes.CallMethodParams<"createPair">
     ): Promise<TokenPairFactoryTypes.CallMethodResult<"createPair">> => {
@@ -434,6 +466,11 @@ export class TokenPairFactoryInstance extends ContractInstance {
         params
       );
     },
+    sortTokens: async (
+      params: TokenPairFactoryTypes.SignExecuteMethodParams<"sortTokens">
+    ): Promise<TokenPairFactoryTypes.SignExecuteMethodResult<"sortTokens">> => {
+      return signExecuteMethod(TokenPairFactory, this, "sortTokens", params);
+    },
     createPair: async (
       params: TokenPairFactoryTypes.SignExecuteMethodParams<"createPair">
     ): Promise<TokenPairFactoryTypes.SignExecuteMethodResult<"createPair">> => {
@@ -441,14 +478,22 @@ export class TokenPairFactoryInstance extends ContractInstance {
     },
   };
 
+  async multicall<Calls extends TokenPairFactoryTypes.MultiCallParams>(
+    calls: Calls
+  ): Promise<TokenPairFactoryTypes.MultiCallResults<Calls>>;
   async multicall<Callss extends TokenPairFactoryTypes.MultiCallParams[]>(
-    ...callss: Callss
-  ): Promise<TokenPairFactoryTypes.MulticallReturnType<Callss>> {
-    return (await multicallMethods(
+    callss: Narrow<Callss>
+  ): Promise<TokenPairFactoryTypes.MulticallReturnType<Callss>>;
+  async multicall<
+    Callss extends
+      | TokenPairFactoryTypes.MultiCallParams
+      | TokenPairFactoryTypes.MultiCallParams[]
+  >(callss: Callss): Promise<unknown> {
+    return await multicallMethods(
       TokenPairFactory,
       this,
       callss,
       getContractByCodeHash
-    )) as TokenPairFactoryTypes.MulticallReturnType<Callss>;
+    );
   }
 }

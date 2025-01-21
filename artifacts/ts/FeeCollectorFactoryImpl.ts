@@ -21,6 +21,7 @@ import {
   callMethod,
   multicallMethods,
   fetchContractState,
+  Asset,
   ContractInstance,
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
@@ -30,9 +31,10 @@ import {
   signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
+  Narrow,
 } from "@alephium/web3";
 import { default as FeeCollectorFactoryImplContractJson } from "../examples/FeeCollectorFactoryImpl.ral.json";
-import { getContractByCodeHash } from "./contracts";
+import { getContractByCodeHash, registerContract } from "./contracts";
 
 // Custom types for the contract
 export namespace FeeCollectorFactoryImplTypes {
@@ -65,10 +67,9 @@ export namespace FeeCollectorFactoryImplTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
-  export type MulticallReturnType<Callss extends MultiCallParams[]> =
-    Callss["length"] extends 1
-      ? MultiCallResults<Callss[0]>
-      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> = {
+    [index in keyof Callss]: MultiCallResults<Callss[index]>;
+  };
 
   export interface SignExecuteMethodTable {
     createFeeCollector: {
@@ -140,6 +141,14 @@ class Factory extends ContractFactory<
       );
     },
   };
+
+  stateForTest(
+    initFields: FeeCollectorFactoryImplTypes.Fields,
+    asset?: Asset,
+    address?: string
+  ) {
+    return this.stateForTest_(initFields, asset, address, undefined);
+  }
 }
 
 // Use this object to test and deploy the contract
@@ -151,6 +160,7 @@ export const FeeCollectorFactoryImpl = new Factory(
     []
   )
 );
+registerContract(FeeCollectorFactoryImpl);
 
 // Use this class to interact with the blockchain
 export class FeeCollectorFactoryImplInstance extends ContractInstance {
@@ -193,16 +203,24 @@ export class FeeCollectorFactoryImplInstance extends ContractInstance {
     },
   };
 
+  async multicall<Calls extends FeeCollectorFactoryImplTypes.MultiCallParams>(
+    calls: Calls
+  ): Promise<FeeCollectorFactoryImplTypes.MultiCallResults<Calls>>;
   async multicall<
     Callss extends FeeCollectorFactoryImplTypes.MultiCallParams[]
   >(
-    ...callss: Callss
-  ): Promise<FeeCollectorFactoryImplTypes.MulticallReturnType<Callss>> {
-    return (await multicallMethods(
+    callss: Narrow<Callss>
+  ): Promise<FeeCollectorFactoryImplTypes.MulticallReturnType<Callss>>;
+  async multicall<
+    Callss extends
+      | FeeCollectorFactoryImplTypes.MultiCallParams
+      | FeeCollectorFactoryImplTypes.MultiCallParams[]
+  >(callss: Callss): Promise<unknown> {
+    return await multicallMethods(
       FeeCollectorFactoryImpl,
       this,
       callss,
       getContractByCodeHash
-    )) as FeeCollectorFactoryImplTypes.MulticallReturnType<Callss>;
+    );
   }
 }

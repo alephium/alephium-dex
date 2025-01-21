@@ -21,6 +21,7 @@ import {
   callMethod,
   multicallMethods,
   fetchContractState,
+  Asset,
   ContractInstance,
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
@@ -30,9 +31,10 @@ import {
   signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
+  Narrow,
 } from "@alephium/web3";
 import { default as FullMathTestContractJson } from "../examples/FullMathTest.ral.json";
-import { getContractByCodeHash } from "./contracts";
+import { getContractByCodeHash, registerContract } from "./contracts";
 
 // Custom types for the contract
 export namespace FullMathTestTypes {
@@ -64,10 +66,9 @@ export namespace FullMathTestTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
-  export type MulticallReturnType<Callss extends MultiCallParams[]> =
-    Callss["length"] extends 1
-      ? MultiCallResults<Callss[0]>
-      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> = {
+    [index in keyof Callss]: MultiCallResults<Callss[index]>;
+  };
 
   export interface SignExecuteMethodTable {
     fullMul: {
@@ -148,6 +149,10 @@ class Factory extends ContractFactory<FullMathTestInstance, {}> {
       return testMethod(this, "fraction", params, getContractByCodeHash);
     },
   };
+
+  stateForTest(initFields: {}, asset?: Asset, address?: string) {
+    return this.stateForTest_(initFields, asset, address, undefined);
+  }
 }
 
 // Use this object to test and deploy the contract
@@ -159,6 +164,7 @@ export const FullMathTest = new Factory(
     []
   )
 );
+registerContract(FullMathTest);
 
 // Use this class to interact with the blockchain
 export class FullMathTestInstance extends ContractInstance {
@@ -224,14 +230,22 @@ export class FullMathTestInstance extends ContractInstance {
     },
   };
 
+  async multicall<Calls extends FullMathTestTypes.MultiCallParams>(
+    calls: Calls
+  ): Promise<FullMathTestTypes.MultiCallResults<Calls>>;
   async multicall<Callss extends FullMathTestTypes.MultiCallParams[]>(
-    ...callss: Callss
-  ): Promise<FullMathTestTypes.MulticallReturnType<Callss>> {
-    return (await multicallMethods(
+    callss: Narrow<Callss>
+  ): Promise<FullMathTestTypes.MulticallReturnType<Callss>>;
+  async multicall<
+    Callss extends
+      | FullMathTestTypes.MultiCallParams
+      | FullMathTestTypes.MultiCallParams[]
+  >(callss: Callss): Promise<unknown> {
+    return await multicallMethods(
       FullMathTest,
       this,
       callss,
       getContractByCodeHash
-    )) as FullMathTestTypes.MulticallReturnType<Callss>;
+    );
   }
 }

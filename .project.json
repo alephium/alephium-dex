@@ -1,5 +1,5 @@
 {
-  "fullNodeVersion": "v3.5.0",
+  "fullNodeVersion": "v3.11.2",
   "compilerOptionsUsed": {
     "ignoreUnusedConstantsWarnings": true,
     "ignoreUnusedVariablesWarnings": false,
@@ -7,7 +7,8 @@
     "ignoreUnusedPrivateFunctionsWarnings": false,
     "ignoreUpdateFieldsCheckWarnings": false,
     "ignoreCheckExternalCallerWarnings": false,
-    "ignoreUnusedFunctionReturnWarnings": true
+    "ignoreUnusedFunctionReturnWarnings": true,
+    "skipAbstractContractCheck": false
   },
   "infos": {
     "AddLiquidity": {

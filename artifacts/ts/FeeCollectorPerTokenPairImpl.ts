@@ -21,6 +21,7 @@ import {
   callMethod,
   multicallMethods,
   fetchContractState,
+  Asset,
   ContractInstance,
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
@@ -30,9 +31,10 @@ import {
   signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
+  Narrow,
 } from "@alephium/web3";
 import { default as FeeCollectorPerTokenPairImplContractJson } from "../examples/FeeCollectorPerTokenPairImpl.ral.json";
-import { getContractByCodeHash } from "./contracts";
+import { getContractByCodeHash, registerContract } from "./contracts";
 
 // Custom types for the contract
 export namespace FeeCollectorPerTokenPairImplTypes {
@@ -73,10 +75,9 @@ export namespace FeeCollectorPerTokenPairImplTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
-  export type MulticallReturnType<Callss extends MultiCallParams[]> =
-    Callss["length"] extends 1
-      ? MultiCallResults<Callss[0]>
-      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> = {
+    [index in keyof Callss]: MultiCallResults<Callss[index]>;
+  };
 
   export interface SignExecuteMethodTable {
     collectFee: {
@@ -186,6 +187,14 @@ class Factory extends ContractFactory<
       );
     },
   };
+
+  stateForTest(
+    initFields: FeeCollectorPerTokenPairImplTypes.Fields,
+    asset?: Asset,
+    address?: string
+  ) {
+    return this.stateForTest_(initFields, asset, address, undefined);
+  }
 }
 
 // Use this object to test and deploy the contract
@@ -197,6 +206,7 @@ export const FeeCollectorPerTokenPairImpl = new Factory(
     []
   )
 );
+registerContract(FeeCollectorPerTokenPairImpl);
 
 // Use this class to interact with the blockchain
 export class FeeCollectorPerTokenPairImplInstance extends ContractInstance {
