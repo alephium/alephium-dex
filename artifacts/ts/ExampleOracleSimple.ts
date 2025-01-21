@@ -21,6 +21,7 @@ import {
   callMethod,
   multicallMethods,
   fetchContractState,
+  Asset,
   ContractInstance,
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
@@ -30,9 +31,10 @@ import {
   signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
+  Narrow,
 } from "@alephium/web3";
 import { default as ExampleOracleSimpleContractJson } from "../examples/ExampleOracleSimple.ral.json";
-import { getContractByCodeHash } from "./contracts";
+import { getContractByCodeHash, registerContract } from "./contracts";
 
 // Custom types for the contract
 export namespace ExampleOracleSimpleTypes {
@@ -60,6 +62,10 @@ export namespace ExampleOracleSimpleTypes {
       params: CallContractParams<{ numerator: bigint; denominator: bigint }>;
       result: CallContractResult<bigint>;
     };
+    currentCumulativePrices: {
+      params: CallContractParams<{ currentBlockTimeStamp: bigint }>;
+      result: CallContractResult<[bigint, bigint]>;
+    };
     update: {
       params: Omit<CallContractParams<{}>, "args">;
       result: CallContractResult<null>;
@@ -81,10 +87,9 @@ export namespace ExampleOracleSimpleTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
-  export type MulticallReturnType<Callss extends MultiCallParams[]> =
-    Callss["length"] extends 1
-      ? MultiCallResults<Callss[0]>
-      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> = {
+    [index in keyof Callss]: MultiCallResults<Callss[index]>;
+  };
 
   export interface SignExecuteMethodTable {
     fullMul: {
@@ -103,6 +108,12 @@ export namespace ExampleOracleSimpleTypes {
       params: SignExecuteContractMethodParams<{
         numerator: bigint;
         denominator: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    currentCumulativePrices: {
+      params: SignExecuteContractMethodParams<{
+        currentBlockTimeStamp: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -207,6 +218,14 @@ class Factory extends ContractFactory<
       return testMethod(this, "consult", params, getContractByCodeHash);
     },
   };
+
+  stateForTest(
+    initFields: ExampleOracleSimpleTypes.Fields,
+    asset?: Asset,
+    address?: string
+  ) {
+    return this.stateForTest_(initFields, asset, address, undefined);
+  }
 }
 
 // Use this object to test and deploy the contract
@@ -218,6 +237,7 @@ export const ExampleOracleSimple = new Factory(
     []
   )
 );
+registerContract(ExampleOracleSimple);
 
 // Use this class to interact with the blockchain
 export class ExampleOracleSimpleInstance extends ContractInstance {
@@ -259,6 +279,19 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
         ExampleOracleSimple,
         this,
         "fraction",
+        params,
+        getContractByCodeHash
+      );
+    },
+    currentCumulativePrices: async (
+      params: ExampleOracleSimpleTypes.CallMethodParams<"currentCumulativePrices">
+    ): Promise<
+      ExampleOracleSimpleTypes.CallMethodResult<"currentCumulativePrices">
+    > => {
+      return callMethod(
+        ExampleOracleSimple,
+        this,
+        "currentCumulativePrices",
         params,
         getContractByCodeHash
       );
@@ -305,6 +338,18 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
     > => {
       return signExecuteMethod(ExampleOracleSimple, this, "fraction", params);
     },
+    currentCumulativePrices: async (
+      params: ExampleOracleSimpleTypes.SignExecuteMethodParams<"currentCumulativePrices">
+    ): Promise<
+      ExampleOracleSimpleTypes.SignExecuteMethodResult<"currentCumulativePrices">
+    > => {
+      return signExecuteMethod(
+        ExampleOracleSimple,
+        this,
+        "currentCumulativePrices",
+        params
+      );
+    },
     update: async (
       params: ExampleOracleSimpleTypes.SignExecuteMethodParams<"update">
     ): Promise<ExampleOracleSimpleTypes.SignExecuteMethodResult<"update">> => {
@@ -317,14 +362,22 @@ export class ExampleOracleSimpleInstance extends ContractInstance {
     },
   };
 
+  async multicall<Calls extends ExampleOracleSimpleTypes.MultiCallParams>(
+    calls: Calls
+  ): Promise<ExampleOracleSimpleTypes.MultiCallResults<Calls>>;
   async multicall<Callss extends ExampleOracleSimpleTypes.MultiCallParams[]>(
-    ...callss: Callss
-  ): Promise<ExampleOracleSimpleTypes.MulticallReturnType<Callss>> {
-    return (await multicallMethods(
+    callss: Narrow<Callss>
+  ): Promise<ExampleOracleSimpleTypes.MulticallReturnType<Callss>>;
+  async multicall<
+    Callss extends
+      | ExampleOracleSimpleTypes.MultiCallParams
+      | ExampleOracleSimpleTypes.MultiCallParams[]
+  >(callss: Callss): Promise<unknown> {
+    return await multicallMethods(
       ExampleOracleSimple,
       this,
       callss,
       getContractByCodeHash
-    )) as ExampleOracleSimpleTypes.MulticallReturnType<Callss>;
+    );
   }
 }

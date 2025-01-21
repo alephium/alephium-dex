@@ -21,6 +21,7 @@ import {
   callMethod,
   multicallMethods,
   fetchContractState,
+  Asset,
   ContractInstance,
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
@@ -30,15 +31,27 @@ import {
   signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
+  Narrow,
 } from "@alephium/web3";
 import { default as RouterContractJson } from "../dex/Router.ral.json";
-import { getContractByCodeHash } from "./contracts";
+import { getContractByCodeHash, registerContract } from "./contracts";
 
 // Custom types for the contract
 export namespace RouterTypes {
   export type State = Omit<ContractState<any>, "fields">;
 
   export interface CallMethodTable {
+    addLiquidity_: {
+      params: CallContractParams<{
+        reserve0: bigint;
+        reserve1: bigint;
+        amount0Desired: bigint;
+        amount1Desired: bigint;
+        amount0Min: bigint;
+        amount1Min: bigint;
+      }>;
+      result: CallContractResult<[bigint, bigint]>;
+    };
     addLiquidity: {
       params: CallContractParams<{
         tokenPair: HexString;
@@ -59,6 +72,13 @@ export namespace RouterTypes {
         amount0Min: bigint;
         amount1Min: bigint;
         deadline: bigint;
+      }>;
+      result: CallContractResult<[bigint, bigint]>;
+    };
+    getReserveInAndReserveOut: {
+      params: CallContractParams<{
+        tokenPair: HexString;
+        tokenInId: HexString;
       }>;
       result: CallContractResult<[bigint, bigint]>;
     };
@@ -86,6 +106,17 @@ export namespace RouterTypes {
       }>;
       result: CallContractResult<null>;
     };
+    swap: {
+      params: CallContractParams<{
+        tokenPair: HexString;
+        sender: Address;
+        to: Address;
+        tokenInId: HexString;
+        amountIn: bigint;
+        amountOut: bigint;
+      }>;
+      result: CallContractResult<null>;
+    };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
     CallMethodTable[T]["params"];
@@ -99,12 +130,22 @@ export namespace RouterTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
-  export type MulticallReturnType<Callss extends MultiCallParams[]> =
-    Callss["length"] extends 1
-      ? MultiCallResults<Callss[0]>
-      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> = {
+    [index in keyof Callss]: MultiCallResults<Callss[index]>;
+  };
 
   export interface SignExecuteMethodTable {
+    addLiquidity_: {
+      params: SignExecuteContractMethodParams<{
+        reserve0: bigint;
+        reserve1: bigint;
+        amount0Desired: bigint;
+        amount1Desired: bigint;
+        amount0Min: bigint;
+        amount1Min: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
     addLiquidity: {
       params: SignExecuteContractMethodParams<{
         tokenPair: HexString;
@@ -125,6 +166,13 @@ export namespace RouterTypes {
         amount0Min: bigint;
         amount1Min: bigint;
         deadline: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    getReserveInAndReserveOut: {
+      params: SignExecuteContractMethodParams<{
+        tokenPair: HexString;
+        tokenInId: HexString;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -149,6 +197,17 @@ export namespace RouterTypes {
         amountOut: bigint;
         to: Address;
         deadline: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    swap: {
+      params: SignExecuteContractMethodParams<{
+        tokenPair: HexString;
+        sender: Address;
+        to: Address;
+        tokenInId: HexString;
+        amountIn: bigint;
+        amountOut: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -330,6 +389,10 @@ class Factory extends ContractFactory<RouterInstance, {}> {
       return testMethod(this, "swap", params, getContractByCodeHash);
     },
   };
+
+  stateForTest(initFields: {}, asset?: Asset, address?: string) {
+    return this.stateForTest_(initFields, asset, address, undefined);
+  }
 }
 
 // Use this object to test and deploy the contract
@@ -341,6 +404,7 @@ export const Router = new Factory(
     []
   )
 );
+registerContract(Router);
 
 // Use this class to interact with the blockchain
 export class RouterInstance extends ContractInstance {
@@ -353,6 +417,17 @@ export class RouterInstance extends ContractInstance {
   }
 
   view = {
+    addLiquidity_: async (
+      params: RouterTypes.CallMethodParams<"addLiquidity_">
+    ): Promise<RouterTypes.CallMethodResult<"addLiquidity_">> => {
+      return callMethod(
+        Router,
+        this,
+        "addLiquidity_",
+        params,
+        getContractByCodeHash
+      );
+    },
     addLiquidity: async (
       params: RouterTypes.CallMethodParams<"addLiquidity">
     ): Promise<RouterTypes.CallMethodResult<"addLiquidity">> => {
@@ -371,6 +446,17 @@ export class RouterInstance extends ContractInstance {
         Router,
         this,
         "removeLiquidity",
+        params,
+        getContractByCodeHash
+      );
+    },
+    getReserveInAndReserveOut: async (
+      params: RouterTypes.CallMethodParams<"getReserveInAndReserveOut">
+    ): Promise<RouterTypes.CallMethodResult<"getReserveInAndReserveOut">> => {
+      return callMethod(
+        Router,
+        this,
+        "getReserveInAndReserveOut",
         params,
         getContractByCodeHash
       );
@@ -397,9 +483,19 @@ export class RouterInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    swap: async (
+      params: RouterTypes.CallMethodParams<"swap">
+    ): Promise<RouterTypes.CallMethodResult<"swap">> => {
+      return callMethod(Router, this, "swap", params, getContractByCodeHash);
+    },
   };
 
   transact = {
+    addLiquidity_: async (
+      params: RouterTypes.SignExecuteMethodParams<"addLiquidity_">
+    ): Promise<RouterTypes.SignExecuteMethodResult<"addLiquidity_">> => {
+      return signExecuteMethod(Router, this, "addLiquidity_", params);
+    },
     addLiquidity: async (
       params: RouterTypes.SignExecuteMethodParams<"addLiquidity">
     ): Promise<RouterTypes.SignExecuteMethodResult<"addLiquidity">> => {
@@ -409,6 +505,18 @@ export class RouterInstance extends ContractInstance {
       params: RouterTypes.SignExecuteMethodParams<"removeLiquidity">
     ): Promise<RouterTypes.SignExecuteMethodResult<"removeLiquidity">> => {
       return signExecuteMethod(Router, this, "removeLiquidity", params);
+    },
+    getReserveInAndReserveOut: async (
+      params: RouterTypes.SignExecuteMethodParams<"getReserveInAndReserveOut">
+    ): Promise<
+      RouterTypes.SignExecuteMethodResult<"getReserveInAndReserveOut">
+    > => {
+      return signExecuteMethod(
+        Router,
+        this,
+        "getReserveInAndReserveOut",
+        params
+      );
     },
     swapExactTokenForToken: async (
       params: RouterTypes.SignExecuteMethodParams<"swapExactTokenForToken">
@@ -424,16 +532,22 @@ export class RouterInstance extends ContractInstance {
     > => {
       return signExecuteMethod(Router, this, "swapTokenForExactToken", params);
     },
+    swap: async (
+      params: RouterTypes.SignExecuteMethodParams<"swap">
+    ): Promise<RouterTypes.SignExecuteMethodResult<"swap">> => {
+      return signExecuteMethod(Router, this, "swap", params);
+    },
   };
 
+  async multicall<Calls extends RouterTypes.MultiCallParams>(
+    calls: Calls
+  ): Promise<RouterTypes.MultiCallResults<Calls>>;
   async multicall<Callss extends RouterTypes.MultiCallParams[]>(
-    ...callss: Callss
-  ): Promise<RouterTypes.MulticallReturnType<Callss>> {
-    return (await multicallMethods(
-      Router,
-      this,
-      callss,
-      getContractByCodeHash
-    )) as RouterTypes.MulticallReturnType<Callss>;
+    callss: Narrow<Callss>
+  ): Promise<RouterTypes.MulticallReturnType<Callss>>;
+  async multicall<
+    Callss extends RouterTypes.MultiCallParams | RouterTypes.MultiCallParams[]
+  >(callss: Callss): Promise<unknown> {
+    return await multicallMethods(Router, this, callss, getContractByCodeHash);
   }
 }

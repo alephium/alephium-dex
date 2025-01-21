@@ -2,12 +2,12 @@ import {
   addressFromContractId,
   subContractId,
   SignerProvider,
-  SignExecuteScriptTxResult,
   NodeProvider,
   ALPH_TOKEN_ID,
   prettifyTokenAmount,
   DUST_AMOUNT,
-  ExplorerProvider
+  ExplorerProvider,
+  ExecuteScriptResult
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
 import { PollingInterval, network, networkId } from "./consts"
@@ -173,7 +173,7 @@ async function swapMinOut(
   amountIn: bigint,
   amountOutMin: bigint,
   ttl: number
-): Promise<SignExecuteScriptTxResult> {
+): Promise<ExecuteScriptResult> {
   const result = await SwapMinOut.execute(signer, {
     initialFields: {
       sender: sender,
@@ -200,7 +200,7 @@ async function swapMaxIn(
   amountInMax: bigint,
   amountOut: bigint,
   ttl: number
-): Promise<SignExecuteScriptTxResult> {
+): Promise<ExecuteScriptResult> {
   const result = await SwapMaxIn.execute(signer, {
     initialFields: {
       sender: sender,
@@ -270,7 +270,7 @@ export async function swap(
   explorerProvider: ExplorerProvider,
   sender: string,
   ttl: number
-): Promise<SignExecuteScriptTxResult> {
+): Promise<ExecuteScriptResult> {
   if (swapDetails.priceImpact >= MaxPriceImpact) {
     throw new Error('Price impact too high')
   }
@@ -420,7 +420,7 @@ export async function addLiquidity(
   amountBDesired: bigint,
   slippage: number,
   ttl: number
-): Promise<SignExecuteScriptTxResult> {
+): Promise<ExecuteScriptResult> {
   if (amountADesired === 0n || amountBDesired === 0n) {
     throw new Error('the input amount must be greater than 0')
   }
@@ -507,7 +507,7 @@ export async function removeLiquidity(
   amount1Desired: bigint,
   slippage: number,
   ttl: number
-): Promise<SignExecuteScriptTxResult> {
+): Promise<ExecuteScriptResult> {
   const amount0Min = minimalAmount(amount0Desired, slippage)
   const amount1Min = minimalAmount(amount1Desired, slippage)
   const result = await RemoveLiquidity.execute(signer, {
@@ -559,7 +559,7 @@ export async function createTokenPair(
   sender: string,
   tokenAId: string,
   tokenBId: string
-): Promise<SignExecuteScriptTxResult & { tokenPairId: string }> {
+): Promise<ExecuteScriptResult & { tokenPairId: string }> {
   const groupIndex = network.groupIndex
   const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId)
   const path = token0Id + token1Id

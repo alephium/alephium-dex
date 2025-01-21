@@ -21,6 +21,7 @@ import {
   callMethod,
   multicallMethods,
   fetchContractState,
+  Asset,
   ContractInstance,
   getContractEventsCurrentCount,
   TestContractParamsWithoutMaps,
@@ -30,9 +31,10 @@ import {
   signExecuteMethod,
   addStdIdToFields,
   encodeContractFields,
+  Narrow,
 } from "@alephium/web3";
 import { default as TokenPairContractJson } from "../dex/TokenPair.ral.json";
-import { getContractByCodeHash } from "./contracts";
+import { getContractByCodeHash, registerContract } from "./contracts";
 
 // Custom types for the contract
 export namespace TokenPairTypes {
@@ -122,6 +124,14 @@ export namespace TokenPairTypes {
       params: Omit<CallContractParams<{}>, "args">;
       result: CallContractResult<bigint>;
     };
+    update: {
+      params: CallContractParams<{ newReserve0: bigint; newReserve1: bigint }>;
+      result: CallContractResult<null>;
+    };
+    mintFee: {
+      params: CallContractParams<{ reserve0_: bigint; reserve1_: bigint }>;
+      result: CallContractResult<[boolean, bigint]>;
+    };
     mint: {
       params: CallContractParams<{
         sender: Address;
@@ -149,6 +159,10 @@ export namespace TokenPairTypes {
       params: Omit<CallContractParams<{}>, "args">;
       result: CallContractResult<null>;
     };
+    collectFeeAndUpdateKLast: {
+      params: CallContractParams<{ feeAmount: bigint }>;
+      result: CallContractResult<null>;
+    };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
     CallMethodTable[T]["params"];
@@ -162,10 +176,9 @@ export namespace TokenPairTypes {
       ? CallMethodTable[MaybeName]["result"]
       : undefined;
   };
-  export type MulticallReturnType<Callss extends MultiCallParams[]> =
-    Callss["length"] extends 1
-      ? MultiCallResults<Callss[0]>
-      : { [index in keyof Callss]: MultiCallResults<Callss[index]> };
+  export type MulticallReturnType<Callss extends MultiCallParams[]> = {
+    [index in keyof Callss]: MultiCallResults<Callss[index]>;
+  };
 
   export interface SignExecuteMethodTable {
     getSymbol: {
@@ -216,6 +229,20 @@ export namespace TokenPairTypes {
       params: Omit<SignExecuteContractMethodParams<{}>, "args">;
       result: SignExecuteScriptTxResult;
     };
+    update: {
+      params: SignExecuteContractMethodParams<{
+        newReserve0: bigint;
+        newReserve1: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    mintFee: {
+      params: SignExecuteContractMethodParams<{
+        reserve0_: bigint;
+        reserve1_: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
     mint: {
       params: SignExecuteContractMethodParams<{
         sender: Address;
@@ -244,6 +271,10 @@ export namespace TokenPairTypes {
     };
     collectFeeManually: {
       params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    collectFeeAndUpdateKLast: {
+      params: SignExecuteContractMethodParams<{ feeAmount: bigint }>;
       result: SignExecuteScriptTxResult;
     };
   }
@@ -485,6 +516,14 @@ class Factory extends ContractFactory<
       );
     },
   };
+
+  stateForTest(
+    initFields: TokenPairTypes.Fields,
+    asset?: Asset,
+    address?: string
+  ) {
+    return this.stateForTest_(initFields, asset, address, undefined);
+  }
 }
 
 // Use this object to test and deploy the contract
@@ -496,6 +535,7 @@ export const TokenPair = new Factory(
     []
   )
 );
+registerContract(TokenPair);
 
 // Use this class to interact with the blockchain
 export class TokenPairInstance extends ContractInstance {
@@ -693,6 +733,28 @@ export class TokenPairInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    update: async (
+      params: TokenPairTypes.CallMethodParams<"update">
+    ): Promise<TokenPairTypes.CallMethodResult<"update">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "update",
+        params,
+        getContractByCodeHash
+      );
+    },
+    mintFee: async (
+      params: TokenPairTypes.CallMethodParams<"mintFee">
+    ): Promise<TokenPairTypes.CallMethodResult<"mintFee">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "mintFee",
+        params,
+        getContractByCodeHash
+      );
+    },
     mint: async (
       params: TokenPairTypes.CallMethodParams<"mint">
     ): Promise<TokenPairTypes.CallMethodResult<"mint">> => {
@@ -716,6 +778,17 @@ export class TokenPairInstance extends ContractInstance {
         this,
         "collectFeeManually",
         params === undefined ? {} : params,
+        getContractByCodeHash
+      );
+    },
+    collectFeeAndUpdateKLast: async (
+      params: TokenPairTypes.CallMethodParams<"collectFeeAndUpdateKLast">
+    ): Promise<TokenPairTypes.CallMethodResult<"collectFeeAndUpdateKLast">> => {
+      return callMethod(
+        TokenPair,
+        this,
+        "collectFeeAndUpdateKLast",
+        params,
         getContractByCodeHash
       );
     },
@@ -803,6 +876,16 @@ export class TokenPairInstance extends ContractInstance {
         params
       );
     },
+    update: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"update">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"update">> => {
+      return signExecuteMethod(TokenPair, this, "update", params);
+    },
+    mintFee: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"mintFee">
+    ): Promise<TokenPairTypes.SignExecuteMethodResult<"mintFee">> => {
+      return signExecuteMethod(TokenPair, this, "mintFee", params);
+    },
     mint: async (
       params: TokenPairTypes.SignExecuteMethodParams<"mint">
     ): Promise<TokenPairTypes.SignExecuteMethodResult<"mint">> => {
@@ -825,16 +908,36 @@ export class TokenPairInstance extends ContractInstance {
     > => {
       return signExecuteMethod(TokenPair, this, "collectFeeManually", params);
     },
+    collectFeeAndUpdateKLast: async (
+      params: TokenPairTypes.SignExecuteMethodParams<"collectFeeAndUpdateKLast">
+    ): Promise<
+      TokenPairTypes.SignExecuteMethodResult<"collectFeeAndUpdateKLast">
+    > => {
+      return signExecuteMethod(
+        TokenPair,
+        this,
+        "collectFeeAndUpdateKLast",
+        params
+      );
+    },
   };
 
+  async multicall<Calls extends TokenPairTypes.MultiCallParams>(
+    calls: Calls
+  ): Promise<TokenPairTypes.MultiCallResults<Calls>>;
   async multicall<Callss extends TokenPairTypes.MultiCallParams[]>(
-    ...callss: Callss
-  ): Promise<TokenPairTypes.MulticallReturnType<Callss>> {
-    return (await multicallMethods(
+    callss: Narrow<Callss>
+  ): Promise<TokenPairTypes.MulticallReturnType<Callss>>;
+  async multicall<
+    Callss extends
+      | TokenPairTypes.MultiCallParams
+      | TokenPairTypes.MultiCallParams[]
+  >(callss: Callss): Promise<unknown> {
+    return await multicallMethods(
       TokenPair,
       this,
       callss,
       getContractByCodeHash
-    )) as TokenPairTypes.MulticallReturnType<Callss>;
+    );
   }
 }
