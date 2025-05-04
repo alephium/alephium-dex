@@ -1,5 +1,5 @@
 {
-  "version": "v2.5.3",
+  "version": "v3.12.7",
   "name": "Burn",
   "bytecodeTemplate": "0101030000000c{1}{0}{2}a3{1}{2}0e0e{0}010f1818",
   "fieldsSig": {
@@ -9,7 +9,7 @@
       "liquidity"
     ],
     "types": [
-      "ByteVec",
+      "TokenPair",
       "Address",
       "U256"
     ],
@@ -22,9 +22,6 @@
   "functions": [
     {
       "name": "main",
-      "usePreapprovedAssets": true,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [],
       "paramTypes": [],
       "paramIsMutable": [],

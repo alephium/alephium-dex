@@ -400,7 +400,7 @@ export const Router = new Factory(
   Contract.fromJson(
     RouterContractJson,
     "",
-    "5b325453e5506a90851742af5f7797303703acecb523830220a105a88273b1b0",
+    "bff2f77daed1e0eea4318819508b1c8e91b6deb04bb8eeb0b4030137884f8cf5",
     []
   )
 );

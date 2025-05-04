@@ -41,9 +41,9 @@
     ]
   },
   "dependencies": {
-    "@alephium/web3": "^1.11.2",
-    "@alephium/web3-wallet": "^1.11.2",
-    "@alephium/web3-react": "^1.11.2",
+    "@alephium/web3": "^1.12.0-danube.0",
+    "@alephium/web3-wallet": "^1.12.0-danube.0",
+    "@alephium/web3-react": "^1.12.0-danube.0",
     "@alephium/token-list": "0.0.11",
     "@material-ui/core": "^4.12.2",
     "@material-ui/icons": "^4.11.2",
@@ -65,8 +65,8 @@
     "typescript": "^4.4.2"
   },
   "devDependencies": {
-    "@alephium/cli": "^1.11.2",
-    "@alephium/web3-test": "^1.11.2",
+    "@alephium/cli": "^1.12.0-danube.0",
+    "@alephium/web3-test": "^1.12.0-danube.0",
     "@types/elliptic": "^6.4.13",
     "@types/jest": "^27.5.1",
     "@types/lodash-es": "^4.17.6",

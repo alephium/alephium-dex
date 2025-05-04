@@ -223,7 +223,7 @@ class Factory extends ContractFactory<
     getFeeSetter: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairFactoryTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<Address>> => {
       return testMethod(this, "getFeeSetter", params, getContractByCodeHash);
@@ -291,7 +291,7 @@ export const TokenPairFactory = new Factory(
   Contract.fromJson(
     TokenPairFactoryContractJson,
     "",
-    "44144899a2b71465a80654889afa8a2bf4a8f3cd0f30ad1880d2ffc7c12ad18b",
+    "ba7456bcbcde24327dfccf85229e59c51e2036903d246e5565438cacabf0186d",
     []
   )
 );

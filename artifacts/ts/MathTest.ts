@@ -120,7 +120,7 @@ export const MathTest = new Factory(
   Contract.fromJson(
     MathTestContractJson,
     "",
-    "085c8183210ec7296681e12ab74e37bebee9d495e78e24cc9b3cd1b110d6df2a",
+    "732c8ff5b38eadaa96074453394619cb78ddf7371ff94ce7fb3dbe5fe332655c",
     []
   )
 );

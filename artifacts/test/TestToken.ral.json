@@ -1,8 +1,8 @@
 {
-  "version": "v2.5.3",
+  "version": "v3.12.7",
   "name": "TestToken",
-  "bytecode": "050509121b40244030010000000102ce0002010000000102ce0102010000000102ce0202010000000102ce03020102020200041600b11601ab",
-  "codeHash": "0831d766037e7873066276e891997881e8787f4fb4bd9d154925d80869efa129",
+  "bytecode": "050509121b40244035010000000102ce0002010000000102ce0102010000000102ce0202010000000102ce0302010202020005d359e9ded71600b11601ab",
+  "codeHash": "f9dac4e7d0bf28a2bc019f43138339e23afadde322d50441cdfe029993bf35f3",
   "fieldsSig": {
     "names": [
       "symbol",
@@ -30,9 +30,6 @@
   "functions": [
     {
       "name": "getSymbol",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [],
       "paramTypes": [],
       "paramIsMutable": [],
@@ -42,9 +39,6 @@
     },
     {
       "name": "getName",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [],
       "paramTypes": [],
       "paramIsMutable": [],
@@ -54,9 +48,6 @@
     },
     {
       "name": "getDecimals",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [],
       "paramTypes": [],
       "paramIsMutable": [],
@@ -66,9 +57,6 @@
     },
     {
       "name": "getTotalSupply",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [],
       "paramTypes": [],
       "paramIsMutable": [],
@@ -78,9 +66,6 @@
     },
     {
       "name": "getToken",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": true,
-      "isPublic": true,
       "paramNames": [
         "sender",
         "amount"

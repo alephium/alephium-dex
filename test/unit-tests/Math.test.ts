@@ -14,7 +14,7 @@ describe('test math', () => {
       const b = randomBigInt(1n, u112Max)
       const result = (a * (1n << 112n)) / b
 
-      const testResult = await MathTest.tests.uqdiv({ testArgs: { a, b } })
+      const testResult = await MathTest.tests.uqdiv({ args: { a, b } })
       expect(testResult.returns).toEqual(result)
     }
   }, 10000)
@@ -24,7 +24,7 @@ describe('test math', () => {
 
     for (let i = 0; i < 10; i++) {
       const y = randomBigInt(1n, u256Max)
-      const testResult0 = await MathTest.tests.sqrt({ testArgs: { y: y } })
+      const testResult0 = await MathTest.tests.sqrt({ args: { y: y } })
       const result = BigNumber(y.toString()).sqrt().toFixed(0, BigNumber.ROUND_DOWN)
       expect(testResult0.returns).toEqual(BigInt(result))
     }

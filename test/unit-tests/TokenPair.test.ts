@@ -39,9 +39,9 @@ describe('test token pair', () => {
     const mintResult = await TokenPair.tests.mint({
       initialFields: fixture.selfState.fields,
       initialAsset: fixture.selfState.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: { sender: sender, amount0: token0Amount, amount1: token1Amount },
+      args: { sender: sender, amount0: token0Amount, amount1: token1Amount },
       inputAssets: [{
         address: sender,
         asset: {
@@ -79,9 +79,9 @@ describe('test token pair', () => {
     const mintResult = await TokenPair.tests.mint({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: { sender: sender, amount0: token0Amount, amount1: token1Amount },
+      args: { sender: sender, amount0: token0Amount, amount1: token1Amount },
       inputAssets: [{
         address: sender,
         asset: {
@@ -143,9 +143,9 @@ describe('test token pair', () => {
         return TokenPair.tests.swap({
           initialFields: contractState.fields,
           initialAsset: contractState.asset,
-          address: fixture.address,
+          contractAddress: fixture.address,
           existingContracts: fixture.dependencies,
-          testArgs: {
+          args: {
             sender: sender,
             amount0In: swapAmount,
             amount1In: 0n,
@@ -178,9 +178,9 @@ describe('test token pair', () => {
     const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: {
+      args: {
         sender: sender,
         amount0In: swapAmount,
         amount1In: 0n,
@@ -229,9 +229,9 @@ describe('test token pair', () => {
     const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: {
+      args: {
         sender: sender,
         amount0In: 0n,
         amount1In: swapAmount,
@@ -284,9 +284,9 @@ describe('test token pair', () => {
     const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: {
+      args: {
         sender: sender,
         amount0In: swapAmount,
         amount1In: 0n,
@@ -321,7 +321,7 @@ describe('test token pair', () => {
     expect(senderTokenOutput.tokens!).toEqual([{ id: token1Id, amount: expectedOutputAmount }])
     expect(senderTokenOutput.alphAmount).toEqual(DUST_AMOUNT)
     const senderALPHOutput = swapResult.txOutputs.find((o) => o.address === sender && (o.tokens === undefined || o.tokens.length === 0))!
-    expect(senderALPHOutput.alphAmount).toEqual(ONE_ALPH * 2n - swapAmount - defaultGasFee - DUST_AMOUNT)
+    expect(senderALPHOutput.alphAmount).toEqual(ONE_ALPH * 2n - swapAmount - DUST_AMOUNT)
   })
 
   test('swap ALPH by token', async () => {
@@ -339,9 +339,9 @@ describe('test token pair', () => {
     const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: {
+      args: {
         sender: sender,
         amount0In: 0n,
         amount1In: swapAmount,
@@ -376,7 +376,7 @@ describe('test token pair', () => {
     expect(contractBalanceOf(tokenPairState, token1Id)).toEqual(token1Amount + swapAmount)
 
     const senderALPHOutput = swapResult.txOutputs.find((o) => o.address === sender)!
-    expect(senderALPHOutput.alphAmount).toEqual(ONE_ALPH + expectedOutputAmount - defaultGasFee)
+    expect(senderALPHOutput.alphAmount).toEqual(ONE_ALPH + expectedOutputAmount)
   })
 
   test('swap to another address', async () => {
@@ -391,9 +391,9 @@ describe('test token pair', () => {
     const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: {
+      args: {
         sender: sender,
         amount0In: 0n,
         amount1In: swapAmount,
@@ -452,9 +452,9 @@ describe('test token pair', () => {
     const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: {
+      args: {
         sender: sender,
         amount0In: 0n,
         amount1In: swapAmount,
@@ -484,9 +484,9 @@ describe('test token pair', () => {
     const burnResult = await TokenPair.tests.burn({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: { sender: sender, liquidity: liquidity },
+      args: { sender: sender, liquidity: liquidity },
       inputAssets: [{
         address: sender,
         asset: {
@@ -532,9 +532,9 @@ describe('test token pair', () => {
       blockTimeStamp: (Number(blockTimeStamp) + 1) * 1000,
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: { newReserve0: contractState.fields.reserve0, newReserve1: contractState.fields.reserve1 }
+      args: { newReserve0: contractState.fields.reserve0, newReserve1: contractState.fields.reserve1 }
     })
 
     const tokenPairState0 = getContractState<TokenPairTypes.Fields>(result0.contracts, fixture.contractId)
@@ -548,9 +548,9 @@ describe('test token pair', () => {
       blockTimeStamp: (Number(blockTimeStamp) + 10) * 1000,
       initialFields: tokenPairState0.fields,
       initialAsset: tokenPairState0.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: {
+      args: {
         sender: sender,
         amount0In: swapAmount,
         amount1In: 0n,
@@ -579,9 +579,9 @@ describe('test token pair', () => {
       blockTimeStamp: (Number(blockTimeStamp) + 20) * 1000,
       initialFields: tokenPairState1.fields,
       initialAsset: tokenPairState1.asset,
-      address: fixture.address,
+      contractAddress: fixture.address,
       existingContracts: fixture.dependencies,
-      testArgs: { newReserve0: tokenPairState1.fields.reserve0, newReserve1: tokenPairState1.fields.reserve1 }
+      args: { newReserve0: tokenPairState1.fields.reserve0, newReserve1: tokenPairState1.fields.reserve1 }
     })
 
     const tokenPairState2 = getContractState<TokenPairTypes.Fields>(result2.contracts, fixture.contractId)

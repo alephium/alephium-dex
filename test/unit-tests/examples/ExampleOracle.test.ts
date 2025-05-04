@@ -28,7 +28,7 @@ describe('test example oracle', () => {
     async function test(fixture: ContractFixture<ExampleOracleSimpleTypes.Fields>, blockTimeStamp: number) {
       return ExampleOracleSimple.tests.update({
         blockTimeStamp: blockTimeStamp,
-        address: fixture.address,
+        contractAddress: fixture.address,
         initialFields: fixture.selfState.fields,
         existingContracts: fixture.dependencies
       })
@@ -49,18 +49,18 @@ describe('test example oracle', () => {
     expect(exampleOracleState.fields.price1Average).toEqual(expectedPrice[1])
 
     const consult0 = await ExampleOracleSimple.tests.consult({
-      address: fixture1.address,
+      contractAddress: fixture1.address,
       initialFields: exampleOracleState.fields,
       existingContracts: fixture1.dependencies,
-      testArgs: { tokenId: token0Id, amountIn: token0Amount }
+      args: { tokenId: token0Id, amountIn: token0Amount }
     })
     expect(consult0.returns).toEqual(token1Amount)
 
     const consult1 = await ExampleOracleSimple.tests.consult({
-      address: fixture1.address,
+      contractAddress: fixture1.address,
       initialFields: exampleOracleState.fields,
       existingContracts: fixture1.dependencies,
-      testArgs: { tokenId: token1Id, amountIn: token1Amount }
+      args: { tokenId: token1Id, amountIn: token1Amount }
     })
     expect(consult1.returns).toEqual(token0Amount)
   }, 10000)

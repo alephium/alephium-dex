@@ -1,16 +1,16 @@
 {
-  "version": "v2.5.3",
+  "version": "v3.12.7",
   "name": "FeeCollectorPerTokenPairImpl",
-  "bytecode": "020415402d4041405801010202000ab3ce014113107b1600b2ce011601aa01020202000cb40c0dce0001024513107b1600ce011601ab01020101000ab40c0dce0001024513107b1600b001000000000cb40c0dce0001024513107b0c0cce010111",
-  "codeHash": "393eee49cd23c00d61848a8b2272e848f5278cc17f8c0b2333e2ed744edf5b79",
+  "bytecode": "0204154032404b406701010202000ab3ce014113107b1600b2ce011601aa01020202000dd3f1ab4760b40c0dce0001024513107b1600ce011601ab01020101000bd320f98f62b40c0dce0001024513107b1600b001000000000dd3f2c71c4bb40c0dce0001024513107b0c0cce010111",
+  "codeHash": "a2326c414551281d90194411b00b614c3fc07cb568020e1ed2e1852099e6996e",
   "fieldsSig": {
     "names": [
       "tokenPairFactory",
       "tokenPair"
     ],
     "types": [
-      "ByteVec",
-      "ByteVec"
+      "TokenPairFactory",
+      "TokenPair"
     ],
     "isMutable": [
       false,
@@ -21,9 +21,6 @@
   "functions": [
     {
       "name": "collectFee",
-      "usePreapprovedAssets": true,
-      "useAssetsInContract": true,
-      "isPublic": true,
       "paramNames": [
         "from",
         "amount"
@@ -40,9 +37,6 @@
     },
     {
       "name": "withdraw",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": true,
-      "isPublic": true,
       "paramNames": [
         "to",
         "amount"
@@ -59,9 +53,6 @@
     },
     {
       "name": "destroy",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": true,
-      "isPublic": true,
       "paramNames": [
         "to"
       ],
@@ -75,9 +66,6 @@
     },
     {
       "name": "collectFeeManually",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [],
       "paramTypes": [],
       "paramIsMutable": [],

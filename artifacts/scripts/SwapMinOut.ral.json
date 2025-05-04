@@ -1,5 +1,5 @@
 {
-  "version": "v2.5.3",
+  "version": "v3.12.7",
   "name": "SwapMinOut",
   "bytecodeTemplate": "0101030000000f{0}{3}{4}a3{2}{0}{3}{4}{5}{0}{6}13070c{1}0104",
   "fieldsSig": {
@@ -14,8 +14,8 @@
     ],
     "types": [
       "Address",
-      "ByteVec",
-      "ByteVec",
+      "Router",
+      "TokenPair",
       "ByteVec",
       "U256",
       "U256",
@@ -34,9 +34,6 @@
   "functions": [
     {
       "name": "main",
-      "usePreapprovedAssets": true,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [],
       "paramTypes": [],
       "paramIsMutable": [],

@@ -27,9 +27,9 @@ describe('test router', () => {
       amount1Min: bigint
     ): Promise<[bigint, bigint]> {
       const result = await Router.tests.addLiquidity_({
-        address: routerFixture.address,
+        contractAddress: routerFixture.address,
         existingContracts: routerFixture.dependencies,
-        testArgs: {
+        args: {
           reserve0: reserve0,
           reserve1: reserve1,
           amount0Desired: amount0Desired,
@@ -72,8 +72,8 @@ describe('test router', () => {
       deadline: bigint
     ) {
       return Router.tests.addLiquidity({
-        address: routerFixture.address,
-        testArgs: {
+        contractAddress: routerFixture.address,
+        args: {
           tokenPair: tokenPairState.contractId,
           sender: sender,
           amount0Desired: amount0Desired,
@@ -133,8 +133,8 @@ describe('test router', () => {
       deadline: bigint
     ) {
       return Router.tests.removeLiquidity({
-        address: routerFixture.address,
-        testArgs: {
+        contractAddress: routerFixture.address,
+        args: {
           tokenPairId: tokenPairState.contractId,
           sender: sender,
           liquidity: liquidity,
@@ -199,8 +199,8 @@ describe('test router', () => {
 
     async function testGetReserveInAndReserveOut(tokenPairState: ContractState, tokenInId: string) {
       return Router.tests.getReserveInAndReserveOut({
-        address: routerFixture.address,
-        testArgs: { tokenPair: tokenPairState.contractId, tokenInId: tokenInId },
+        contractAddress: routerFixture.address,
+        args: { tokenPair: tokenPairState.contractId, tokenInId: tokenInId },
         existingContracts: routerFixture.dependencies.concat([tokenPairState])
       })
     }
@@ -223,8 +223,8 @@ describe('test router', () => {
       deadline: bigint
     ) {
       return Router.tests.swapExactTokenForToken({
-        address: routerFixture.address,
-        testArgs: {
+        contractAddress: routerFixture.address,
+        args: {
           tokenPair: tokenPairState.contractId,
           sender: sender,
           tokenInId: tokenInId,
@@ -286,8 +286,8 @@ describe('test router', () => {
       deadline: bigint
     ) {
       return Router.tests.swapTokenForExactToken({
-        address: routerFixture.address,
-        testArgs: {
+        contractAddress: routerFixture.address,
+        args: {
           tokenPair: tokenPairState.contractId,
           sender: sender,
           tokenInId: tokenInId,

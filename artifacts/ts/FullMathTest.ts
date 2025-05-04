@@ -160,7 +160,7 @@ export const FullMathTest = new Factory(
   Contract.fromJson(
     FullMathTestContractJson,
     "",
-    "d6834220b59d306adb6cd548433f9e1ab4f20c155cad9c80ef89be27cb82a286",
+    "4e6bd23542804a31c9fdc85b4a0065857c11fcd0b7a40a7ce2c66558001e2040",
     []
   )
 );

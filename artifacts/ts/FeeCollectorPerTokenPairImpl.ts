@@ -176,7 +176,7 @@ class Factory extends ContractFactory<
           FeeCollectorPerTokenPairImplTypes.Fields,
           never
         >,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(
@@ -202,7 +202,7 @@ export const FeeCollectorPerTokenPairImpl = new Factory(
   Contract.fromJson(
     FeeCollectorPerTokenPairImplContractJson,
     "",
-    "393eee49cd23c00d61848a8b2272e848f5278cc17f8c0b2333e2ed744edf5b79",
+    "a2326c414551281d90194411b00b614c3fc07cb568020e1ed2e1852099e6996e",
     []
   )
 );

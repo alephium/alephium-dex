@@ -1,5 +1,5 @@
 {
-  "fullNodeVersion": "v3.11.2",
+  "fullNodeVersion": "v3.12.7",
   "compilerOptionsUsed": {
     "ignoreUnusedConstantsWarnings": true,
     "ignoreUnusedVariablesWarnings": false,
@@ -51,7 +51,7 @@
       "sourceFile": "examples/example_oracle_simple.ral",
       "sourceCodeHash": "2b330617826658a6336ab325956bc44df89c251c6183e1b2d10805f26d0c8746",
       "bytecodeDebugPatch": "",
-      "codeHashDebug": "77c214087d18764740b2479fc13342959a21a02a36977c0d998667644200071a"
+      "codeHashDebug": "c96ea41f2579f435d70c7801c2ec158031575b7571d8e8bbb2e460a8814cfbdf"
     },
     "FeeCollectorFactory": {
       "sourceFile": "dex/fee_collector_factory.ral",
@@ -75,7 +75,7 @@
       "sourceFile": "examples/fee_collector_per_token_pair_impl.ral",
       "sourceCodeHash": "12030965f27aedb1e593ea659314be67a7caf9a604885f4b8fc54f7303e95487",
       "bytecodeDebugPatch": "",
-      "codeHashDebug": "393eee49cd23c00d61848a8b2272e848f5278cc17f8c0b2333e2ed744edf5b79"
+      "codeHashDebug": "a2326c414551281d90194411b00b614c3fc07cb568020e1ed2e1852099e6996e"
     },
     "FullMath": {
       "sourceFile": "examples/full_math.ral",
@@ -87,7 +87,7 @@
       "sourceFile": "examples/full_math_test.ral",
       "sourceCodeHash": "0e2e55075a2b663409743948d49459826e8e8ebdd0c881cb1fefd8d11686cfe5",
       "bytecodeDebugPatch": "",
-      "codeHashDebug": "d6834220b59d306adb6cd548433f9e1ab4f20c155cad9c80ef89be27cb82a286"
+      "codeHashDebug": "4e6bd23542804a31c9fdc85b4a0065857c11fcd0b7a40a7ce2c66558001e2040"
     },
     "GetToken": {
       "sourceFile": "test/get_token.ral",
@@ -111,7 +111,7 @@
       "sourceFile": "test/math_test.ral",
       "sourceCodeHash": "7f307735569bf071f47a34a3abfe87c9529c53890765d90c1aabf6bdb8494a81",
       "bytecodeDebugPatch": "",
-      "codeHashDebug": "085c8183210ec7296681e12ab74e37bebee9d495e78e24cc9b3cd1b110d6df2a"
+      "codeHashDebug": "732c8ff5b38eadaa96074453394619cb78ddf7371ff94ce7fb3dbe5fe332655c"
     },
     "Mint": {
       "sourceFile": "scripts/mint.ral",
@@ -135,7 +135,7 @@
       "sourceFile": "dex/router.ral",
       "sourceCodeHash": "c954ad981c2457825654144d2930cf07266efeb0013603532ac925ca85db2eca",
       "bytecodeDebugPatch": "",
-      "codeHashDebug": "5b325453e5506a90851742af5f7797303703acecb523830220a105a88273b1b0"
+      "codeHashDebug": "bff2f77daed1e0eea4318819508b1c8e91b6deb04bb8eeb0b4030137884f8cf5"
     },
     "SetFeeCollectorFactory": {
       "sourceFile": "scripts/set_fee_collector_factory.ral",
@@ -165,19 +165,19 @@
       "sourceFile": "test/test_token.ral",
       "sourceCodeHash": "cf585aa37720c2530bf4ba7493268a0c499bd5e9269cbb11423ba72ded571654",
       "bytecodeDebugPatch": "",
-      "codeHashDebug": "0831d766037e7873066276e891997881e8787f4fb4bd9d154925d80869efa129"
+      "codeHashDebug": "f9dac4e7d0bf28a2bc019f43138339e23afadde322d50441cdfe029993bf35f3"
     },
     "TokenPair": {
       "sourceFile": "dex/token_pair.ral",
       "sourceCodeHash": "fe3049c8d6472fce53015f300c82cefc0d3cac80550bd1afb428b9c39ce8c12b",
       "bytecodeDebugPatch": "",
-      "codeHashDebug": "44cb575528fd174a595daf0a095f1b0f2e6b234213a99449173542520f63222e"
+      "codeHashDebug": "201ee7049177a8b37b683f39f5837d37110c0ddc14f5c9836639ae261ea33e10"
     },
     "TokenPairFactory": {
       "sourceFile": "dex/token_pair_factory.ral",
       "sourceCodeHash": "19388715466d7a867264ca64b362f4c1aeac7aad99816acd7e660358ee6b6095",
       "bytecodeDebugPatch": "",
-      "codeHashDebug": "44144899a2b71465a80654889afa8a2bf4a8f3cd0f30ad1880d2ffc7c12ad18b"
+      "codeHashDebug": "ba7456bcbcde24327dfccf85229e59c51e2036903d246e5565438cacabf0186d"
     }
   }
 }

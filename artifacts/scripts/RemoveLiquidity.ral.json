@@ -1,5 +1,5 @@
 {
-  "version": "v2.5.3",
+  "version": "v3.12.7",
   "name": "RemoveLiquidity",
   "bytecodeTemplate": "01010300000010{0}{2}{3}a3{2}{0}{3}{4}{5}{6}13060e{1}01021818",
   "fieldsSig": {
@@ -14,7 +14,7 @@
     ],
     "types": [
       "Address",
-      "ByteVec",
+      "Router",
       "ByteVec",
       "U256",
       "U256",
@@ -34,9 +34,6 @@
   "functions": [
     {
       "name": "main",
-      "usePreapprovedAssets": true,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [],
       "paramTypes": [],
       "paramIsMutable": [],

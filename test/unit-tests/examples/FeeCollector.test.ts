@@ -82,9 +82,9 @@ describe('test fee collector', () => {
     const swapResult = await TokenPair.tests.swap({
       initialFields: contractState.fields,
       initialAsset: contractState.asset,
-      address: tokenPairFixture.address,
+      contractAddress: tokenPairFixture.address,
       existingContracts: tokenPairFixture.dependencies,
-      testArgs: {
+      args: {
         sender: sender,
         amount0In: 0n,
         amount1In: swapAmount,
@@ -111,9 +111,9 @@ describe('test fee collector', () => {
     const burnResult = await TokenPair.tests.burn({
       initialFields: contractState0.fields,
       initialAsset: contractState0.asset,
-      address: tokenPairFixture.address,
+      contractAddress: tokenPairFixture.address,
       existingContracts: tokenPairFixture.dependencies,
-      testArgs: { sender: sender, liquidity: burnLiquidity },
+      args: { sender: sender, liquidity: burnLiquidity },
       inputAssets: [{
         address: sender,
         asset: {
@@ -131,9 +131,9 @@ describe('test fee collector', () => {
     const enableFeeCollectorResult = await TokenPairFactory.tests.enableFeeCollector({
       initialFields: tokenPairFactoryFixture.selfState.fields,
       initialAsset: tokenPairFactoryFixture.selfState.asset,
-      address: tokenPairFactoryFixture.address,
+      contractAddress: tokenPairFactoryFixture.address,
       existingContracts: tokenPairFactoryFixture.dependencies.concat(tokenPairFixture.selfState),
-      testArgs: { tokenPair: tokenPairFixture.contractId, alphAmount: ONE_ALPH },
+      args: { tokenPair: tokenPairFixture.contractId, alphAmount: ONE_ALPH },
       inputAssets: [{
         address: sender,
         asset: { alphAmount: ONE_ALPH * 2n }
@@ -151,9 +151,9 @@ describe('test fee collector', () => {
     const burnResult = await TokenPair.tests.burn({
       initialFields: contractState1.fields,
       initialAsset: contractState1.asset,
-      address: tokenPairFixture.address,
+      contractAddress: tokenPairFixture.address,
       existingContracts: tokenPairFixture.dependencies.concat([feeCollectorState]),
-      testArgs: { sender: sender, liquidity: burnLiquidity },
+      args: { sender: sender, liquidity: burnLiquidity },
       inputAssets: [{
         address: sender,
         asset: {

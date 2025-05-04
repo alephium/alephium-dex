@@ -204,7 +204,7 @@ class Factory extends ContractFactory<
     update: async (
       params: Omit<
         TestContractParamsWithoutMaps<ExampleOracleSimpleTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "update", params, getContractByCodeHash);
@@ -233,7 +233,7 @@ export const ExampleOracleSimple = new Factory(
   Contract.fromJson(
     ExampleOracleSimpleContractJson,
     "",
-    "77c214087d18764740b2479fc13342959a21a02a36977c0d998667644200071a",
+    "c96ea41f2579f435d70c7801c2ec158031575b7571d8e8bbb2e460a8814cfbdf",
     []
   )
 );

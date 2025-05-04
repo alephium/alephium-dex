@@ -1,8 +1,8 @@
 {
-  "version": "v2.5.3",
+  "version": "v3.12.7",
   "name": "MathTest",
-  "bytecode": "000212404801000202010816000d1340703b2c16012d0201000103011f16000f334c191600170116000e2d0d2a170216021601314c0b16021701160016022d16022a0e2d17024a311601020d02",
-  "codeHash": "085c8183210ec7296681e12ab74e37bebee9d495e78e24cc9b3cd1b110d6df2a",
+  "bytecode": "0002174053010002020109d38c844efd16000d1340703b2c16012d0201000103014020d36ae1998016000f334c191600170116000e2d0d2a170216021601314c0b16021701160016022d16022a0e2d17024a311601020d02",
+  "codeHash": "732c8ff5b38eadaa96074453394619cb78ddf7371ff94ce7fb3dbe5fe332655c",
   "fieldsSig": {
     "names": [],
     "types": [],
@@ -12,9 +12,6 @@
   "functions": [
     {
       "name": "uqdiv",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [
         "a",
         "b"
@@ -33,9 +30,6 @@
     },
     {
       "name": "sqrt",
-      "usePreapprovedAssets": false,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [
         "y"
       ],

@@ -196,9 +196,9 @@ export async function mint(
   const testResult = await TokenPair.tests.mint({
     initialFields: initFields,
     initialAsset: initAsset,
-    address: tokenPairFixture.address,
+    contractAddress: tokenPairFixture.address,
     existingContracts: tokenPairFixture.dependencies,
-    testArgs: { sender: sender, amount0: amount0, amount1: amount1 },
+    args: { sender: sender, amount0: amount0, amount1: amount1 },
     inputAssets: inputAssets
   })
   const contractState = getContractState<TokenPairTypes.Fields>(testResult.contracts, tokenPairFixture.contractId)

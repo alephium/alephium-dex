@@ -1,5 +1,5 @@
 {
-  "version": "v2.5.3",
+  "version": "v3.12.7",
   "name": "Swap",
   "bytecodeTemplate": "01010300020040460c0e{0}010717011700{1}{2}464c04{1}{2}13c3038d7ea4c68000a7{3}0c2f4c0f{1}1601{4}a3{1}{2}{3}{4}{5}{6}13060c{0}01104a4025{4}0c2f4c0f{1}1600{3}a3{1}{2}{3}{4}{5}{6}13060c{0}01104a12{1}7a1600{3}a31601{4}a3{1}{2}{3}{4}{5}{6}13060c{0}0110",
   "fieldsSig": {
@@ -13,7 +13,7 @@
       "amount1Out"
     ],
     "types": [
-      "ByteVec",
+      "TokenPair",
       "Address",
       "Address",
       "U256",
@@ -34,9 +34,6 @@
   "functions": [
     {
       "name": "main",
-      "usePreapprovedAssets": true,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [],
       "paramTypes": [],
       "paramIsMutable": [],

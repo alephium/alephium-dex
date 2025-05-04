@@ -17,7 +17,7 @@ describe('test math', () => {
       const result = x * y
       const [l, h] = [result % UpperBound, result / UpperBound]
 
-      const testResult = await FullMathTest.tests.fullMul({ testArgs: { x, y } })
+      const testResult = await FullMathTest.tests.fullMul({ args: { x, y } })
       expect(testResult.returns).toEqual([l, h])
     }
   }, 10000)
@@ -28,8 +28,8 @@ describe('test math', () => {
 
     async function test(a: bigint, b: bigint, denominator: bigint) {
       return FullMathTest.tests.mulDiv({
-        address: address,
-        testArgs: { a, b, denominator }
+        contractAddress: address,
+        args: { a, b, denominator }
       })
     }
 
@@ -57,8 +57,8 @@ describe('test math', () => {
 
     async function test(numerator: bigint, denominator: bigint) {
       return FullMathTest.tests.fraction({
-        address: address,
-        testArgs: { numerator, denominator }
+        contractAddress: address,
+        args: { numerator, denominator }
       })
     }
 
@@ -81,10 +81,10 @@ describe('test math', () => {
 
     // the tests are different with eth, eth only test the gas cost of the function
     const gasCostCases: [bigint, bigint, number][] = [
-      [0n, 569n, 1081],
-      [239n, 569n, 1154],
-      [Q112 * 2359n, Q112 * 2360n, 1154],
-      [Q112 * 2359n * (2n ** 32n), Q112 * 2360n, 2140]
+      [0n, 569n, 1083],
+      [239n, 569n, 1156],
+      [Q112 * 2359n, Q112 * 2360n, 1156],
+      [Q112 * 2359n * (2n ** 32n), Q112 * 2360n, 2142]
     ]
     for (const c of gasCostCases) {
       const testResult = await test(c[0], c[1])

@@ -1,5 +1,5 @@
 {
-  "version": "v2.5.3",
+  "version": "v3.12.7",
   "name": "FeeCollectorFactoryImpl",
   "bytecode": "0201402a010303050116b3ce014113107bce0116021302641300641704170316001601a21602ce0016031604c102",
   "codeHash": "966f75cddefe774a87dbf778012f4f3f494b3a860f4c975d0c5262a1be185d49",
@@ -10,7 +10,7 @@
     ],
     "types": [
       "ByteVec",
-      "ByteVec"
+      "TokenPairFactory"
     ],
     "isMutable": [
       false,
@@ -21,9 +21,6 @@
   "functions": [
     {
       "name": "createFeeCollector",
-      "usePreapprovedAssets": true,
-      "useAssetsInContract": false,
-      "isPublic": true,
       "paramNames": [
         "caller",
         "alphAmount",
@@ -32,7 +29,7 @@
       "paramTypes": [
         "Address",
         "U256",
-        "ByteVec"
+        "TokenPair"
       ],
       "paramIsMutable": [
         false,

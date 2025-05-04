@@ -99,7 +99,8 @@ async function deployTokenPairFactory() {
     }
   }))
   const feeCollectorFactory = await deployFeeCollectorFactory(result.contractInstance.contractId)
-  await waitTxConfirmed(SetFeeCollectorFactory.execute(signer, {
+  await waitTxConfirmed(SetFeeCollectorFactory.execute({
+    signer,
     initialFields: {
       tokenPairFactory: result.contractInstance.contractId,
       feeCollectorFactory: feeCollectorFactory.contractInstance.contractId
@@ -109,7 +110,8 @@ async function deployTokenPairFactory() {
 }
 
 async function createTokenPair(tokenPairFactory: TokenPairFactoryInstance, token0Id: string, token1Id: string) {
-  await waitTxConfirmed(CreatePair.execute(signer, {
+  await waitTxConfirmed(CreatePair.execute({
+    signer,
     initialFields: {
       payer: testAddress,
       factory: tokenPairFactory.contractId,
@@ -128,7 +130,8 @@ async function createTokenPair(tokenPairFactory: TokenPairFactoryInstance, token
 }
 
 async function enableFeeCollector(tokenPairFactory: TokenPairFactoryInstance, tokenPair: TokenPairInstance) {
-  await waitTxConfirmed(EnableFeeCollector.execute(signer, {
+  await waitTxConfirmed(EnableFeeCollector.execute({
+    signer,
     initialFields: {
       tokenPairFactory: tokenPairFactory.contractId,
       tokenPair: tokenPair.contractId
@@ -138,7 +141,8 @@ async function enableFeeCollector(tokenPairFactory: TokenPairFactoryInstance, to
 }
 
 async function collectFeeManually(feeCollectorId: HexString, signerProvider = signer) {
-  await waitTxConfirmed(CollectFee.execute(signerProvider, {
+  await waitTxConfirmed(CollectFee.execute({
+    signer: signerProvider,
     initialFields: { feeCollector: feeCollectorId }
   }))
 }
@@ -162,7 +166,8 @@ async function deployTestToken(): Promise<string> {
     },
     issueTokenAmount: 1n << 255n
   }))
-  await waitTxConfirmed(GetToken.execute(signer, {
+  await waitTxConfirmed(GetToken.execute({
+    signer,
     initialFields: {
       token: result.contractInstance.contractId,
       sender: testAddress,
@@ -183,7 +188,7 @@ async function transferAlphTo(to: Address, amount: bigint) {
   return await waitTxConfirmed(signer.signAndSubmitTransferTx({
     signerAddress: testAddress,
     destinations: [{ address: to, attoAlphAmount: amount }]
-  }))
+  }) as Promise<{ txId: string }>)
 }
 
 class Fixture {
@@ -209,7 +214,8 @@ class Fixture {
   }
 
   async mint(amount0: bigint, amount1: bigint) {
-    return waitTxConfirmed(Mint.execute(signer, {
+    return waitTxConfirmed(Mint.execute({
+      signer,
       initialFields: {
         tokenPair: this.tokenPair.contractId,
         sender: testAddress,
@@ -231,7 +237,8 @@ class Fixture {
       ? [{ id: this.token0Id, amount: amount0In }]
       : [{ id: this.token0Id, amount: amount0In }, { id: this.token1Id, amount: amount1In }]
     const senderAddress = signerProvider.address
-    return waitTxConfirmed(Swap.execute(signerProvider, {
+    return waitTxConfirmed(Swap.execute({
+      signer: signerProvider,
       initialFields: {
         tokenPair: this.tokenPair.contractId,
         sender: senderAddress,
@@ -247,7 +254,8 @@ class Fixture {
   }
 
   async burn(liquidity: bigint) {
-    return waitTxConfirmed(Burn.execute(signer, {
+    return waitTxConfirmed(Burn.execute({
+      signer,
       initialFields: {
         tokenPair: this.tokenPair.contractId,
         sender: testAddress,
