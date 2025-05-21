@@ -3,6 +3,21 @@ Abstract Contract Math() {
     return (a * (1 << 112)) / b
   }
 
+  test "uqdiv" {
+    testEqual!(uqdiv(0, 1), 0)
+    testEqual!(uqdiv(1, 1), (1 << 112))
+    testEqual!(uqdiv(1, 2), (1 << 111))
+    testEqual!(uqdiv(12345, 100), 640989047186124470742089771842220851u)
+
+    let a = randomU256!()
+    let b = randomU256!()
+    if (a < (1 << 112) && b != 0) {
+      testEqual!(uqdiv(a, b), ((a * (1 << 112)) / b))
+    } else {
+      testFail!(uqdiv(a, b))
+    }
+  }
+
   // babylonian method
   pub fn sqrt(y: U256) -> U256 {
     if (y > 3) {
@@ -15,5 +30,15 @@ Abstract Contract Math() {
       return z
     }
     return 1
+  }
+
+  test "sqrt" {
+    testEqual!(sqrt(0), 1)
+    testEqual!(sqrt(1), 1)
+    testEqual!(sqrt(2), 1)
+    testEqual!(sqrt(3), 1)
+    testEqual!(sqrt(4), 2)
+    testEqual!(sqrt(5), 2)
+    testEqual!(sqrt(10), 3)
   }
 }
