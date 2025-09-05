@@ -174,7 +174,8 @@ async function swapMinOut(
   amountOutMin: bigint,
   ttl: number
 ): Promise<ExecuteScriptResult> {
-  const result = await SwapMinOut.execute(signer, {
+  const result = await SwapMinOut.execute({
+    signer,
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -201,7 +202,8 @@ async function swapMaxIn(
   amountOut: bigint,
   ttl: number
 ): Promise<ExecuteScriptResult> {
-  const result = await SwapMaxIn.execute(signer, {
+  const result = await SwapMaxIn.execute({
+    signer,
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -440,7 +442,8 @@ export async function addLiquidity(
   const [amount0Desired, amount1Desired, amount0Min, amount1Min] = tokenAInfo.id === tokenPairState.token0Info.id
     ? [amountADesired, amountBDesired, amountAMin, amountBMin]
     : [amountBDesired, amountADesired, amountBMin, amountAMin]
-  const result = await AddLiquidity.execute(signer, {
+  const result = await AddLiquidity.execute({
+    signer,
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -510,7 +513,8 @@ export async function removeLiquidity(
 ): Promise<ExecuteScriptResult> {
   const amount0Min = minimalAmount(amount0Desired, slippage)
   const amount1Min = minimalAmount(amount1Desired, slippage)
-  const result = await RemoveLiquidity.execute(signer, {
+  const result = await RemoveLiquidity.execute({
+    signer,
     initialFields: {
       sender: sender,
       router: network.routerId,
@@ -564,7 +568,8 @@ export async function createTokenPair(
   const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId)
   const path = token0Id + token1Id
   const pairContractId = subContractId(network.factoryId, path, groupIndex)
-  const result = await CreatePair.execute(signer, {
+  const result = await CreatePair.execute({
+    signer,
     initialFields: {
       payer: sender,
       factory: network.factoryId,
