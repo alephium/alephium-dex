@@ -7,8 +7,7 @@ import {
   prettifyTokenAmount,
   DUST_AMOUNT,
   ExplorerProvider,
-  ExecuteScriptResult,
-  isGrouplessAddressWithoutGroupIndex
+  ExecuteScriptResult
 } from "@alephium/web3"
 import alephiumIcon from "../icons/alephium.svg";
 import { PollingInterval, network, networkId } from "./consts"
@@ -165,13 +164,6 @@ function deadline(ttl: number): bigint {
   return BigInt(Date.now() + ttl * 60 * 1000)
 }
 
-function getCorrectSender(sender: string): string {
-  if (isGrouplessAddressWithoutGroupIndex(sender)) {
-    return `${sender}:${network.groupIndex}`
-  }
-  return sender
-}
-
 async function swapMinOut(
   signer: SignerProvider,
   explorerProvider: ExplorerProvider,
@@ -185,7 +177,7 @@ async function swapMinOut(
   const result = await SwapMinOut.execute({
     signer,
     initialFields: {
-      sender: getCorrectSender(sender),
+      sender: sender,
       router: network.routerId,
       pair: state.tokenPairId,
       tokenInId: tokenInId,
@@ -213,7 +205,7 @@ async function swapMaxIn(
   const result = await SwapMaxIn.execute({
     signer,
     initialFields: {
-      sender: getCorrectSender(sender),
+      sender: sender,
       router: network.routerId,
       pair: state.tokenPairId,
       tokenInId: tokenInId,
@@ -453,7 +445,7 @@ export async function addLiquidity(
   const result = await AddLiquidity.execute({
     signer,
     initialFields: {
-      sender: getCorrectSender(sender),
+      sender: sender,
       router: network.routerId,
       pair: tokenPairState.tokenPairId,
       amount0Desired: amount0Desired,
@@ -524,7 +516,7 @@ export async function removeLiquidity(
   const result = await RemoveLiquidity.execute({
     signer,
     initialFields: {
-      sender: getCorrectSender(sender),
+      sender: sender,
       router: network.routerId,
       pairId: state.tokenPairId,
       liquidity: liquidity,
@@ -579,7 +571,7 @@ export async function createTokenPair(
   const result = await CreatePair.execute({
     signer,
     initialFields: {
-      payer: getCorrectSender(sender),
+      payer: sender,
       factory: network.factoryId,
       alphAmount: 10n ** 18n,
       tokenAId: tokenAId,
