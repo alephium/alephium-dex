@@ -223,7 +223,7 @@ class Factory extends ContractFactory<
     getFeeSetter: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairFactoryTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<Address>> => {
       return testMethod(this, "getFeeSetter", params, getContractByCodeHash);

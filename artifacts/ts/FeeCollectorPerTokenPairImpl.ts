@@ -176,7 +176,7 @@ class Factory extends ContractFactory<
           FeeCollectorPerTokenPairImplTypes.Fields,
           never
         >,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(

@@ -329,7 +329,7 @@ class Factory extends ContractFactory<
     getSymbol: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "getSymbol", params, getContractByCodeHash);
@@ -337,7 +337,7 @@ class Factory extends ContractFactory<
     getName: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "getName", params, getContractByCodeHash);
@@ -345,7 +345,7 @@ class Factory extends ContractFactory<
     getDecimals: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<bigint>> => {
       return testMethod(this, "getDecimals", params, getContractByCodeHash);
@@ -353,7 +353,7 @@ class Factory extends ContractFactory<
     getTotalSupply: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<bigint>> => {
       return testMethod(this, "getTotalSupply", params, getContractByCodeHash);
@@ -390,7 +390,7 @@ class Factory extends ContractFactory<
     getTokenPair: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<[HexString, HexString]>> => {
       return testMethod(this, "getTokenPair", params, getContractByCodeHash);
@@ -398,7 +398,7 @@ class Factory extends ContractFactory<
     getReserves: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
       return testMethod(this, "getReserves", params, getContractByCodeHash);
@@ -406,7 +406,7 @@ class Factory extends ContractFactory<
     getBlockTimeStampLast: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<bigint>> => {
       return testMethod(
@@ -419,7 +419,7 @@ class Factory extends ContractFactory<
     getPrice0CumulativeLast: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<bigint>> => {
       return testMethod(
@@ -432,7 +432,7 @@ class Factory extends ContractFactory<
     getPrice1CumulativeLast: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<bigint>> => {
       return testMethod(
@@ -492,7 +492,7 @@ class Factory extends ContractFactory<
     collectFeeManually: async (
       params: Omit<
         TestContractParamsWithoutMaps<TokenPairTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(
