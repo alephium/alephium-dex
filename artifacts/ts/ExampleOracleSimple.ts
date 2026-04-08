@@ -204,7 +204,7 @@ class Factory extends ContractFactory<
     update: async (
       params: Omit<
         TestContractParamsWithoutMaps<ExampleOracleSimpleTypes.Fields, never>,
-        "testArgs"
+        "args"
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "update", params, getContractByCodeHash);

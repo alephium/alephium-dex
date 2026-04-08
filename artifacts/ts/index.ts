@@ -11,4 +11,5 @@ export * from "./Router";
 export * from "./TestToken";
 export * from "./TokenPair";
 export * from "./TokenPairFactory";
+export * from "./contracts";
 export * from "./scripts";

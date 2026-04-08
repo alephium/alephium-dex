@@ -37,7 +37,7 @@ npm run compile
 ### Deploy dex contracts to devnet
 
 ```
-npm run deploy
+npm run deploy:devnet
 ```
 
 ### Create test tokens on devnet
